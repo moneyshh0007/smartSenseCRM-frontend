@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deals · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="deals" class="deals-page">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><span class="current">Deals</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M2 · F2.1 · F2.2 · F2.4</div>
+      <h1 class="page-title mt-2">Deals</h1>
+      <div class="page-sub" id="deals-sub">Loading deals...</div>
+    </div>
+    <div class="row gap-2">
+      <select class="btn" style="padding-right: 24px;">
+        <option>Direct Sales</option>
+        <option>Channel Partners</option>
+        <option>Expansion</option>
+      </select>
+      <button class="btn" onclick="window.location.href='settings-pipelines.html'">Manage pipelines</button>
+      <button class="btn primary" id="new-deal-btn">+ New deal</button>
+    </div>
+  </div>
+
+  <div class="row mb-4 between">
+    <div class="tab-bar">
+      <a href="deals.html" class="active">Kanban</a>
+      <a href="deals-table.html">Table</a>
+      <a href="deals-forecast.html">Forecast</a>
+    </div>
+    <div class="row gap-2">
+      <button class="btn sm">+ Add filter</button>
+    </div>
+  </div>
+
+  <div class="kanban" id="kanban-board">
+    <div class="kanban-col" data-stage="Discovery">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Discovery</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+
+    <div class="kanban-col" data-stage="Qualified">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Qualified</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+
+    <div class="kanban-col" data-stage="Proposal">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Proposal</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+
+    <div class="kanban-col" data-stage="Negotiation">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Negotiation</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+
+    <div class="kanban-col closed-lost" data-stage="Closed Lost">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Closed Lost</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+
+    <div class="kanban-col" data-stage="Closed Won">
+      <div class="kanban-col-head">
+        <div>
+          <div class="kanban-col-title">Closed Won</div>
+          <div class="kanban-col-meta">0 deals</div>
+        </div>
+        <div class="kanban-col-count">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Deal Modal -->
+  <div id="new-deal-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
+      <div class="row between mb-4">
+        <div class="card-title">New deal</div>
+        <button onclick="document.getElementById('new-deal-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
+      </div>
+      <div id="new-deal-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
+      <div class="field">
+        <label>Deal name *</label>
+        <input type="text" id="nd-name" placeholder="Acme — Annual License" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Amount *</label>
+          <input type="number" id="nd-amount" placeholder="48000" />
+        </div>
+        <div class="field">
+          <label>Stage</label>
+          <select id="nd-stage">
+            <option>Discovery</option>
+            <option>Qualified</option>
+            <option selected>Proposal</option>
+            <option>Negotiation</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Close date</label>
+          <input type="date" id="nd-closedate" />
+        </div>
+        <div class="field">
+          <label>Competitor</label>
+          <input type="text" id="nd-competitor" placeholder="HubSpot" />
+        </div>
+      </div>
+      <div class="row gap-2 mt-4 between">
+        <button class="btn" onclick="document.getElementById('new-deal-modal').style.display='none'">Cancel</button>
+        <button class="btn primary" id="nd-save-btn">Save deal</button>
+      </div>
+    </div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    async function loadDeals() {
+      try {
+        const data = await SS_API.Deals.list();
+        const sub = document.getElementById("deals-sub");
+        sub.textContent = "Direct Sales pipeline · " + data.total + " deals · Live from database";
+
+        // Group by stage
+        var grouped = {
+          "Discovery": [],
+          "Qualified": [],
+          "Proposal": [],
+          "Negotiation": [],
+          "Closed Won": [],
+          "Closed Lost": []
+        };
+
+        data.deals.forEach(function(d) {
+          if (grouped[d.stage] !== undefined) {
+            grouped[d.stage].push(d);
+          } else {
+            grouped["Discovery"].push(d);
+          }
+        });
+
+        // Update each column
+        document.querySelectorAll(".kanban-col").forEach(function(col) {
+          var stage = col.getAttribute("data-stage");
+          if (!stage) return;
+          var deals = grouped[stage] || [];
+
+          // Update count and meta
+          var meta = col.querySelector(".kanban-col-meta");
+          var count = col.querySelector(".kanban-col-count");
+          if (meta) meta.textContent = deals.length + " deals";
+          if (count) count.textContent = deals.length;
+
+          // Remove existing cards
+          col.querySelectorAll(".kanban-card").forEach(function(c) { c.remove(); });
+
+          // Add real deal cards
+          deals.forEach(function(d) {
+            var card = document.createElement("div");
+            card.className = "kanban-card";
+            if (stage === "Closed Lost") card.style.opacity = "0.55";
+            if (stage === "Closed Won") card.style.opacity = "0.65";
+            card.style.cursor = "pointer";
+            card.onclick = function() {
+              window.location.href = "deal-detail.html?id=" + d.id;
+            };
+            card.innerHTML = "<div class='kanban-card-title'>" + d.name + "</div>" +
+              "<div class='kanban-card-meta'>" +
+              "<span class='kanban-card-amount'>$" + Number(d.amount).toLocaleString() + "</span>" +
+              (d.company ? "<span>" + d.company.name + "</span>" : "") +
+              "</div>";
+            col.appendChild(card);
+          });
+
+          // Empty state
+          if (deals.length === 0) {
+            var empty = document.createElement("div");
+            empty.style.cssText = "padding:16px; color:var(--ink-30); font-size:12px; text-align:center;";
+            empty.textContent = "No deals";
+            col.appendChild(empty);
+          }
+        });
+
+      } catch (err) {
+        console.error("Failed to load deals:", err);
+        document.getElementById("deals-sub").textContent = "Failed to load deals.";
+      }
+    }
+
+    // New deal modal
+    document.getElementById("new-deal-btn").addEventListener("click", function() {
+      document.getElementById("new-deal-modal").style.display = "flex";
+    });
+
+    document.getElementById("nd-save-btn").addEventListener("click", async function() {
+      var name = document.getElementById("nd-name").value.trim();
+      var amount = document.getElementById("nd-amount").value;
+      var stage = document.getElementById("nd-stage").value;
+      var closeDate = document.getElementById("nd-closedate").value;
+      var competitor = document.getElementById("nd-competitor").value.trim();
+      var errEl = document.getElementById("new-deal-error");
+      var btn = document.getElementById("nd-save-btn");
+
+      if (!name || !amount) {
+        errEl.textContent = "Deal name and amount are required.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+      errEl.style.display = "none";
+
+      try {
+        var payload = {
+          name: name,
+          amount: Number(amount),
+          stage: stage
+        };
+        if (closeDate) payload.closeDate = closeDate;
+        if (competitor) payload.competitor = competitor;
+
+        await SS_API.Deals.create(payload);
+        document.getElementById("new-deal-modal").style.display = "none";
+        ["nd-name","nd-amount","nd-competitor","nd-closedate"].forEach(function(id) {
+          document.getElementById(id).value = "";
+        });
+        btn.textContent = "Save deal";
+        btn.disabled = false;
+        loadDeals();
+      } catch (err) {
+        errEl.textContent = err.message || "Failed to save deal.";
+        errEl.style.display = "block";
+        btn.textContent = "Save deal";
+        btn.disabled = false;
+      }
+    });
+
+    loadDeals();
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  
+  <div class="auth-page">
+    <div class="auth-hero">
+      <div class="auth-hero-head">
+        <div class="brand-mark" style="color:#fff;">SmartSense</div>
+        <div class="brand-sub">CRM · Phase 1 · Prototype</div>
+      </div>
+      <div>
+        <div class="auth-headline">
+          A CRM that<br/>
+          <em>writes itself.</em>
+        </div>
+        <p style="color:rgba(255,255,255,0.6); max-width: 420px; margin-top: 24px; line-height: 1.5; font-size: 14px;">
+          Phase 1 ships the credible core: contacts, deals, activities and the platform spine.
+          AI augmentation arrives in Phase 2.
+        </p>
+      </div>
+      <div class="auth-foot">SOC2 · GDPR · DPDP — Data residency you choose</div>
+    </div>
+
+    <div class="auth-form-pane">
+      <div class="eyebrow mb-3">Workspace · M9 · F9.2 · F9.5</div>
+      <h1 class="display-l mb-5">Sign in to continue.</h1>
+
+      <div id="login-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:16px;"></div>
+
+      <div class="field">
+        <label>Work email</label>
+        <input type="email" id="login-email" value="mayur@smartsense.test" />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" />
+      </div>
+
+      <button class="btn primary lg" id="login-btn" style="width:100%;">
+        Continue with email
+      </button>
+
+      <div style="text-align:center; margin: 20px 0; color: var(--ink-30); font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em;">
+        — OR —
+      </div>
+
+      <button class="btn lg" style="width:100%;" onclick="window.location.href='my-day.html'">
+        Continue with Google
+      </button>
+      <button class="btn lg" style="width:100%; margin-top: 8px;" onclick="window.location.href='my-day.html'">
+        Continue with Microsoft
+      </button>
+
+      <div class="section-rule">
+        <span class="num">02</span>
+        <span class="title">First time here?</span>
+        <span class="line"></span>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Start a new workspace</div>
+            <div class="card-sub">Choose your data residency — this is permanent.</div>
+          </div>
+        </div>
+
+        <div class="field mt-3">
+          <label>Workspace name</label>
+          <input type="text" id="reg-workspace" placeholder="Acme Sales Team" />
+        </div>
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="reg-name" placeholder="Mayur S." />
+        </div>
+        <div class="field">
+          <label>Work email</label>
+          <input type="email" id="reg-email" placeholder="mayur@acme.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min 8 characters" />
+        </div>
+
+        <div class="split-3 mt-4" style="gap: 12px;">
+          <label class="card" style="cursor: pointer; padding: 16px;">
+            <div class="row" style="margin-bottom: 8px;">
+              <input type="radio" name="region" value="us-east-1" />
+              <span class="text-mono" style="font-size: 11px; letter-spacing: 0.1em;">US</span>
+            </div>
+            <div style="font-weight: 500; font-size: 13px;">United States</div>
+            <div class="text-muted" style="font-size: 11px; margin-top: 2px;">us-east-1 · Virginia</div>
+          </label>
+          <label class="card" style="cursor: pointer; padding: 16px;">
+            <div class="row" style="margin-bottom: 8px;">
+              <input type="radio" name="region" value="eu-west-1" checked />
+              <span class="text-mono" style="font-size: 11px; letter-spacing: 0.1em;">EU</span>
+            </div>
+            <div style="font-weight: 500; font-size: 13px;">European Union</div>
+            <div class="text-muted" style="font-size: 11px; margin-top: 2px;">eu-west-1 · Ireland</div>
+          </label>
+          <label class="card" style="cursor: pointer; padding: 16px;">
+            <div class="row" style="margin-bottom: 8px;">
+              <input type="radio" name="region" value="ap-south-1" />
+              <span class="text-mono" style="font-size: 11px; letter-spacing: 0.1em;">IN</span>
+            </div>
+            <div style="font-weight: 500; font-size: 13px;">India</div>
+            <div class="text-muted" style="font-size: 11px; margin-top: 2px;">ap-south-1 · Mumbai</div>
+          </label>
+        </div>
+
+        <div id="reg-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-top:12px;"></div>
+
+        <button class="btn primary mt-4" id="reg-btn" style="width: 100%;">
+          Create workspace
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (SS_API.Auth.isLoggedIn()) {
+      window.location.href = "my-day.html";
+    }
+
+    // Login
+    document.getElementById("login-btn").addEventListener("click", async () => {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      const errEl = document.getElementById("login-error");
+      const btn = document.getElementById("login-btn");
+
+      if (!email || !password) {
+        errEl.textContent = "Please enter your email and password.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      btn.textContent = "Signing in...";
+      btn.disabled = true;
+      errEl.style.display = "none";
+
+      try {
+        await SS_API.Auth.login(email, password);
+        window.location.href = "my-day.html";
+      } catch (err) {
+        errEl.textContent = err.message || "Invalid email or password.";
+        errEl.style.display = "block";
+        btn.textContent = "Continue with email";
+        btn.disabled = false;
+      }
+    });
+
+    // Register
+    document.getElementById("reg-btn").addEventListener("click", async () => {
+      const name = document.getElementById("reg-name").value;
+      const email = document.getElementById("reg-email").value;
+      const password = document.getElementById("reg-password").value;
+      const workspaceName = document.getElementById("reg-workspace").value;
+      const region = document.querySelector('input[name="region"]:checked')?.value || "eu-west-1";
+      const errEl = document.getElementById("reg-error");
+      const btn = document.getElementById("reg-btn");
+
+      if (!name || !email || !password || !workspaceName) {
+        errEl.textContent = "Please fill in all fields.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      const slug = workspaceName.toLowerCase().replace(/[^a-z0-9]/g, "-");
+
+      btn.textContent = "Creating...";
+      btn.disabled = true;
+      errEl.style.display = "none";
+
+      try {
+        await SS_API.Auth.register({ name, email, password, workspaceName, slug, region });
+        window.location.href = "my-day.html";
+      } catch (err) {
+        errEl.textContent = err.message || "Could not create workspace.";
+        errEl.style.display = "block";
+        btn.textContent = "Create workspace";
+        btn.disabled = false;
+      }
+    });
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

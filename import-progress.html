@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Import CSV — Importing · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="import" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Tools</span><span class="sep">/</span><span>Import CSV</span><span class="sep">/</span><span class="current">Importing</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M1 · F1.7 · STEP 4 OF 4</div>
+      <h1 class="page-title mt-2">Importing your records</h1>
+      <div class="page-sub">Background job · You can close this tab — we'll email when complete</div>
+    </div>
+  </div>
+
+  <div class="stepper">
+    <div class="stepper-step done"><span class="stepper-num"></span><span>Upload</span></div>
+    <div class="stepper-step done"><span class="stepper-num"></span><span>Map columns</span></div>
+    <div class="stepper-step done"><span class="stepper-num"></span><span>Review</span></div>
+    <div class="stepper-step active"><span class="stepper-num">4</span><span>Import</span></div>
+  </div>
+
+  <div class="progress-card mb-5">
+    <div class="row between items-baseline">
+      <div>
+        <div class="card-title">Importing 4,823 records</div>
+        <div class="text-muted mt-1" style="font-size:12px;">Job ID: imp_v9k3mq2 · Started 09:42 · Region: EU</div>
+      </div>
+      <span class="badge solid">RUNNING</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 34%;"></div></div>
+    <div class="progress-counter">
+      <span id="progress-text">1,640 of 4,823 imported · 34%</span>
+      <span>ETA ~85 seconds</span>
+    </div>
+  </div>
+
+  <div class="split-3 mb-5">
+    <div class="card">
+      <div class="label">PEOPLE CREATED</div>
+      <div class="kpi-value" style="font-size:32px;" id="people-count">1,420</div>
+      <div class="text-muted" style="font-size:11px;">Includes auto-enriched fields</div>
+    </div>
+    <div class="card">
+      <div class="label">COMPANIES CREATED</div>
+      <div class="kpi-value" style="font-size:32px;" id="companies-count">220</div>
+      <div class="text-muted" style="font-size:11px;">Deduplicated by domain</div>
+    </div>
+    <div class="card">
+      <div class="label">SKIPPED (DUPLICATES)</div>
+      <div class="kpi-value" style="font-size:32px;">142</div>
+      <div class="text-muted" style="font-size:11px;">As configured · downloadable</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">02</span>
+    <span class="title">Live activity stream</span>
+    <span class="line"></span>
+  </div>
+
+  <div class="card mb-5">
+    <ul class="summary-list" id="live-stream">
+      <li>
+        <div class="left-icon">●</div>
+        <div class="grow">
+          <div>Batch 7 of 20 processed</div>
+          <div class="text-muted" style="font-size:11px;">240 records · 8 enriched · 4 duplicates skipped</div>
+        </div>
+        <span class="meta">just now</span>
+      </li>
+      <li>
+        <div class="left-icon">●</div>
+        <div class="grow">
+          <div>Batch 6 of 20 processed</div>
+          <div class="text-muted" style="font-size:11px;">240 records · 12 enriched · 7 duplicates skipped</div>
+        </div>
+        <span class="meta">2 sec ago</span>
+      </li>
+      <li>
+        <div class="left-icon">●</div>
+        <div class="grow">
+          <div>Schema validation passed for all batches</div>
+          <div class="text-muted" style="font-size:11px;">Custom field "Territory" mapped to 100% of rows</div>
+        </div>
+        <span class="meta">15 sec ago</span>
+      </li>
+      <li>
+        <div class="left-icon">●</div>
+        <div class="grow">
+          <div>Import job started</div>
+          <div class="text-muted" style="font-size:11px;">Worker spawned in eu-west-1 · Owner: Mayur S.</div>
+        </div>
+        <span class="meta">25 sec ago</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="row gap-3 between">
+    <a href="contacts.html">View Contacts (newly imported records will appear there)</a>
+    <button class="btn">Cancel import (rollback all)</button>
+  </div>
+
+  <script>
+    // Simulate progress
+    let pct = 34;
+    const fill = document.getElementById("progress-fill");
+    const txt = document.getElementById("progress-text");
+    const pCount = document.getElementById("people-count");
+    const cCount = document.getElementById("companies-count");
+    const interval = setInterval(() => {
+      pct = Math.min(100, pct + 4);
+      fill.style.width = pct + "%";
+      const imported = Math.round(4823 * pct / 100);
+      txt.textContent = imported.toLocaleString() + " of 4,823 imported · " + pct + "%";
+      pCount.textContent = Math.round(imported * 0.866).toLocaleString();
+      cCount.textContent = Math.round(imported * 0.135).toLocaleString();
+      if (pct >= 100) {
+        clearInterval(interval);
+        // Show completion banner
+        const banner = document.createElement("div");
+        banner.className = "won-banner";
+        banner.innerHTML = '<div class="won-icon">✓</div><div class="won-text"><div class="won-title">Import complete — 4,823 records created</div><div class="won-sub">1,420 people · 220 companies · 142 duplicates skipped · 35 errors saved</div></div><div class="won-actions"><button class="btn ghost">Download summary</button><button class="btn" onclick="window.location.href=\'contacts.html\'">View Contacts</button></div>';
+        document.querySelector(".page-header").after(banner);
+        document.querySelector(".badge.solid").outerHTML = '<span class="badge solid">COMPLETE</span>';
+      }
+    }, 800);
+  </script>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

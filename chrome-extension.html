@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkedIn Capture · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  
+  <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--paper); border-bottom: var(--rule); padding: 8px 16px; display: flex; align-items: center; gap: 16px;">
+    <a href="my-day.html" class="text-mono" style="font-size: 11px; color: var(--ink-50);">← BACK TO CRM</a>
+    <div class="text-mono" style="font-size: 11px; color: var(--ink-50);">SIMULATED LINKEDIN PAGE · CHROME EXTENSION (F1.3)</div>
+  </div>
+
+  <div class="linkedin-frame" style="padding-top: 60px;">
+    <div class="linkedin-card">
+      <div class="linkedin-header">
+        <div class="linkedin-photo">SC</div>
+        <div style="flex: 1;">
+          <div style="font-size: 24px; font-weight: 600; color: #000;">Sarah Chen</div>
+          <div style="color: #666; margin: 4px 0;">VP Engineering at Acme Corp</div>
+          <div style="color: #888; font-size: 13px;">San Francisco Bay Area · 500+ connections</div>
+          <div style="margin-top: 12px;">
+            <button style="background:#0a66c2;color:white;border:none;padding:6px 16px;border-radius:16px;font-weight:600;font-size:14px;">Message</button>
+            <button style="background:white;color:#0a66c2;border:1px solid #0a66c2;padding:6px 16px;border-radius:16px;font-weight:600;font-size:14px;margin-left:8px;">More</button>
+          </div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid #e0e0e0; margin-top: 24px; padding-top: 16px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">About</div>
+        <div style="color: #444; line-height: 1.5; font-size: 14px;">
+          Engineering leader with 12+ years building developer infrastructure at high-growth SaaS companies.
+          Currently scaling Acme's engineering org from 40 to 120. Previously at Hooli (Senior Director),
+          Pied Piper (Eng Manager), Initrode (IC). Stanford CS.
+        </div>
+      </div>
+      <div style="border-top: 1px solid #e0e0e0; margin-top: 24px; padding-top: 16px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">Experience</div>
+        <div style="font-size: 14px; color:#444;">
+          <div><strong>VP Engineering</strong> · Acme Corp · 2024 – Present</div>
+          <div style="color:#888; margin-top:4px;">San Francisco, CA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The CRM extension overlay -->
+    <div class="extension-overlay">
+      <div class="row between mb-3">
+        <h3>SmartSense Capture</h3>
+        <span class="text-mono text-muted" style="font-size: 10px;">v1.0</span>
+      </div>
+
+      <div class="card" style="background: var(--paper-warm); border: var(--rule); padding: 12px; margin-bottom: 12px;">
+        <div class="row gap-2" style="font-size: 12px;">
+          <span class="badge positive">EXISTS IN CRM</span>
+        </div>
+        <div class="mt-2" style="font-size: 12px;">
+          Last activity: <strong>Today 09:32</strong> (Discovery call)
+        </div>
+        <div class="text-muted" style="font-size: 11px;">
+          Linked to: <a href="deal-detail.html">Acme — Annual License</a>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" value="Sarah Chen" />
+      </div>
+      <div class="field">
+        <label>Title</label>
+        <input type="text" value="VP Engineering" />
+      </div>
+      <div class="field">
+        <label>Company</label>
+        <input type="text" value="Acme Corp" />
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" value="San Francisco Bay Area" />
+      </div>
+      <div class="field">
+        <label>LinkedIn URL</label>
+        <input type="text" value="linkedin.com/in/sarahchen" />
+      </div>
+
+      <div class="row gap-2 mt-4">
+        <button class="btn" style="flex:1;" onclick="window.location.href='contact-detail.html'">View in CRM</button>
+        <button class="btn primary" style="flex:1;" onclick="alert('Updating fields where LinkedIn differs from CRM:\n  Title: VP Engineering (no change)\n  Location: + San Francisco Bay Area (new from LinkedIn)\nClick OK to view contact');window.location.href='contact-detail.html'">Update with diff</button>
+      </div>
+      <div class="text-muted mt-2" style="font-size: 11px; text-align: center;">
+        A7 fix: distinct flows. Existing contact = UPDATE with diff preview. New contact = CREATE (badge swaps to "NEW").
+      </div>
+
+      <div class="text-muted mt-3" style="font-size: 11px; text-align: center;">
+        Will update fields where CRM differs from LinkedIn
+      </div>
+    </div>
+  </div>
+  
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

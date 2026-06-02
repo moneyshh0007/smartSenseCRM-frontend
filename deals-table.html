@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deals — Table · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="deals" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="deals.html">Deals</a><span class="sep">/</span><span class="current">Table</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M2 · F2.2 · F2.3</div>
+      <h1 class="page-title mt-2">Deals</h1>
+      <div class="page-sub">Table view — sort, filter, edit inline · 47 deals shown</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">Edit columns</button>
+      <button class="btn primary">+ New deal</button>
+    </div>
+  </div>
+
+  <div class="row mb-4 between">
+    <div class="tab-bar">
+      <a href="deals.html">Kanban</a>
+      <a href="deals-table.html" class="active">Table</a>
+      <a href="deals-forecast.html">Forecast</a>
+    </div>
+    <div class="row gap-2">
+      <a href="deals-table-junior.html" style="font-size:11px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;">View as Junior Rep ↗</a>
+      <button class="btn sm">+ Filter</button>
+      <button class="btn sm">Group by stage</button>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 24px;"><input type="checkbox" /></th>
+        <th>Deal</th>
+        <th>Company</th>
+        <th>Stage</th>
+        <th class="num">Amount</th>
+        <th>Probability</th>
+        <th>Close date</th>
+        <th>Competitor</th>
+        <th>Owner</th>
+        <th>Days in stage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr onclick="window.location.href='deal-detail.html'">
+        <td><input type="checkbox" /></td>
+        <td><strong>Acme — Annual License</strong></td>
+        <td>Acme Corp</td>
+        <td><span class="badge">Proposal</span></td>
+        <td class="num">$48,000</td>
+        <td class="num">60%</td>
+        <td>30 Jun 2026</td>
+        <td>HubSpot</td>
+        <td>Mayur S.</td>
+        <td class="num">1</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Northwind — Multi-year</strong> <span class="badge warn">ROTTING</span></td>
+        <td>Northwind Corp</td>
+        <td><span class="badge">Proposal</span></td>
+        <td class="num">$96,000</td>
+        <td class="num">60%</td>
+        <td>15 Jul 2026</td>
+        <td>Salesforce</td>
+        <td>Mayur S.</td>
+        <td class="num" style="color:var(--ink);font-weight:600;">27</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Initech — Enterprise</strong> <span class="badge warn">ROTTING</span></td>
+        <td>Initech</td>
+        <td><span class="badge">Qualified</span></td>
+        <td class="num">$72,000</td>
+        <td class="num">30%</td>
+        <td>30 Jul 2026</td>
+        <td>—</td>
+        <td>Sarah K.</td>
+        <td class="num" style="font-weight:600;">23</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Globex Inc — Annual</strong></td>
+        <td>Globex Inc.</td>
+        <td><span class="badge">Qualified</span></td>
+        <td class="num">$24,000</td>
+        <td class="num">30%</td>
+        <td>20 Jun 2026</td>
+        <td>HubSpot</td>
+        <td>Sarah K.</td>
+        <td class="num">8</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Vellichor Ltd — Annual</strong></td>
+        <td>Vellichor Ltd</td>
+        <td><span class="badge">Qualified</span></td>
+        <td class="num">$36,000</td>
+        <td class="num">30%</td>
+        <td>30 Jun 2026</td>
+        <td>—</td>
+        <td>Mayur S.</td>
+        <td class="num">11</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Hooli — Multi-year</strong></td>
+        <td>Hooli</td>
+        <td><span class="badge solid">Negotiation</span></td>
+        <td class="num">$28,000</td>
+        <td class="num">85%</td>
+        <td>10 Jun 2026</td>
+        <td>—</td>
+        <td>Mayur S.</td>
+        <td class="num">2</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Pied Piper — Enterprise</strong></td>
+        <td>Pied Piper</td>
+        <td><span class="badge">Proposal</span></td>
+        <td class="num">$43,000</td>
+        <td class="num">60%</td>
+        <td>15 Jul 2026</td>
+        <td>HubSpot</td>
+        <td>Mayur S.</td>
+        <td class="num">4</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Soylent Corp</strong></td>
+        <td>Soylent Corp</td>
+        <td><span class="badge solid">Negotiation</span></td>
+        <td class="num">$16,500</td>
+        <td class="num">85%</td>
+        <td>5 Jun 2026</td>
+        <td>—</td>
+        <td>Sarah K.</td>
+        <td class="num">6</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Pied Piper — Pro Plan</strong></td>
+        <td>Pied Piper</td>
+        <td><span class="badge muted">Discovery</span></td>
+        <td class="num">$24,000</td>
+        <td class="num">10%</td>
+        <td>15 Aug 2026</td>
+        <td>—</td>
+        <td>Mayur S.</td>
+        <td class="num">3</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Hooli — Team Tier</strong></td>
+        <td>Hooli</td>
+        <td><span class="badge muted">Discovery</span></td>
+        <td class="num">$18,000</td>
+        <td class="num">10%</td>
+        <td>30 Aug 2026</td>
+        <td>—</td>
+        <td>Mayur S.</td>
+        <td class="num">5</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="empty-state-compact mt-5 mb-5">
+    <strong>Empty states designed (B1, B2):</strong> 0 deals → onboarding CTAs (Create deal, Set up pipeline).
+    Filter returns 0 → "No deals match — clear or refine." Also includes <a href="deals-table-junior.html">Junior Rep view</a> demonstrating field- and record-level RBAC.
+  </div>
+  <div class="row between mt-5">
+    <div class="text-muted text-mono" style="font-size: 11px;">SHOWING 10 OF 47 · <strong style="color:var(--ink)">$405,500 TOTAL</strong> on screen</div>
+    <div class="row gap-2">
+      <button class="btn sm">← Prev</button>
+      <button class="btn sm">Next →</button>
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

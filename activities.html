@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Activities · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="activities" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><span class="current">Activities</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M3 · F3.2 · F3.3</div>
+      <h1 class="page-title mt-2">Activities</h1>
+      <div class="page-sub" id="activities-sub">Loading activities...</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn" onclick="window.location.href='settings-selling-rules.html'">Selling rules</button>
+      <button class="btn primary" id="log-activity-btn">+ Log activity</button>
+    </div>
+  </div>
+
+  <div class="row mb-4 gap-3">
+    <div class="tab-bar">
+      <a href="#" class="active" id="tab-all" onclick="filterByType(null, this)">All</a>
+      <a href="#" id="tab-meeting" onclick="filterByType('meeting', this)">Meetings</a>
+      <a href="#" id="tab-email" onclick="filterByType('email', this)">Emails</a>
+      <a href="#" id="tab-call" onclick="filterByType('call', this)">Calls</a>
+      <a href="#" id="tab-note" onclick="filterByType('note', this)">Notes</a>
+    </div>
+    <div class="row gap-2">
+      <button class="btn sm">+ Add filter</button>
+    </div>
+  </div>
+
+  <div class="timeline" id="activities-timeline">
+    <div style="text-align:center; padding:40px; color:var(--ink-50);">Loading...</div>
+  </div>
+
+  <!-- Log Activity Modal -->
+  <div id="log-activity-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
+      <div class="row between mb-4">
+        <div class="card-title">Log activity</div>
+        <button onclick="document.getElementById('log-activity-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
+      </div>
+      <div id="log-activity-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
+      <div class="field-row">
+        <div class="field">
+          <label>Type</label>
+          <select id="la-type">
+            <option value="meeting">Meeting</option>
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+            <option value="note">Note</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date & time</label>
+          <input type="datetime-local" id="la-date" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Title *</label>
+        <input type="text" id="la-title" placeholder="Discovery call — Acme Corp" />
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="la-body" placeholder="What happened?" style="width:100%; padding:8px; border:var(--rule); border-radius:4px; font-size:13px; min-height:80px; resize:vertical;"></textarea>
+      </div>
+      <div class="row gap-2 mt-4 between">
+        <button class="btn" onclick="document.getElementById('log-activity-modal').style.display='none'">Cancel</button>
+        <button class="btn primary" id="la-save-btn">Log activity</button>
+      </div>
+    </div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var currentType = null;
+
+    function filterByType(type, el) {
+      currentType = type;
+      document.querySelectorAll(".tab-bar a").forEach(function(a) { a.className = ""; });
+      el.className = "active";
+      loadActivities();
+      return false;
+    }
+
+    function getTypeClass(type) {
+      if (type === "meeting") return "timeline-item meeting";
+      if (type === "email") return "timeline-item email";
+      return "timeline-item";
+    }
+
+    async function loadActivities() {
+      try {
+        var params = { limit: 50 };
+        if (currentType) params.type = currentType;
+        var data = await SS_API.Activities.list(params);
+        var timeline = document.getElementById("activities-timeline");
+        var sub = document.getElementById("activities-sub");
+
+        sub.textContent = data.total + " activities · Live from database";
+
+        if (data.activities.length === 0) {
+          timeline.innerHTML = "<div style='text-align:center;padding:40px;color:var(--ink-50);'>No activities yet — log your first activity.</div>";
+          return;
+        }
+
+        timeline.innerHTML = data.activities.map(function(a) {
+          var date = new Date(a.occurredAt).toLocaleDateString("en-GB", {
+            day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+          });
+          var typeLabel = a.type.toUpperCase();
+          var autoLabel = a.autoLogged ? "Auto-logged" : "Manual";
+          var body = a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "";
+          var contact = a.contact ? " · <a href='contact-detail.html?id=" + a.contact.id + "'>" + a.contact.firstName + " " + a.contact.lastName + "</a>" : "";
+          var deal = a.deal ? " · <a href='deal-detail.html?id=" + a.deal.id + "'>" + a.deal.name + "</a>" : "";
+
+          return "<div class='" + getTypeClass(a.type) + "'>" +
+            "<div class='timeline-meta'>" +
+            "<span>" + date + "</span>" +
+            "<span class='badge muted'>" + typeLabel + "</span>" +
+            "<span>" + autoLabel + "</span>" +
+            "</div>" +
+            "<div class='timeline-title'>" + a.title + contact + deal + "</div>" +
+            body +
+            "</div>";
+        }).join("");
+
+      } catch (err) {
+        console.error("Failed to load activities:", err);
+        document.getElementById("activities-timeline").innerHTML = "<div style='text-align:center;padding:40px;color:var(--ink-50);'>Failed to load activities. Please refresh.</div>";
+      }
+    }
+
+    document.getElementById("log-activity-btn").addEventListener("click", function() {
+      var now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById("la-date").value = now.toISOString().slice(0, 16);
+      document.getElementById("log-activity-modal").style.display = "flex";
+    });
+
+    document.getElementById("la-save-btn").addEventListener("click", async function() {
+      var type = document.getElementById("la-type").value;
+      var title = document.getElementById("la-title").value.trim();
+      var body = document.getElementById("la-body").value.trim();
+      var date = document.getElementById("la-date").value;
+      var errEl = document.getElementById("log-activity-error");
+      var btn = document.getElementById("la-save-btn");
+
+      if (!title) {
+        errEl.textContent = "Title is required.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+      errEl.style.display = "none";
+
+      try {
+        var payload = {
+          type: type,
+          title: title,
+          occurredAt: date ? new Date(date).toISOString() : new Date().toISOString()
+        };
+        if (body) payload.body = body;
+
+        await SS_API.Activities.create(payload);
+        document.getElementById("log-activity-modal").style.display = "none";
+        document.getElementById("la-title").value = "";
+        document.getElementById("la-body").value = "";
+        btn.textContent = "Log activity";
+        btn.disabled = false;
+        loadActivities();
+      } catch (err) {
+        errEl.textContent = err.message || "Failed to log activity.";
+        errEl.style.display = "block";
+        btn.textContent = "Log activity";
+        btn.disabled = false;
+      }
+    });
+
+    loadActivities();
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

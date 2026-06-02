@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sarah Chen · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="contacts" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="contacts.html">Contacts</a><span class="sep">/</span><span class="current">Sarah Chen</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div class="row gap-4 items-center">
+      <div class="avatar lg" style="width:72px; height:72px; font-size:24px;">SC</div>
+      <div>
+        <div class="eyebrow">PERSON · M1 · F1.2 · F1.4 · F1.8 · F3.2</div>
+        <h1 class="page-title mt-2">Sarah Chen</h1>
+        <div class="page-sub">VP Engineering at <a href="company-detail.html">Acme Corp</a> · San Francisco · ✉ sarah.chen@acme.com</div>
+      </div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn sm">Re-enrich</button>
+      <button class="btn">Log activity</button>
+      <button class="btn primary">+ New task</button>
+    </div>
+  </div>
+
+  <div class="record-grid">
+    <div>
+      <div class="record-tab-bar">
+        <button class="record-tab active" data-tab="timeline">Timeline</button>
+        <button class="record-tab" data-tab="emails">Emails</button>
+        <button class="record-tab" data-tab="notes">Notes</button>
+        <button class="record-tab" data-tab="tasks">Tasks</button>
+        <button class="record-tab" data-tab="files">Files</button>
+      </div>
+
+      <div class="tab-pane active" data-pane="timeline">
+        <div class="row between mb-4">
+          <div class="row gap-2">
+            <button class="btn sm">All types</button>
+            <button class="btn sm">Last 30 days</button>
+          </div>
+          <input type="search" placeholder="Search timeline..." style="width: 240px; padding: 6px 10px; border: var(--rule); font-size: 12px;" />
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item meeting">
+            <div class="timeline-meta">
+              <span>26 May · 09:32</span>
+              <span class="badge muted">MEETING</span>
+              <span>45 min · Auto-logged</span>
+            </div>
+            <div class="timeline-title">Discovery call</div>
+            <div class="timeline-body">Sarah introduced David Park (CTO). Buying committee identified. Next step: send security questionnaire by EoW.</div>
+          </div>
+          <div class="timeline-item email">
+            <div class="timeline-meta">
+              <span>25 May · 18:47</span>
+              <span class="badge muted">EMAIL</span>
+              <span>Outbound</span>
+            </div>
+            <div class="timeline-title">Re: Pricing options for annual license</div>
+            <div class="timeline-body">Hi Sarah, attached are the three tier options we discussed...</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-meta">
+              <span>25 May · 11:02</span>
+              <span class="badge muted">NOTE</span>
+              <span>By you</span>
+            </div>
+            <div class="timeline-title">Discovery prep notes</div>
+            <div class="timeline-body">Sarah is technical buyer. Cares about SSO + audit log. Mentioned competing eval with HubSpot. @mayur to send security PDF before next call.</div>
+          </div>
+          <div class="timeline-item stage">
+            <div class="timeline-meta">
+              <span>22 May · 16:30</span>
+              <span class="badge muted">STAGE MOVE</span>
+              <span>Deal: Acme — Annual License</span>
+            </div>
+            <div class="timeline-title">Moved Discovery → Qualified</div>
+            <div class="timeline-body">Owner: Mayur. Amount: $48,000. Probability set to 60%.</div>
+          </div>
+          <div class="timeline-item email">
+            <div class="timeline-meta">
+              <span>20 May · 09:15</span>
+              <span class="badge muted">EMAIL</span>
+              <span>Inbound</span>
+            </div>
+            <div class="timeline-title">Re: Following up on our LinkedIn intro</div>
+            <div class="timeline-body">Hi Mayur, thanks for reaching out. We're evaluating CRMs to replace our spreadsheet workflow. Happy to chat next week — propose Tuesday?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="emails">
+        <div class="email-thread">
+          <div class="email-head"><div class="email-from">Sarah Chen → Mayur S.</div><div class="email-date">26 MAY · 09:32</div></div>
+          <div class="email-subject">Re: Pricing options for annual license</div>
+          <div class="email-snippet">Thanks for the breakdown. The mid-tier looks right for us, but our CFO wants to confirm the data residency commitment — can you send the EU DPA?</div>
+        </div>
+        <div class="email-thread">
+          <div class="email-head"><div class="email-from">Mayur S. → Sarah Chen</div><div class="email-date">25 MAY · 18:47</div></div>
+          <div class="email-subject">Re: Pricing options for annual license</div>
+          <div class="email-snippet">Hi Sarah, attached are the three tier options we discussed. Let me know which works best for your team — happy to set up a follow-up call this week.</div>
+        </div>
+        <div class="email-thread">
+          <div class="email-head"><div class="email-from">Sarah Chen → Mayur S.</div><div class="email-date">22 MAY · 11:30</div></div>
+          <div class="email-subject">Intro: David Park (CTO)</div>
+          <div class="email-snippet">Looping in David — he'll lead the security review on our side. Available Wednesday afternoon for a quick architecture call.</div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="notes">
+        <div class="note-card">
+          <div class="note-head"><div class="note-author">Mayur S.</div><div class="note-date">25 MAY · 11:02</div></div>
+          <div class="note-body">Sarah is the technical buyer. Cares about SSO + audit log. Mentioned a competing evaluation with HubSpot. <span class="mention">@sarah.k</span> please send the security PDF before the next call. <span class="mention">/task</span> Follow up by Friday on CFO timeline.</div>
+          <div class="note-attachment">📎 Security_Overview_v3.pdf · 2.4 MB</div>
+        </div>
+        <div class="note-card">
+          <div class="note-head"><div class="note-author">Sarah K.</div><div class="note-date">22 MAY · 16:30</div></div>
+          <div class="note-body">From the SDR intro call — Sarah explicitly asked about EU data residency. Their main concern is GDPR compliance for their EU customer data. They've eliminated Pipedrive already. <span class="mention">@mayur</span> worth flagging F9.5 in your discovery deck.</div>
+        </div>
+      </div>
+
+      <div class="tab-pane" data-pane="tasks">
+        <ul class="summary-list">
+          <li>
+            <input type="checkbox" />
+            <div class="grow"><strong>Follow up on Acme pricing question</strong><div class="text-muted" style="font-size:11px;">Due today 10:00 · High priority</div></div>
+            <span class="badge">High</span>
+          </li>
+          <li>
+            <input type="checkbox" />
+            <div class="grow"><strong>Send EU DPA + DPIA documents</strong><div class="text-muted" style="font-size:11px;">Due Friday · Triggered from /task in note</div></div>
+            <span class="badge muted">Med</span>
+          </li>
+          <li>
+            <input type="checkbox" checked />
+            <div class="grow" style="opacity:0.5;text-decoration:line-through;"><strong>Prep for discovery call</strong><div class="text-muted" style="font-size:11px;">Completed 25 May</div></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-pane" data-pane="files">
+        <div class="files-grid">
+          <div class="file-card">
+            <div class="file-type">PDF · 2.4 MB</div>
+            <div class="file-name">Security_Overview_v3.pdf</div>
+            <div class="file-meta">Attached by Mayur · 25 May · 2 downloads</div>
+          </div>
+          <div class="file-card">
+            <div class="file-type">LINK · Google Docs</div>
+            <div class="file-name">Proposal v3</div>
+            <div class="file-meta">Attached by Mayur · 25 May · Last opened by Sarah today 09:14</div>
+          </div>
+          <div class="file-card">
+            <div class="file-type">LINK · Notion</div>
+            <div class="file-name">Architecture brief</div>
+            <div class="file-meta">Attached by Sarah K. · 22 May · Read by 4</div>
+          </div>
+          <div class="file-card">
+            <div class="file-type">EMAIL ATTACHMENT</div>
+            <div class="file-name">SOC2_Type_II_Report_2025.pdf</div>
+            <div class="file-meta">From Mayur's outbound · 20 May · 9.1 MB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-aside">
+      <div class="card">
+        <div class="label">Details</div>
+        <dl class="kv-grid mt-3">
+          <dt>Title</dt><dd>VP Engineering</dd>
+          <dt>Company</dt><dd><a href="company-detail.html">Acme Corp</a></dd>
+          <dt>Location</dt><dd>San Francisco</dd>
+          <dt>Email</dt><dd>sarah.chen@acme.com</dd>
+          <dt>Phone</dt><dd class="text-mono">+1 415 555 0117</dd>
+          <dt>LinkedIn</dt><dd><a href="chrome-extension.html">linkedin.com/in/sarahchen</a></dd>
+          <dt>Owner</dt><dd>Mayur S.</dd>
+          <dt>Created</dt><dd>14 May 2026 · via Gmail sync</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="label">Enrichment</div>
+        <div class="row gap-2 mt-2"><span class="badge positive">VERIFIED</span><span class="text-muted" style="font-size:11px;">Public web + signature parser · 94% confidence</span></div>
+        <div class="text-muted mt-3" style="font-size: 12px;">
+          Title and company verified from email signature. Photo and bio sourced from public LinkedIn.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Tags</div>
+        <div class="row mt-2 gap-2" style="flex-wrap: wrap;">
+          <span class="chip">Decision Maker <span class="chip-x">×</span></span>
+          <span class="chip">SaaS <span class="chip-x">×</span></span>
+          <span class="chip">Series B+ <span class="chip-x">×</span></span>
+          <button class="btn sm">+ Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Linked deals</div>
+        <ul class="summary-list mt-2">
+          <li>
+            <div class="left-icon">◇</div>
+            <div class="grow">
+              <a href="deal-detail.html"><strong>Acme — Annual License</strong></a>
+              <div class="text-muted" style="font-size: 11px;">Proposal · $48,000</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

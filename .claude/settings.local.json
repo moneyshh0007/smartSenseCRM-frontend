@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Manish\\\\Documents\\\\SmartSense_CRM_Phase1_Prototype\" -Recurse)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Day · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="my-day" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><span class="sep">/</span><span class="current">My Day</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow" id="today-date">Loading...</div>
+      <h1 class="page-title mt-2" id="greeting">Good morning.</h1>
+      <div class="page-sub" id="day-sub">Loading your day...</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">+ New task</button>
+      <button class="btn primary" onclick="window.location.href='contacts.html'">Quick add</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid mb-5">
+    <div class="kpi" style="cursor:pointer;" onclick="window.location.href='deals.html'">
+      <div class="kpi-label">Pipeline this quarter</div>
+      <div class="kpi-value" id="kpi-pipeline">—</div>
+      <div class="kpi-delta" id="kpi-pipeline-sub">All open deals</div>
+    </div>
+    <div class="kpi" style="cursor:pointer;" onclick="window.location.href='deals-forecast.html'">
+      <div class="kpi-label">Forecast — Commit</div>
+      <div class="kpi-value" id="kpi-commit">—</div>
+      <div class="kpi-delta" id="kpi-commit-sub">High confidence deals</div>
+    </div>
+    <div class="kpi" style="cursor:pointer;" onclick="window.location.href='activities.html'">
+      <div class="kpi-label">Total activities</div>
+      <div class="kpi-value" id="kpi-activities">—</div>
+      <div class="kpi-delta">All logged activities</div>
+    </div>
+    <div class="kpi" style="cursor:pointer;" onclick="window.location.href='tasks.html'">
+      <div class="kpi-label">Open tasks</div>
+      <div class="kpi-value" id="kpi-tasks">—</div>
+      <div class="kpi-delta" id="kpi-tasks-sub">Due today or overdue</div>
+    </div>
+  </div>
+
+  <div class="split-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Today's tasks</div>
+        <a href="tasks.html" class="text-muted text-mono" style="font-size: 11px;">VIEW ALL ↗</a>
+      </div>
+      <ul class="summary-list" id="today-tasks">
+        <li><div class="grow" style="color:var(--ink-50); font-size:13px;">Loading tasks...</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Recent deals</div>
+        <a href="deals.html" class="text-muted text-mono" style="font-size: 11px;">VIEW ALL ↗</a>
+      </div>
+      <ul class="summary-list" id="recent-deals">
+        <li><div class="grow" style="color:var(--ink-50); font-size:13px;">Loading deals...</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">02</span>
+    <span class="title">Recent activity</span>
+    <span class="line"></span>
+    <a href="activities.html" class="text-muted text-mono" style="font-size: 11px;">VIEW ALL ↗</a>
+  </div>
+
+  <div class="timeline" id="recent-activities">
+    <div style="text-align:center; padding:40px; color:var(--ink-50);">Loading activities...</div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    // Set date and greeting
+    var now = new Date();
+    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    var hour = now.getHours();
+    var greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+    document.getElementById("today-date").textContent = days[now.getDay()] + " · " + now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
+
+    var user = SS_API.getUser();
+    document.getElementById("greeting").textContent = greeting + (user ? ", " + user.name.split(" ")[0] + "." : ".");
+
+    function formatCurrency(amount) {
+      if (amount >= 1000000) return "$" + (amount / 1000000).toFixed(1) + "M";
+      if (amount >= 1000) return "$" + Math.round(amount / 1000) + "k";
+      return "$" + amount;
+    }
+
+    function getTypeClass(type) {
+      if (type === "meeting") return "timeline-item meeting";
+      if (type === "email") return "timeline-item email";
+      return "timeline-item";
+    }
+
+    async function loadMyDay() {
+      try {
+        // Load all data in parallel
+        var results = await Promise.all([
+          SS_API.Deals.list(),
+          SS_API.Tasks.list({ completed: "false" }),
+          SS_API.Activities.list({ limit: 5 })
+        ]);
+
+        var dealsData = results[0];
+        var tasksData = results[1];
+        var activitiesData = results[2];
+
+        // ── KPIs ──────────────────────────────────────────
+        var totalPipeline = dealsData.deals.reduce(function(sum, d) {
+          return sum + Number(d.amount);
+        }, 0);
+
+        var commitDeals = dealsData.deals.filter(function(d) {
+          return d.forecastCategory === "commit";
+        });
+        var commitTotal = commitDeals.reduce(function(sum, d) {
+          return sum + Number(d.amount);
+        }, 0);
+
+        document.getElementById("kpi-pipeline").textContent = formatCurrency(totalPipeline);
+        document.getElementById("kpi-commit").textContent = formatCurrency(commitTotal);
+        document.getElementById("kpi-activities").textContent = activitiesData.total;
+        document.getElementById("kpi-tasks").textContent = tasksData.total;
+
+        // Day sub
+        var overdueTasks = tasksData.tasks.filter(function(t) {
+          return t.dueAt && new Date(t.dueAt) < new Date();
+        });
+        document.getElementById("day-sub").textContent =
+          tasksData.total + " open tasks · " +
+          dealsData.total + " deals · " +
+          (overdueTasks.length > 0 ? overdueTasks.length + " overdue" : "nothing overdue ✓");
+
+        // ── Today's tasks ─────────────────────────────────
+        var tasksList = document.getElementById("today-tasks");
+        var todayTasks = tasksData.tasks.slice(0, 4);
+
+        if (todayTasks.length === 0) {
+          tasksList.innerHTML = "<li><div class='grow' style='color:var(--ink-50);font-size:13px;'>You're all caught up ✓</div></li>";
+        } else {
+          tasksList.innerHTML = todayTasks.map(function(t) {
+            var isOverdue = t.dueAt && new Date(t.dueAt) < new Date();
+            var due = t.dueAt ? new Date(t.dueAt).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) : "";
+            var priority = t.priority || "med";
+            var badgeClass = priority === "high" ? "badge" : "badge muted";
+            return "<li>" +
+              "<input type='checkbox' onchange=\"completeTask('" + t.id + "', this)\" />" +
+              "<div class='grow'>" +
+              "<div>" + t.title + (isOverdue ? " <span class='badge warn' style='font-size:9px;'>OVERDUE</span>" : "") + "</div>" +
+              (due ? "<div class='text-muted' style='font-size:11px;'>Due " + due + "</div>" : "") +
+              "</div>" +
+              "<span class='" + badgeClass + "'>" + priority.charAt(0).toUpperCase() + priority.slice(1) + "</span>" +
+              "</li>";
+          }).join("");
+        }
+
+        // ── Recent deals ──────────────────────────────────
+        var dealsList = document.getElementById("recent-deals");
+        var recentDeals = dealsData.deals.slice(0, 4);
+
+        if (recentDeals.length === 0) {
+          dealsList.innerHTML = "<li><div class='grow' style='color:var(--ink-50);font-size:13px;'>No deals yet.</div></li>";
+        } else {
+          dealsList.innerHTML = recentDeals.map(function(d) {
+            return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+              "<div class='left-icon'>◇</div>" +
+              "<div class='grow'>" +
+              "<div><strong>" + d.name + "</strong></div>" +
+              "<div class='text-muted' style='font-size:11px;'>" + d.stage + " · " + formatCurrency(Number(d.amount)) + (d.company ? " · " + d.company.name : "") + "</div>" +
+              "</div>" +
+              "<span class='badge muted'>" + d.stage.toUpperCase() + "</span>" +
+              "</li>";
+          }).join("");
+        }
+
+        // ── Recent activities ─────────────────────────────
+        var timeline = document.getElementById("recent-activities");
+
+        if (activitiesData.activities.length === 0) {
+          timeline.innerHTML = "<div style='text-align:center;padding:40px;color:var(--ink-50);'>No activities yet — log your first activity.</div>";
+        } else {
+          timeline.innerHTML = activitiesData.activities.map(function(a) {
+            var date = new Date(a.occurredAt).toLocaleDateString("en-GB", {
+              day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+            });
+            var typeLabel = a.type.toUpperCase();
+            var autoLabel = a.autoLogged ? "Auto-logged" : "By you";
+            var body = a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "";
+            return "<div class='" + getTypeClass(a.type) + "'>" +
+              "<div class='timeline-meta'>" +
+              "<span>" + date + "</span>" +
+              "<span class='badge muted'>" + typeLabel + "</span>" +
+              "<span>" + autoLabel + "</span>" +
+              "</div>" +
+              "<div class='timeline-title'>" + a.title + "</div>" +
+              body +
+              "</div>";
+          }).join("");
+        }
+
+      } catch (err) {
+        console.error("Failed to load My Day:", err);
+        document.getElementById("day-sub").textContent = "Failed to load data. Please refresh.";
+      }
+    }
+
+    async function completeTask(id, checkbox) {
+      try {
+        await SS_API.Tasks.update(id, { completed: checkbox.checked });
+        loadMyDay();
+      } catch (err) {
+        console.error("Failed to complete task:", err);
+        checkbox.checked = !checkbox.checked;
+      }
+    }
+
+    loadMyDay();
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

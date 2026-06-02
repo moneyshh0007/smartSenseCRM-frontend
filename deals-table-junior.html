@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deals — Junior Rep view · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="deals" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="deals.html">Deals</a><span class="sep">/</span><span>Table</span><span class="sep">/</span><span class="current">(as Junior Rep)</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="role-banner">
+    <span class="role-pill">JR</span>
+    <span><strong>Viewing as Junior Rep · Aria R.</strong> — record-level filter: <span class="text-mono">amount &lt; $100k</span> · field-level restriction: <span class="text-mono">Amount hidden on deals you don't own</span></span>
+    <a href="deals-table.html" style="margin-left:auto;font-size:12px;">View as Workspace Admin instead</a>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M2 · F2.2 · F2.3 · F9.1 RBAC IN EFFECT</div>
+      <h1 class="page-title mt-2">Deals</h1>
+      <div class="page-sub">Table view · <strong>6 deals shown · 2 hidden by your role's permissions</strong></div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">Edit columns</button>
+      <button class="btn primary">+ New deal</button>
+    </div>
+  </div>
+
+  <div class="row mb-4 between">
+    <div class="tab-bar">
+      <a href="deals.html">Kanban</a>
+      <a href="deals-table.html" class="active">Table</a>
+      <a href="deals-forecast.html">Forecast</a>
+    </div>
+    <div class="row gap-2">
+      <button class="btn sm">+ Filter</button>
+      <button class="btn sm">Group by stage</button>
+    </div>
+  </div>
+
+  <div class="card mb-4" style="background:var(--paper-warm); padding:12px 14px; font-size:12px;">
+    <strong>Role-based visibility active.</strong>
+    <span class="text-muted">Northwind — Multi-year ($96,000) is visible to you because you own it. Initech — Enterprise is hidden — owned by Sarah K. and amount exceeds your $100k record-filter. Acme — Annual ($48k, not owned by you) shows but the Amount field is restricted.</span>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 24px;"><input type="checkbox" /></th>
+        <th>Deal</th>
+        <th>Company</th>
+        <th>Stage</th>
+        <th class="num">Amount</th>
+        <th>Probability</th>
+        <th>Close date</th>
+        <th>Owner</th>
+        <th>Days in stage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Acme — Annual License</strong></td>
+        <td>Acme Corp</td>
+        <td><span class="badge">Proposal</span></td>
+        <td class="num"><span class="restricted-value">Restricted</span></td>
+        <td class="num">60%</td>
+        <td>30 Jun 2026</td>
+        <td>Mayur S.</td>
+        <td class="num">1</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Northwind — Multi-year</strong> <span class="badge muted">YOU OWN</span></td>
+        <td>Northwind Corp</td>
+        <td><span class="badge">Proposal</span></td>
+        <td class="num">$96,000</td>
+        <td class="num">60%</td>
+        <td>15 Jul 2026</td>
+        <td>Aria R. (you)</td>
+        <td class="num" style="font-weight:600;">27</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Globex Inc — Annual</strong></td>
+        <td>Globex Inc.</td>
+        <td><span class="badge">Qualified</span></td>
+        <td class="num"><span class="restricted-value">Restricted</span></td>
+        <td class="num">30%</td>
+        <td>20 Jun 2026</td>
+        <td>Sarah K.</td>
+        <td class="num">8</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Vellichor Ltd — Annual</strong></td>
+        <td>Vellichor Ltd</td>
+        <td><span class="badge">Qualified</span></td>
+        <td class="num"><span class="restricted-value">Restricted</span></td>
+        <td class="num">30%</td>
+        <td>30 Jun 2026</td>
+        <td>Mayur S.</td>
+        <td class="num">11</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Hooli — Multi-year</strong> <span class="badge muted">YOU OWN</span></td>
+        <td>Hooli</td>
+        <td><span class="badge solid">Negotiation</span></td>
+        <td class="num">$28,000</td>
+        <td class="num">85%</td>
+        <td>10 Jun 2026</td>
+        <td>Aria R. (you)</td>
+        <td class="num">2</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td><strong>Pied Piper — Pro Plan</strong></td>
+        <td>Pied Piper</td>
+        <td><span class="badge muted">Discovery</span></td>
+        <td class="num"><span class="restricted-value">Restricted</span></td>
+        <td class="num">10%</td>
+        <td>15 Aug 2026</td>
+        <td>Mayur S.</td>
+        <td class="num">3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card mt-5" style="background:var(--paper-warm); border-left:3px solid var(--ink); padding:14px 16px;">
+    <div class="label">RBAC EXPLANATION (F9.1)</div>
+    <div class="mt-2" style="font-size:12px; line-height:1.6;">
+      <strong>What you're seeing:</strong> 6 of 8 open deals. Two deals are hidden entirely:
+      <ul style="margin: 6px 0 6px 18px;">
+        <li><strong>Initech — Enterprise ($72,000)</strong> — under threshold, but you don't own it AND it has the "Junior-restricted" tag set by your manager · hidden</li>
+        <li><strong>Hidden deal #X ($125,000)</strong> — over your $100k record-level filter · hidden</li>
+      </ul>
+      <strong>Amount-field hiding:</strong> On deals you don't own, the Amount column shows "Restricted" instead of the value. This is field-level RBAC — the API returns 403 for that field, not the whole row.
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

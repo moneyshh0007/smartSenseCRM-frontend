@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audit Log · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Admin</span><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Audit Log</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M9 · F9.3</div>
+      <h1 class="page-title mt-2">Audit log</h1>
+      <div class="page-sub">Append-only, immutable. 7-year retention. Every state-changing operation is recorded.</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid mb-5">
+    <div class="kpi">
+      <div class="kpi-label">Total entries</div>
+      <div class="kpi-value">142,890</div>
+      <div class="kpi-delta">Since 14 May 2026</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">This week</div>
+      <div class="kpi-value">8,247</div>
+      <div class="kpi-delta">1,178 / day avg</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Schema changes</div>
+      <div class="kpi-value">7</div>
+      <div class="kpi-delta">v1 → v3</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Role changes</div>
+      <div class="kpi-value">12</div>
+      <div class="kpi-delta">3 this week</div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-title mb-3">Filter</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Actor</label>
+        <input type="text" placeholder="Any user or system" />
+      </div>
+      <div class="field">
+        <label>Object</label>
+        <input type="text" value="Deal · Acme — Annual License" />
+      </div>
+      <div class="field">
+        <label>Action type</label>
+        <select><option>All</option><option>Field change</option><option>Stage move</option><option>Schema change</option></select>
+      </div>
+      <div class="field">
+        <label>Date range</label>
+        <input type="text" value="Last quarter" />
+      </div>
+    </div>
+    <div class="row mt-3 gap-2">
+      <button class="btn primary">Apply</button>
+      <button class="btn">Clear</button>
+      <span class="text-mono text-muted" style="font-size:11px; margin-left: auto;">7 ENTRIES MATCH</span>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Timestamp (UTC)</th>
+        <th>Actor</th>
+        <th>Action</th>
+        <th>Object</th>
+        <th>Diff</th>
+        <th>IP</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">26 May 09:32:14</td>
+        <td>system (sync)</td>
+        <td><span class="badge muted">ACTIVITY</span> meeting.created</td>
+        <td>Deal · Acme</td>
+        <td>+meeting #m_4821</td>
+        <td class="text-mono">10.0.0.1</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">25 May 14:12:08</td>
+        <td>Mayur S.</td>
+        <td><span class="badge muted">FIELD</span> stage.changed</td>
+        <td>Deal · Acme</td>
+        <td>Qualified → Proposal</td>
+        <td class="text-mono">115.241.x.x</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">25 May 14:12:08</td>
+        <td>Mayur S.</td>
+        <td><span class="badge muted">FIELD</span> probability.changed</td>
+        <td>Deal · Acme</td>
+        <td>30 → 60</td>
+        <td class="text-mono">115.241.x.x</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">22 May 16:30:42</td>
+        <td>Mayur S.</td>
+        <td><span class="badge muted">FIELD</span> competitor.changed</td>
+        <td>Deal · Acme</td>
+        <td>"" → "HubSpot"</td>
+        <td class="text-mono">115.241.x.x</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">22 May 16:29:53</td>
+        <td>Mayur S.</td>
+        <td><span class="badge muted">FIELD</span> amount.changed</td>
+        <td>Deal · Acme</td>
+        <td>$36,000 → $48,000</td>
+        <td class="text-mono">115.241.x.x</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">22 May 11:30:01</td>
+        <td>system (sync)</td>
+        <td><span class="badge muted">ACTIVITY</span> email.received</td>
+        <td>Deal · Acme</td>
+        <td>+email #e_3201</td>
+        <td class="text-mono">10.0.0.1</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+      <tr>
+        <td class="text-mono" style="font-size:11px;">14 May 11:08:22</td>
+        <td>Mayur S.</td>
+        <td><span class="badge">CREATE</span> deal.created</td>
+        <td>Deal · Acme</td>
+        <td>Source: LinkedIn outbound</td>
+        <td class="text-mono">115.241.x.x</td>
+        <td><button class="btn sm">View</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="empty-state-compact mt-5 mb-3">
+    <strong>Audit-row drill-down (E7, G9):</strong> clicking "View" on any row above now opens a slide-over with full request body, session ID, user-agent, IP geolocation, and related-record diffs.
+  </div>
+
+  <div class="row mt-4">
+    <span class="text-mono text-muted" style="font-size:11px;">
+      ✓ All 7 entries cryptographically chained — any tampering would be detected
+    </span>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

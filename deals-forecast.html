@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deals — Forecast · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="deals" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="deals.html">Deals</a><span class="sep">/</span><span class="current">Forecast</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M2 · F2.5 · F2.6</div>
+      <h1 class="page-title mt-2">Forecast — Q2 FY26</h1>
+      <div class="page-sub">Locked snapshot · 26 May 09:00 IST · Owner: Mayur S.</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">Export CSV</button>
+      <button class="btn">Lock snapshot</button>
+      <button class="btn primary">Submit to VP</button>
+    </div>
+  </div>
+
+  <div class="row mb-4 between">
+    <div class="tab-bar">
+      <a href="deals.html">Kanban</a>
+      <a href="deals-table.html">Table</a>
+      <a href="deals-forecast.html" class="active">Forecast</a>
+    </div>
+  </div>
+
+  <div class="kpi-grid mb-6">
+    <div class="kpi">
+      <div class="kpi-label">Closed Won (YTD)</div>
+      <div class="kpi-value">$452k</div>
+      <div class="kpi-delta up">100% — booked</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Commit</div>
+      <div class="kpi-value">$310k</div>
+      <div class="kpi-delta">High-confidence open deals</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Best Case</div>
+      <div class="kpi-value">$214k</div>
+      <div class="kpi-delta">Stretch goal</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Pipeline</div>
+      <div class="kpi-value">$487k</div>
+      <div class="kpi-delta">All open</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">01</span>
+    <span class="title">Forecast roll-up</span>
+    <span class="line"></span>
+  </div>
+
+  <div class="card">
+    <div class="bar-row">
+      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Closed Won</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div>
+      <div class="num">$452,000</div>
+    </div>
+    <div class="bar-row">
+      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Commit</div>
+      <div class="bar-track"><div class="bar-fill" style="width:68%;"></div></div>
+      <div class="num">$310,000</div>
+    </div>
+    <div class="bar-row">
+      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Best Case</div>
+      <div class="bar-track"><div class="bar-fill muted" style="width:47%;"></div></div>
+      <div class="num">$214,000</div>
+    </div>
+    <div class="bar-row">
+      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Pipeline</div>
+      <div class="bar-track"><div class="bar-fill light" style="width:100%;"></div></div>
+      <div class="num">$487,000</div>
+    </div>
+    <div class="bar-row">
+      <div class="label" style="font-size:13px;color:var(--ink-50);">Omitted</div>
+      <div class="bar-track"><div class="bar-fill light" style="width:12%;"></div></div>
+      <div class="num">$56,000</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">02</span>
+    <span class="title">By category</span>
+    <span class="line"></span>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Deal</th>
+        <th>Stage</th>
+        <th class="num">Amount</th>
+        <th class="num">Weighted</th>
+        <th>Close</th>
+        <th>Rep</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="badge solid">COMMIT</span></td><td>Hooli — Multi-year</td><td>Negotiation</td><td class="num">$28,000</td><td class="num">$23,800</td><td>10 Jun</td><td>Mayur S.</td></tr>
+      <tr><td><span class="badge solid">COMMIT</span></td><td>Soylent Corp</td><td>Negotiation</td><td class="num">$16,500</td><td class="num">$14,025</td><td>5 Jun</td><td>Sarah K.</td></tr>
+      <tr><td><span class="badge solid">COMMIT</span></td><td>Acme — Annual License</td><td>Proposal</td><td class="num">$48,000</td><td class="num">$28,800</td><td>30 Jun</td><td>Mayur S.</td></tr>
+      <tr><td><span class="badge">BEST CASE</span></td><td>Northwind — Multi-year</td><td>Proposal</td><td class="num">$96,000</td><td class="num">$57,600</td><td>15 Jul</td><td>Mayur S.</td></tr>
+      <tr><td><span class="badge">BEST CASE</span></td><td>Pied Piper — Enterprise</td><td>Proposal</td><td class="num">$43,000</td><td class="num">$25,800</td><td>15 Jul</td><td>Mayur S.</td></tr>
+      <tr><td><span class="badge muted">PIPELINE</span></td><td>Vellichor Ltd — Annual</td><td>Qualified</td><td class="num">$36,000</td><td class="num">$10,800</td><td>30 Jun</td><td>Mayur S.</td></tr>
+      <tr><td><span class="badge muted">OMITTED</span></td><td>Initech — Enterprise</td><td>Qualified</td><td class="num">$72,000</td><td class="num">—</td><td>30 Jul</td><td>Sarah K.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-rule">
+    <span class="num">03</span>
+    <span class="title">Won/lost analysis (last 90 days)</span>
+    <span class="line"></span>
+    <a href="#" class="text-muted text-mono" style="font-size: 11px;">F2.6 ↗</a>
+  </div>
+
+  <div class="split-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Loss reasons</div>
+        <span class="text-muted text-mono" style="font-size:11px;">18 LOST DEALS</span>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">Lost to competitor — HubSpot</div>
+        <div class="bar-track"><div class="bar-fill" style="width:55%;"></div></div>
+        <div class="num">10</div>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">Budget / Timing</div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%;"></div></div>
+        <div class="num">5</div>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">No decision (status quo)</div>
+        <div class="bar-track"><div class="bar-fill muted" style="width:15%;"></div></div>
+        <div class="num">3</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Win reasons</div>
+        <span class="text-muted text-mono" style="font-size:11px;">13 WON DEALS</span>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">Product fit / features</div>
+        <div class="bar-track"><div class="bar-fill" style="width:62%;"></div></div>
+        <div class="num">8</div>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">Speed of evaluation</div>
+        <div class="bar-track"><div class="bar-fill" style="width:23%;"></div></div>
+        <div class="num">3</div>
+      </div>
+      <div class="bar-row">
+        <div class="label" style="font-size:13px;color:var(--ink);">Pricing</div>
+        <div class="bar-track"><div class="bar-fill muted" style="width:15%;"></div></div>
+        <div class="num">2</div>
+      </div>
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

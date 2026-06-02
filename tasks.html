@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tasks · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="tasks" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><span class="current">Tasks</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M3 · F3.1</div>
+      <h1 class="page-title mt-2">Tasks</h1>
+      <div class="page-sub" id="tasks-sub">Loading tasks...</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn">Group by deal</button>
+      <button class="btn primary" id="new-task-btn">+ New task</button>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="tab-bar">
+      <a href="#" class="active" id="tab-open" onclick="switchTab('open')">Open</a>
+      <a href="#" id="tab-completed" onclick="switchTab('completed')">Completed</a>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:32px;"><input type="checkbox" /></th>
+        <th>Task</th>
+        <th>Due</th>
+        <th>Priority</th>
+        <th>Owner</th>
+      </tr>
+    </thead>
+    <tbody id="tasks-tbody">
+      <tr>
+        <td colspan="5" style="text-align:center; padding:40px; color:var(--ink-50);">
+          Loading...
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="row between mt-5">
+    <div class="text-mono text-muted" style="font-size:11px;" id="tasks-footer"></div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="new-task-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
+      <div class="row between mb-4">
+        <div class="card-title">New task</div>
+        <button onclick="document.getElementById('new-task-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
+      </div>
+      <div id="new-task-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
+      <div class="field">
+        <label>Task title *</label>
+        <input type="text" id="nt-title" placeholder="Follow up on Acme pricing" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Due date</label>
+          <input type="datetime-local" id="nt-due" />
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="nt-priority">
+            <option value="high">High</option>
+            <option value="med" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="row gap-2 mt-4 between">
+        <button class="btn" onclick="document.getElementById('new-task-modal').style.display='none'">Cancel</button>
+        <button class="btn primary" id="nt-save-btn">Save task</button>
+      </div>
+    </div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var currentTab = "open";
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById("tab-open").className = tab === "open" ? "active" : "";
+      document.getElementById("tab-completed").className = tab === "completed" ? "active" : "";
+      loadTasks();
+    }
+
+    async function loadTasks() {
+      try {
+        var params = currentTab === "open" ? { completed: "false" } : { completed: "true" };
+        var data = await SS_API.Tasks.list(params);
+        var tbody = document.getElementById("tasks-tbody");
+        var sub = document.getElementById("tasks-sub");
+        var footer = document.getElementById("tasks-footer");
+
+        sub.textContent = data.total + " " + currentTab + " tasks · Live from database";
+        footer.textContent = "SHOWING " + data.total + " TASKS";
+
+        if (data.tasks.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:40px;color:var(--ink-50);'>" +
+            (currentTab === "open" ? "You're all caught up ✓" : "No completed tasks yet.") +
+            "</td></tr>";
+          return;
+        }
+
+        tbody.innerHTML = data.tasks.map(function(t) {
+          var due = t.dueAt ? new Date(t.dueAt).toLocaleString() : "No due date";
+          var priority = t.priority || "med";
+          var badgeClass = priority === "high" ? "badge" : "badge muted";
+          var isOverdue = t.dueAt && !t.completed && new Date(t.dueAt) < new Date();
+          return "<tr>" +
+            "<td><input type='checkbox' " + (t.completed ? "checked" : "") + " onchange=\"toggleTask('" + t.id + "', this)\" /></td>" +
+            "<td>" +
+              "<strong style='" + (t.completed ? "text-decoration:line-through;opacity:0.5;" : "") + "'>" + t.title + "</strong>" +
+              (isOverdue ? " <span class='badge warn'>OVERDUE</span>" : "") +
+            "</td>" +
+            "<td style='" + (isOverdue ? "color:var(--ink);font-weight:500;" : "") + "'>" + due + "</td>" +
+            "<td><span class='" + badgeClass + "'>" + priority.toUpperCase() + "</span></td>" +
+            "<td>—</td>" +
+            "</tr>";
+        }).join("");
+
+      } catch (err) {
+        console.error("Failed to load tasks:", err);
+        document.getElementById("tasks-tbody").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:40px;color:var(--ink-50);'>Failed to load tasks. Please refresh.</td></tr>";
+      }
+    }
+
+    async function toggleTask(id, checkbox) {
+      try {
+        await SS_API.Tasks.update(id, { completed: checkbox.checked });
+        loadTasks();
+      } catch (err) {
+        console.error("Failed to update task:", err);
+        checkbox.checked = !checkbox.checked;
+      }
+    }
+
+    document.getElementById("new-task-btn").addEventListener("click", function() {
+      document.getElementById("new-task-modal").style.display = "flex";
+    });
+
+    document.getElementById("nt-save-btn").addEventListener("click", async function() {
+      var title = document.getElementById("nt-title").value.trim();
+      var due = document.getElementById("nt-due").value;
+      var priority = document.getElementById("nt-priority").value;
+      var errEl = document.getElementById("new-task-error");
+      var btn = document.getElementById("nt-save-btn");
+
+      if (!title) {
+        errEl.textContent = "Task title is required.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+      errEl.style.display = "none";
+
+      try {
+        var payload = { title: title, priority: priority };
+        if (due) payload.dueAt = new Date(due).toISOString();
+
+        await SS_API.Tasks.create(payload);
+        document.getElementById("new-task-modal").style.display = "none";
+        document.getElementById("nt-title").value = "";
+        document.getElementById("nt-due").value = "";
+        btn.textContent = "Save task";
+        btn.disabled = false;
+        loadTasks();
+      } catch (err) {
+        errEl.textContent = err.message || "Failed to save task.";
+        errEl.style.display = "block";
+        btn.textContent = "Save task";
+        btn.disabled = false;
+      }
+    });
+
+    loadTasks();
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pipelines · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Admin</span><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Pipelines</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M2 · F2.1</div>
+      <h1 class="page-title mt-2">Pipelines</h1>
+      <div class="page-sub">3 pipelines · Each with its own stages, probabilities, and role-scoped visibility</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn primary">+ New pipeline</button>
+    </div>
+  </div>
+
+  <div class="card mb-5" style="border-color: var(--ink);">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Direct Sales</div>
+        <div class="card-sub">5 stages · 47 open deals · Visible to: Sales Rep, Sales Manager, RevOps Lead</div>
+      </div>
+      <div class="row gap-2">
+        <span class="badge solid">DEFAULT</span>
+        <button class="btn sm">Settings</button>
+      </div>
+    </div>
+
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th style="width:24px;"></th>
+          <th>Stage</th>
+          <th>Probability</th>
+          <th>Open deals</th>
+          <th class="num">Value</th>
+          <th>Required fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Discovery</strong></td>
+          <td class="num">10%</td>
+          <td>8</td>
+          <td class="num">$96,000</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Qualified</strong></td>
+          <td class="num">30%</td>
+          <td>12</td>
+          <td class="num">$128,000</td>
+          <td>Source</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Proposal</strong></td>
+          <td class="num">60%</td>
+          <td>9</td>
+          <td class="num">$187,000</td>
+          <td>Competitor</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Negotiation</strong></td>
+          <td class="num">85%</td>
+          <td>5</td>
+          <td class="num">$76,000</td>
+          <td>Close date</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Closed Won</strong></td>
+          <td class="num">100%</td>
+          <td>—</td>
+          <td class="num">—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Closed Lost</strong></td>
+          <td class="num">0%</td>
+          <td>—</td>
+          <td class="num">—</td>
+          <td>Loss reason</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Channel Partner Deals</div>
+        <div class="card-sub">5 stages · 7 open deals · Restricted to: Channel Team role only</div>
+      </div>
+      <button class="btn sm">Settings</button>
+    </div>
+    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
+      <span><strong>Stages:</strong> Identified · Qualified · Co-sell · Signed · Won</span>
+      <span><strong>Created:</strong> 2 weeks ago by Mayur</span>
+    </div>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Expansion (renewals)</div>
+        <div class="card-sub">4 stages · 0 open deals · Visible to: CS Manager, Sales Manager</div>
+      </div>
+      <button class="btn sm">Settings</button>
+    </div>
+    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
+      <span><strong>Stages:</strong> Health Check · At Risk · Renewal Discussion · Renewed</span>
+      <span><strong>Created:</strong> Today by RevOps</span>
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

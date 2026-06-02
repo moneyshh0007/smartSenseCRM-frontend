@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Selling Rules · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Admin</span><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Selling Rules</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M3 · F3.4</div>
+      <h1 class="page-title mt-2">Selling rules</h1>
+      <div class="page-sub">Process hygiene rules that flag deals when activity drops. Soft enforcement — visual flags, not blockers.</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn primary">+ New rule</button>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Every open deal must have a next activity within 5 days</div>
+        <div class="card-sub">Applies to: Deals in Proposal+ stages · Pipeline: Direct Sales</div>
+      </div>
+      <div class="row gap-2">
+        <div class="toggle on" data-toggle></div>
+        <button class="btn sm">Edit</button>
+      </div>
+    </div>
+    <div class="row gap-4 mt-3" style="font-size:12px;">
+      <div><span class="label">CREATED BY</span> <strong>Sarah K.</strong> · 2 weeks ago</div>
+      <div><span class="label">CURRENTLY FLAGGED</span> <strong>4 deals</strong></div>
+      <div><span class="label">LAST RUN</span> <strong>2 hours ago</strong></div>
+      <div><span class="label">COMPLIANCE RATE</span> <strong>87%</strong></div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-head">
+      <div>
+        <div class="card-title">When competitor = HubSpot, require a discovery-call note within 7 days of move to Proposal</div>
+        <div class="card-sub">Applies to: Deals · Trigger: stage move to Proposal · Tag: competitive</div>
+      </div>
+      <div class="row gap-2">
+        <div class="toggle on" data-toggle></div>
+        <button class="btn sm">Edit</button>
+      </div>
+    </div>
+    <div class="row gap-4 mt-3" style="font-size:12px;">
+      <div><span class="label">CREATED BY</span> <strong>Mayur</strong> · Today</div>
+      <div><span class="label">CURRENTLY FLAGGED</span> <strong>1 deal</strong></div>
+      <div><span class="label">LAST RUN</span> <strong>2 hours ago</strong></div>
+      <div><span class="label">COMPLIANCE RATE</span> <strong>50% (new)</strong></div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Stalled-deal flag: 21+ days without activity (Qualified, Proposal or Negotiation)</div>
+        <div class="card-sub">Applies to: Deals in Qualified+ stages · Action: Slack notification to deal owner's manager</div>
+      </div>
+      <div class="row gap-2">
+        <div class="toggle on" data-toggle></div>
+        <button class="btn sm">Edit</button>
+      </div>
+    </div>
+    <div class="row gap-4 mt-3" style="font-size:12px;">
+      <div><span class="label">CREATED BY</span> <strong>Mayur</strong> · 1 month ago</div>
+      <div><span class="label">CURRENTLY FLAGGED</span> <strong>2 deals</strong></div>
+      <div><span class="label">LAST RUN</span> <strong>2 hours ago</strong></div>
+      <div><span class="label">COMPLIANCE RATE</span> <strong>92%</strong></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-style: dashed; opacity: 0.6;">
+    <div class="card-title">Inactive rule example</div>
+    <div class="card-sub mt-2">Auto-notify rep when a contact replies to email · Disabled by Sarah K. · Reason: too noisy in pilot</div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">02</span>
+    <span class="title">Currently flagged deals</span>
+    <span class="line"></span>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr><th>Deal</th><th>Rule violated</th><th>Days since activity</th><th>Owner</th><th></th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="deals.html"><strong>Northwind — Multi-year</strong></a></td>
+        <td>Stalled-deal flag (21 days)</td>
+        <td>27</td>
+        <td>Mayur S.</td>
+        <td><button class="btn sm">Open deal</button></td>
+      </tr>
+      <tr>
+        <td><a href="deals.html"><strong>Initech — Enterprise</strong></a></td>
+        <td>Stalled-deal flag (21 days)</td>
+        <td>23</td>
+        <td>Sarah K.</td>
+        <td><button class="btn sm">Open deal</button></td>
+      </tr>
+      <tr>
+        <td><a href="deal-detail.html"><strong>Acme — Annual License</strong></a></td>
+        <td>HubSpot competitor + Proposal &gt; 7d</td>
+        <td>8 (since stage move)</td>
+        <td>Mayur S.</td>
+        <td><button class="btn sm">Open deal</button></td>
+      </tr>
+    </tbody>
+  </table>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

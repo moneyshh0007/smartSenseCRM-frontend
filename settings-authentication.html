@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Authentication · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Admin</span><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Authentication</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M9 · F9.2</div>
+      <h1 class="page-title mt-2">Authentication</h1>
+      <div class="page-sub">SSO, SAML, SCIM provisioning · Use a managed provider (Auth0/Clerk/WorkOS) — never roll your own.</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">01</span>
+    <span class="title">Login methods</span>
+    <span class="line"></span>
+  </div>
+
+  <div class="card mb-4">
+    <div class="row between">
+      <div>
+        <div class="card-title">Password + email magic link</div>
+        <div class="text-muted mt-1" style="font-size: 12px;">Enabled for all users. Can be disabled once SSO is enforced.</div>
+      </div>
+      <div class="toggle on" data-toggle></div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="row between">
+      <div>
+        <div class="card-title">Google OAuth</div>
+        <div class="text-muted mt-1" style="font-size: 12px;">Sign in with @gmail.com or G Suite domains</div>
+      </div>
+      <div class="toggle on" data-toggle></div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="row between">
+      <div>
+        <div class="card-title">Microsoft OAuth</div>
+        <div class="text-muted mt-1" style="font-size: 12px;">Sign in with Outlook / Office 365 accounts</div>
+      </div>
+      <div class="toggle on" data-toggle></div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">02</span>
+    <span class="title">Single Sign-On (SAML 2.0)</span>
+    <span class="line"></span>
+    <span class="badge muted">NOT YET ENABLED</span>
+  </div>
+
+  <div class="card mb-4" style="background:var(--paper-warm); border-left:3px solid var(--ink); padding:14px 16px;">
+    <div class="label">ENABLED STATE PREVIEW (B6) · Toggle role to see different states</div>
+    <div class="card-title mt-2">When SSO is enabled with Okta:</div>
+    <div class="text-muted mt-2" style="font-size:12px;">
+      Banner shows "✓ SSO enabled · Identity provider: Okta · Last successful login: 2 minutes ago · 38 users authenticated this week"
+      Disable CTA appears with a warning slide-over (G3): "Disabling SSO will reset all user passwords. They'll be emailed reset links. Are you sure?"
+    </div>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Configure SAML with your IdP</div>
+        <div class="card-sub">Supports Okta, Azure AD, OneLogin, Google Workspace, JumpCloud</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>IdP Metadata URL</label>
+      <input type="text" placeholder="https://your-org.okta.com/app/exk1234/sso/saml/metadata" />
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Entity ID (Audience)</label>
+        <input type="text" value="urn:smartsense:sp:smartsense-eu" readonly />
+      </div>
+      <div class="field">
+        <label>ACS URL (callback)</label>
+        <input type="text" value="https://app.smartsense.eu/sso/saml/callback" readonly />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Attribute mappings</label>
+      <table class="table" style="margin-top: 4px;">
+        <thead><tr><th>CRM field</th><th>Maps to SAML attribute</th></tr></thead>
+        <tbody>
+          <tr><td>Email</td><td class="text-mono">http://schemas.xmlsoap.org/.../emailaddress</td></tr>
+          <tr><td>Name</td><td class="text-mono">http://schemas.xmlsoap.org/.../givenname + surname</td></tr>
+          <tr><td>Role</td><td class="text-mono">https://smartsense.io/saml/role</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row gap-2 mt-4">
+      <button class="btn">Test SSO flow</button>
+      <button class="btn primary" data-confirm="enforce-sso">Save & enable SSO</button>
+      <div class="text-muted" style="font-size: 11px; margin-left: auto;">
+        Enforce SSO after testing — password login will be disabled for non-admins
+      </div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">03</span>
+    <span class="title">SCIM provisioning</span>
+    <span class="line"></span>
+    <span class="badge muted">NOT YET ENABLED</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Auto-provision users from your IdP</div>
+        <div class="card-sub">Create / update / deactivate users in real time via SCIM 2.0</div>
+      </div>
+    </div>
+
+    <div class="field-row mt-3">
+      <div class="field">
+        <label>SCIM 2.0 Endpoint</label>
+        <input type="text" value="https://app.smartsense.eu/scim/v2" readonly />
+      </div>
+      <div class="field">
+        <label>Bearer token</label>
+        <input type="text" value="••••••••••••••••••••••••" readonly />
+      </div>
+    </div>
+
+    <div class="row gap-2 mt-4">
+      <button class="btn">Rotate token</button>
+      <button class="btn primary">Enable SCIM</button>
+    </div>
+
+    <div class="text-muted mt-4" style="font-size: 12px;">
+      <strong>Behavior:</strong> New hires in your IdP's HR group are auto-created with default role "Sales Rep" and emailed onboarding instructions.
+      Offboarded users have sessions revoked and record ownership transferred per workspace policy.
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

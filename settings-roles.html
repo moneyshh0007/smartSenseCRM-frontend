@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roles & Permissions · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb"><span>Admin</span><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Roles & Permissions</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content ">
+        
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M9 · F9.1</div>
+      <h1 class="page-title mt-2">Roles &amp; permissions</h1>
+      <div class="page-sub">Object-, field-, and record-level permissions · Every API call goes through RBAC</div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn primary">+ New role</button>
+    </div>
+  </div>
+
+  <div class="split-2 mb-6">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Sales Rep</div>
+        <span class="text-mono text-muted" style="font-size:11px;">12 USERS</span>
+      </div>
+      <div class="text-muted" style="font-size: 12px;">Daily-driver IC. Can manage own records and their related activities.</div>
+      <button class="btn sm mt-3">View permissions</button>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Sales Manager</div>
+        <span class="text-mono text-muted" style="font-size:11px;">3 USERS</span>
+      </div>
+      <div class="text-muted" style="font-size: 12px;">Read all reps' data within their team. Manage forecast, run reports.</div>
+      <button class="btn sm mt-3">View permissions</button>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">RevOps Lead</div>
+        <span class="text-mono text-muted" style="font-size:11px;">2 USERS</span>
+      </div>
+      <div class="text-muted" style="font-size: 12px;">Edit schema, pipelines, selling rules. Read all data. Cannot change billing.</div>
+      <button class="btn sm mt-3">View permissions</button>
+    </div>
+    <div class="card" style="border-color: var(--ink);">
+      <div class="row between">
+        <div class="card-title">Workspace Admin</div>
+        <span class="text-mono text-muted" style="font-size:11px;">2 USERS · EDITING</span>
+      </div>
+      <div class="text-muted" style="font-size: 12px;">Full access. Manages billing, SSO, residency, audit log, role definitions.</div>
+      <button class="btn sm mt-3">View permissions</button>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <span class="num">01</span>
+    <span class="title">Editing — Junior Rep (new role)</span>
+    <span class="line"></span>
+    <span class="text-mono text-muted" style="font-size:11px;">UNSAVED CHANGES</span>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-title mb-3">Object permissions</div>
+    <table class="table" style="margin: -16px;">
+      <thead>
+        <tr>
+          <th>Object</th>
+          <th>Read</th>
+          <th>Create</th>
+          <th>Update</th>
+          <th>Delete</th>
+          <th>Record-level filter</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Person</strong></td>
+          <td><span class="badge positive">ALL</span></td>
+          <td><span class="badge positive">YES</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td><span class="badge negative">NO</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Company</strong></td>
+          <td><span class="badge positive">ALL</span></td>
+          <td><span class="badge positive">YES</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td><span class="badge negative">NO</span></td>
+          <td>—</td>
+        </tr>
+        <tr style="background: var(--ink-03);">
+          <td><strong>Deal</strong></td>
+          <td><span class="badge muted">FILTERED</span></td>
+          <td><span class="badge positive">YES</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td><span class="badge negative">NO</span></td>
+          <td><span class="text-mono" style="font-size:11px;">amount &lt; $100k</span></td>
+        </tr>
+        <tr>
+          <td><strong>Task</strong></td>
+          <td><span class="badge positive">ALL</span></td>
+          <td><span class="badge positive">YES</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Note</strong></td>
+          <td><span class="badge positive">ALL</span></td>
+          <td><span class="badge positive">YES</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td><span class="badge positive">OWN</span></td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title mb-3">Field-level overrides</div>
+    <table class="table" style="margin: -16px;">
+      <thead>
+        <tr><th>Object</th><th>Field</th><th>Restriction</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Deal</td>
+          <td><strong>Amount</strong></td>
+          <td>Visible only on deals owned by user</td>
+          <td><button class="btn sm">Edit</button></td>
+        </tr>
+        <tr>
+          <td>Person</td>
+          <td><strong>Phone</strong></td>
+          <td>Hidden</td>
+          <td><button class="btn sm">Edit</button></td>
+        </tr>
+        <tr style="background: var(--ink-03);">
+          <td colspan="4"><button class="btn sm primary">+ Add field-level rule</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row gap-2 mt-5 between">
+    <div class="text-muted" style="font-size: 12px;">Changes take effect on user's next page load. Existing sessions are not invalidated.</div>
+    <div class="row gap-2">
+      <button class="btn">Discard</button>
+      <button class="btn primary">Save role</button>
+    </div>
+  </div>
+  
+      </div>
+    </main>
+  </div>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>
