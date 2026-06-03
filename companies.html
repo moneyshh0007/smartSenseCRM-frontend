@@ -73,42 +73,6 @@
     </div>
   </div>
 
-  <!-- New Company Modal -->
-  <div id="new-company-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
-      <div class="row between mb-4">
-        <div class="card-title">New company</div>
-        <button onclick="document.getElementById('new-company-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
-      </div>
-      <div id="new-company-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
-      <div class="field">
-        <label>Company name *</label>
-        <input type="text" id="nc-name" placeholder="Acme Corp" />
-      </div>
-      <div class="field">
-        <label>Domain</label>
-        <input type="text" id="nc-domain" placeholder="acme.com" />
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Industry</label>
-          <input type="text" id="nc-industry" placeholder="SaaS" />
-        </div>
-        <div class="field">
-          <label>Size</label>
-          <input type="number" id="nc-size" placeholder="500" />
-        </div>
-      </div>
-      <div class="field">
-        <label>HQ</label>
-        <input type="text" id="nc-hq" placeholder="San Francisco" />
-      </div>
-      <div class="row gap-2 mt-4 between">
-        <button class="btn" onclick="document.getElementById('new-company-modal').style.display='none'">Cancel</button>
-        <button class="btn primary" id="nc-save-btn">Save company</button>
-      </div>
-    </div>
-  </div>
 
       </div>
     </main>
@@ -126,16 +90,28 @@
         const count = document.getElementById("companies-count");
         const footer = document.getElementById("companies-footer");
 
-        sub.textContent = data.total + " Companies · Live from database";
-        count.textContent = data.total + " RESULTS";
-        footer.textContent = "SHOWING " + data.total + " COMPANIES";
+        // Deduplicate by name (case-insensitive), keeping the record with the most contacts+deals
+        var seen = new Map();
+        data.companies.forEach(function(c) {
+          var key = c.name.toLowerCase();
+          var existing = seen.get(key);
+          var score = (c._count ? c._count.contacts + c._count.deals : 0);
+          var existingScore = existing ? (existing._count ? existing._count.contacts + existing._count.deals : 0) : -1;
+          if (!existing || score > existingScore) seen.set(key, c);
+        });
+        var companies = Array.from(seen.values());
 
-        if (data.companies.length === 0) {
+        sub.textContent = companies.length + " Companies · Live from database";
+        count.textContent = companies.length + " RESULTS";
+        footer.textContent = "SHOWING " + companies.length + " COMPANIES";
+
+        if (companies.length === 0) {
           tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;padding:40px;color:var(--ink-50);'>No companies yet — import CSV or add your first company.</td></tr>";
           return;
         }
 
-        tbody.innerHTML = data.companies.map(function(c) {
+
+        tbody.innerHTML = companies.map(function(c) {
           var domain = c.domain ? "<div class='text-muted' style='font-size:11px;'>" + c.domain + "</div>" : "";
           var industry = c.industry || "—";
           var size = c.size || "—";
@@ -157,52 +133,7 @@
       }
     }
 
-    document.getElementById("new-company-btn").addEventListener("click", function() {
-      document.getElementById("new-company-modal").style.display = "flex";
-    });
-
-    document.getElementById("nc-save-btn").addEventListener("click", async function() {
-      var name = document.getElementById("nc-name").value.trim();
-      var domain = document.getElementById("nc-domain").value.trim();
-      var industry = document.getElementById("nc-industry").value.trim();
-      var size = document.getElementById("nc-size").value;
-      var hq = document.getElementById("nc-hq").value.trim();
-      var errEl = document.getElementById("new-company-error");
-      var btn = document.getElementById("nc-save-btn");
-
-      if (!name) {
-        errEl.textContent = "Company name is required.";
-        errEl.style.display = "block";
-        return;
-      }
-
-      btn.textContent = "Saving...";
-      btn.disabled = true;
-      errEl.style.display = "none";
-
-      try {
-        var payload = { name: name };
-        if (domain) payload.domain = domain;
-        if (industry) payload.industry = industry;
-        if (size) payload.size = Number(size);
-        if (hq) payload.hq = hq;
-
-        await SS_API.Companies.create(payload);
-        document.getElementById("new-company-modal").style.display = "none";
-        ["nc-name","nc-domain","nc-industry","nc-size","nc-hq"].forEach(function(id) {
-          document.getElementById(id).value = "";
-        });
-        btn.textContent = "Save company";
-        btn.disabled = false;
-        loadCompanies();
-      } catch (err) {
-        errEl.textContent = err.message || "Failed to save company.";
-        errEl.style.display = "block";
-        btn.textContent = "Save company";
-        btn.disabled = false;
-      }
-    });
-
+    window.SS_loadCompanies = loadCompanies;
     loadCompanies();
   </script>
   <script src="assets/chrome.js"></script>

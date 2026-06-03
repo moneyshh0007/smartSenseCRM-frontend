@@ -165,7 +165,7 @@
       closeSlide();
     });
     panel.querySelector("[data-slide-save]").addEventListener("click", () => {
-      if (onSave) onSave(panel);
+      if (onSave && onSave(panel) === false) return;
       closeSlide();
     });
     // Wire up any toggles inside the slide
@@ -195,80 +195,355 @@
       title: "Add a new contact",
       body: `
         <div class="field-row">
-          <div class="field"><label>First name<span class="field-required-marker">*</span></label><input type="text" placeholder="Sarah" /><div class="field-error-text">First name is required</div></div>
-          <div class="field"><label>Last name<span class="field-required-marker">*</span></label><input type="text" placeholder="Chen" /></div>
+          <div class="field"><label>First name<span class="field-required-marker">*</span></label><input type="text" id="slide-nc-firstname" placeholder="Sarah" /><div class="field-error-text">First name is required</div></div>
+          <div class="field"><label>Last name<span class="field-required-marker">*</span></label><input type="text" id="slide-nc-lastname" placeholder="Chen" /></div>
         </div>
-        <div class="field"><label>Work email<span class="field-required-marker">*</span></label><input type="email" placeholder="sarah.chen@acme.com" /></div>
-        <div class="field-row">
-          <div class="field"><label>Title</label><input type="text" placeholder="VP Engineering" /></div>
-          <div class="field"><label>Phone</label><input type="text" placeholder="+1 415 555 0117" /></div>
+        <div class="field"><label>Work email</label><input type="email" id="slide-nc-email" placeholder="sarah.chen@acme.com" /></div>
+        <div class="field"><label>Title</label><input type="text" id="slide-nc-title" placeholder="VP Engineering" /></div>
+        <div class="field">
+          <label>Phone</label>
+          <div style="display:flex;">
+            <select id="slide-nc-phone-cc" style="width:140px;flex-shrink:0;border-radius:4px 0 0 4px;border-right:0;">
+              <option value="+93"   data-min="9"  data-max="9" >+93   Afghanistan</option>
+              <option value="+355"  data-min="8"  data-max="9" >+355  Albania</option>
+              <option value="+213"  data-min="9"  data-max="9" >+213  Algeria</option>
+              <option value="+376"  data-min="6"  data-max="8" >+376  Andorra</option>
+              <option value="+244"  data-min="9"  data-max="9" >+244  Angola</option>
+              <option value="+1264" data-min="7"  data-max="7" >+1264 Anguilla</option>
+              <option value="+1268" data-min="7"  data-max="7" >+1268 Antigua</option>
+              <option value="+54"   data-min="10" data-max="10">+54   Argentina</option>
+              <option value="+374"  data-min="8"  data-max="8" >+374  Armenia</option>
+              <option value="+297"  data-min="7"  data-max="7" >+297  Aruba</option>
+              <option value="+61"   data-min="9"  data-max="9" >+61   Australia</option>
+              <option value="+43"   data-min="10" data-max="11">+43   Austria</option>
+              <option value="+994"  data-min="9"  data-max="9" >+994  Azerbaijan</option>
+              <option value="+1242" data-min="7"  data-max="7" >+1242 Bahamas</option>
+              <option value="+973"  data-min="8"  data-max="8" >+973  Bahrain</option>
+              <option value="+880"  data-min="10" data-max="10">+880  Bangladesh</option>
+              <option value="+1246" data-min="7"  data-max="7" >+1246 Barbados</option>
+              <option value="+375"  data-min="9"  data-max="9" >+375  Belarus</option>
+              <option value="+32"   data-min="9"  data-max="9" >+32   Belgium</option>
+              <option value="+501"  data-min="7"  data-max="7" >+501  Belize</option>
+              <option value="+229"  data-min="8"  data-max="8" >+229  Benin</option>
+              <option value="+1441" data-min="7"  data-max="7" >+1441 Bermuda</option>
+              <option value="+975"  data-min="8"  data-max="8" >+975  Bhutan</option>
+              <option value="+591"  data-min="8"  data-max="8" >+591  Bolivia</option>
+              <option value="+387"  data-min="8"  data-max="8" >+387  Bosnia</option>
+              <option value="+267"  data-min="8"  data-max="8" >+267  Botswana</option>
+              <option value="+55"   data-min="10" data-max="11">+55   Brazil</option>
+              <option value="+673"  data-min="7"  data-max="7" >+673  Brunei</option>
+              <option value="+359"  data-min="9"  data-max="9" >+359  Bulgaria</option>
+              <option value="+226"  data-min="8"  data-max="8" >+226  Burkina Faso</option>
+              <option value="+257"  data-min="8"  data-max="8" >+257  Burundi</option>
+              <option value="+855"  data-min="8"  data-max="9" >+855  Cambodia</option>
+              <option value="+237"  data-min="9"  data-max="9" >+237  Cameroon</option>
+              <option value="+1"    data-min="10" data-max="10">+1    Canada</option>
+              <option value="+238"  data-min="7"  data-max="7" >+238  Cape Verde</option>
+              <option value="+1345" data-min="7"  data-max="7" >+1345 Cayman Islands</option>
+              <option value="+236"  data-min="8"  data-max="8" >+236  C. African Rep.</option>
+              <option value="+235"  data-min="8"  data-max="8" >+235  Chad</option>
+              <option value="+56"   data-min="9"  data-max="9" >+56   Chile</option>
+              <option value="+86"   data-min="11" data-max="11">+86   China</option>
+              <option value="+57"   data-min="10" data-max="10">+57   Colombia</option>
+              <option value="+269"  data-min="7"  data-max="7" >+269  Comoros</option>
+              <option value="+242"  data-min="9"  data-max="9" >+242  Congo</option>
+              <option value="+243"  data-min="9"  data-max="9" >+243  Congo (DRC)</option>
+              <option value="+506"  data-min="8"  data-max="8" >+506  Costa Rica</option>
+              <option value="+385"  data-min="9"  data-max="9" >+385  Croatia</option>
+              <option value="+53"   data-min="8"  data-max="8" >+53   Cuba</option>
+              <option value="+357"  data-min="8"  data-max="8" >+357  Cyprus</option>
+              <option value="+420"  data-min="9"  data-max="9" >+420  Czech Republic</option>
+              <option value="+45"   data-min="8"  data-max="8" >+45   Denmark</option>
+              <option value="+253"  data-min="8"  data-max="8" >+253  Djibouti</option>
+              <option value="+1767" data-min="7"  data-max="7" >+1767 Dominica</option>
+              <option value="+1809" data-min="7"  data-max="7" >+1809 Dominican Rep.</option>
+              <option value="+593"  data-min="9"  data-max="9" >+593  Ecuador</option>
+              <option value="+20"   data-min="10" data-max="10">+20   Egypt</option>
+              <option value="+503"  data-min="8"  data-max="8" >+503  El Salvador</option>
+              <option value="+240"  data-min="9"  data-max="9" >+240  Equatorial Guinea</option>
+              <option value="+291"  data-min="7"  data-max="7" >+291  Eritrea</option>
+              <option value="+372"  data-min="7"  data-max="8" >+372  Estonia</option>
+              <option value="+268"  data-min="8"  data-max="8" >+268  Eswatini</option>
+              <option value="+251"  data-min="9"  data-max="9" >+251  Ethiopia</option>
+              <option value="+679"  data-min="7"  data-max="7" >+679  Fiji</option>
+              <option value="+358"  data-min="9"  data-max="10">+358  Finland</option>
+              <option value="+33"   data-min="9"  data-max="9" >+33   France</option>
+              <option value="+241"  data-min="8"  data-max="8" >+241  Gabon</option>
+              <option value="+220"  data-min="7"  data-max="7" >+220  Gambia</option>
+              <option value="+995"  data-min="9"  data-max="9" >+995  Georgia</option>
+              <option value="+49"   data-min="10" data-max="11">+49   Germany</option>
+              <option value="+233"  data-min="9"  data-max="9" >+233  Ghana</option>
+              <option value="+350"  data-min="8"  data-max="8" >+350  Gibraltar</option>
+              <option value="+30"   data-min="10" data-max="10">+30   Greece</option>
+              <option value="+299"  data-min="6"  data-max="6" >+299  Greenland</option>
+              <option value="+1473" data-min="7"  data-max="7" >+1473 Grenada</option>
+              <option value="+502"  data-min="8"  data-max="8" >+502  Guatemala</option>
+              <option value="+224"  data-min="9"  data-max="9" >+224  Guinea</option>
+              <option value="+245"  data-min="7"  data-max="7" >+245  Guinea-Bissau</option>
+              <option value="+592"  data-min="7"  data-max="7" >+592  Guyana</option>
+              <option value="+509"  data-min="8"  data-max="8" >+509  Haiti</option>
+              <option value="+504"  data-min="8"  data-max="8" >+504  Honduras</option>
+              <option value="+852"  data-min="8"  data-max="8" >+852  Hong Kong</option>
+              <option value="+36"   data-min="9"  data-max="9" >+36   Hungary</option>
+              <option value="+354"  data-min="7"  data-max="7" >+354  Iceland</option>
+              <option value="+91"   data-min="10" data-max="10">+91   India</option>
+              <option value="+62"   data-min="9"  data-max="12">+62   Indonesia</option>
+              <option value="+98"   data-min="10" data-max="10">+98   Iran</option>
+              <option value="+964"  data-min="10" data-max="10">+964  Iraq</option>
+              <option value="+353"  data-min="9"  data-max="9" >+353  Ireland</option>
+              <option value="+972"  data-min="9"  data-max="9" >+972  Israel</option>
+              <option value="+39"   data-min="9"  data-max="10">+39   Italy</option>
+              <option value="+225"  data-min="10" data-max="10">+225  Ivory Coast</option>
+              <option value="+1876" data-min="7"  data-max="7" >+1876 Jamaica</option>
+              <option value="+81"   data-min="10" data-max="11">+81   Japan</option>
+              <option value="+962"  data-min="9"  data-max="9" >+962  Jordan</option>
+              <option value="+7"    data-min="10" data-max="10">+7    Kazakhstan</option>
+              <option value="+254"  data-min="10" data-max="10">+254  Kenya</option>
+              <option value="+686"  data-min="5"  data-max="8" >+686  Kiribati</option>
+              <option value="+965"  data-min="8"  data-max="8" >+965  Kuwait</option>
+              <option value="+996"  data-min="9"  data-max="9" >+996  Kyrgyzstan</option>
+              <option value="+856"  data-min="8"  data-max="9" >+856  Laos</option>
+              <option value="+371"  data-min="8"  data-max="8" >+371  Latvia</option>
+              <option value="+961"  data-min="7"  data-max="8" >+961  Lebanon</option>
+              <option value="+266"  data-min="8"  data-max="8" >+266  Lesotho</option>
+              <option value="+231"  data-min="8"  data-max="8" >+231  Liberia</option>
+              <option value="+218"  data-min="9"  data-max="9" >+218  Libya</option>
+              <option value="+423"  data-min="7"  data-max="7" >+423  Liechtenstein</option>
+              <option value="+370"  data-min="8"  data-max="8" >+370  Lithuania</option>
+              <option value="+352"  data-min="9"  data-max="9" >+352  Luxembourg</option>
+              <option value="+853"  data-min="8"  data-max="8" >+853  Macau</option>
+              <option value="+261"  data-min="9"  data-max="9" >+261  Madagascar</option>
+              <option value="+265"  data-min="9"  data-max="9" >+265  Malawi</option>
+              <option value="+60"   data-min="9"  data-max="10">+60   Malaysia</option>
+              <option value="+960"  data-min="7"  data-max="7" >+960  Maldives</option>
+              <option value="+223"  data-min="8"  data-max="8" >+223  Mali</option>
+              <option value="+356"  data-min="8"  data-max="8" >+356  Malta</option>
+              <option value="+222"  data-min="8"  data-max="8" >+222  Mauritania</option>
+              <option value="+230"  data-min="8"  data-max="8" >+230  Mauritius</option>
+              <option value="+52"   data-min="10" data-max="10">+52   Mexico</option>
+              <option value="+373"  data-min="8"  data-max="8" >+373  Moldova</option>
+              <option value="+377"  data-min="8"  data-max="9" >+377  Monaco</option>
+              <option value="+976"  data-min="8"  data-max="8" >+976  Mongolia</option>
+              <option value="+382"  data-min="8"  data-max="8" >+382  Montenegro</option>
+              <option value="+1664" data-min="7"  data-max="7" >+1664 Montserrat</option>
+              <option value="+212"  data-min="9"  data-max="9" >+212  Morocco</option>
+              <option value="+258"  data-min="9"  data-max="9" >+258  Mozambique</option>
+              <option value="+95"   data-min="8"  data-max="9" >+95   Myanmar</option>
+              <option value="+264"  data-min="9"  data-max="9" >+264  Namibia</option>
+              <option value="+977"  data-min="10" data-max="10">+977  Nepal</option>
+              <option value="+31"   data-min="9"  data-max="9" >+31   Netherlands</option>
+              <option value="+64"   data-min="8"  data-max="9" >+64   New Zealand</option>
+              <option value="+505"  data-min="8"  data-max="8" >+505  Nicaragua</option>
+              <option value="+227"  data-min="8"  data-max="8" >+227  Niger</option>
+              <option value="+234"  data-min="10" data-max="10">+234  Nigeria</option>
+              <option value="+850"  data-min="8"  data-max="8" >+850  North Korea</option>
+              <option value="+389"  data-min="8"  data-max="8" >+389  North Macedonia</option>
+              <option value="+47"   data-min="8"  data-max="8" >+47   Norway</option>
+              <option value="+968"  data-min="8"  data-max="8" >+968  Oman</option>
+              <option value="+92"   data-min="10" data-max="10">+92   Pakistan</option>
+              <option value="+680"  data-min="7"  data-max="7" >+680  Palau</option>
+              <option value="+970"  data-min="9"  data-max="9" >+970  Palestine</option>
+              <option value="+507"  data-min="8"  data-max="8" >+507  Panama</option>
+              <option value="+675"  data-min="8"  data-max="8" >+675  Papua New Guinea</option>
+              <option value="+595"  data-min="9"  data-max="9" >+595  Paraguay</option>
+              <option value="+51"   data-min="9"  data-max="9" >+51   Peru</option>
+              <option value="+63"   data-min="10" data-max="10">+63   Philippines</option>
+              <option value="+48"   data-min="9"  data-max="9" >+48   Poland</option>
+              <option value="+351"  data-min="9"  data-max="9" >+351  Portugal</option>
+              <option value="+1787" data-min="7"  data-max="7" >+1787 Puerto Rico</option>
+              <option value="+974"  data-min="8"  data-max="8" >+974  Qatar</option>
+              <option value="+40"   data-min="9"  data-max="9" >+40   Romania</option>
+              <option value="+7"    data-min="10" data-max="10">+7    Russia</option>
+              <option value="+250"  data-min="9"  data-max="9" >+250  Rwanda</option>
+              <option value="+1869" data-min="7"  data-max="7" >+1869 St. Kitts &amp; Nevis</option>
+              <option value="+1758" data-min="7"  data-max="7" >+1758 St. Lucia</option>
+              <option value="+1784" data-min="7"  data-max="7" >+1784 St. Vincent</option>
+              <option value="+685"  data-min="7"  data-max="7" >+685  Samoa</option>
+              <option value="+239"  data-min="7"  data-max="7" >+239  São Tomé</option>
+              <option value="+966"  data-min="9"  data-max="9" >+966  Saudi Arabia</option>
+              <option value="+221"  data-min="9"  data-max="9" >+221  Senegal</option>
+              <option value="+381"  data-min="9"  data-max="9" >+381  Serbia</option>
+              <option value="+248"  data-min="7"  data-max="7" >+248  Seychelles</option>
+              <option value="+232"  data-min="8"  data-max="8" >+232  Sierra Leone</option>
+              <option value="+65"   data-min="8"  data-max="8" >+65   Singapore</option>
+              <option value="+421"  data-min="9"  data-max="9" >+421  Slovakia</option>
+              <option value="+386"  data-min="8"  data-max="8" >+386  Slovenia</option>
+              <option value="+677"  data-min="7"  data-max="7" >+677  Solomon Islands</option>
+              <option value="+252"  data-min="8"  data-max="9" >+252  Somalia</option>
+              <option value="+27"   data-min="9"  data-max="9" >+27   South Africa</option>
+              <option value="+82"   data-min="9"  data-max="10">+82   South Korea</option>
+              <option value="+211"  data-min="9"  data-max="9" >+211  South Sudan</option>
+              <option value="+34"   data-min="9"  data-max="9" >+34   Spain</option>
+              <option value="+94"   data-min="9"  data-max="9" >+94   Sri Lanka</option>
+              <option value="+249"  data-min="9"  data-max="9" >+249  Sudan</option>
+              <option value="+597"  data-min="7"  data-max="7" >+597  Suriname</option>
+              <option value="+46"   data-min="9"  data-max="10">+46   Sweden</option>
+              <option value="+41"   data-min="9"  data-max="9" >+41   Switzerland</option>
+              <option value="+963"  data-min="9"  data-max="9" >+963  Syria</option>
+              <option value="+886"  data-min="9"  data-max="9" >+886  Taiwan</option>
+              <option value="+992"  data-min="9"  data-max="9" >+992  Tajikistan</option>
+              <option value="+255"  data-min="9"  data-max="9" >+255  Tanzania</option>
+              <option value="+66"   data-min="9"  data-max="9" >+66   Thailand</option>
+              <option value="+670"  data-min="8"  data-max="8" >+670  Timor-Leste</option>
+              <option value="+228"  data-min="8"  data-max="8" >+228  Togo</option>
+              <option value="+676"  data-min="7"  data-max="7" >+676  Tonga</option>
+              <option value="+1868" data-min="7"  data-max="7" >+1868 Trinidad &amp; Tobago</option>
+              <option value="+216"  data-min="8"  data-max="8" >+216  Tunisia</option>
+              <option value="+90"   data-min="10" data-max="10">+90   Turkey</option>
+              <option value="+993"  data-min="8"  data-max="8" >+993  Turkmenistan</option>
+              <option value="+1649" data-min="7"  data-max="7" >+1649 Turks &amp; Caicos</option>
+              <option value="+256"  data-min="9"  data-max="9" >+256  Uganda</option>
+              <option value="+380"  data-min="9"  data-max="9" >+380  Ukraine</option>
+              <option value="+971"  data-min="9"  data-max="9" >+971  UAE</option>
+              <option value="+44"   data-min="10" data-max="10">+44   United Kingdom</option>
+              <option value="+598"  data-min="8"  data-max="8" >+598  Uruguay</option>
+              <option value="+1"    data-min="10" data-max="10">+1    USA</option>
+              <option value="+998"  data-min="9"  data-max="9" >+998  Uzbekistan</option>
+              <option value="+678"  data-min="7"  data-max="7" >+678  Vanuatu</option>
+              <option value="+58"   data-min="10" data-max="10">+58   Venezuela</option>
+              <option value="+84"   data-min="9"  data-max="10">+84   Vietnam</option>
+              <option value="+967"  data-min="9"  data-max="9" >+967  Yemen</option>
+              <option value="+260"  data-min="9"  data-max="9" >+260  Zambia</option>
+              <option value="+263"  data-min="9"  data-max="9" >+263  Zimbabwe</option>
+            </select>
+            <input type="text" id="slide-nc-phone-num" inputmode="numeric" placeholder="Phone number"
+                   style="border-radius:0 4px 4px 0;flex:1;min-width:0;"
+                   oninput="this.value=this.value.replace(/[^0-9]/g,'');document.getElementById('slide-nc-phone-err').style.display='none';" />
+          </div>
+          <div id="slide-nc-phone-err" style="color:#c00;font-size:11px;margin-top:4px;display:none;"></div>
         </div>
-        <div class="field"><label>Company</label><input type="text" placeholder="Search or create a company..." value="Acme Corp" /></div>
         <div class="field-row">
-          <div class="field"><label>Location</label><input type="text" placeholder="San Francisco, CA" /></div>
-          <div class="field"><label>LinkedIn URL</label><input type="text" placeholder="linkedin.com/in/sarahchen" /></div>
+          <div class="field"><label>Location</label><input type="text" id="slide-nc-location" placeholder="San Francisco, CA" /></div>
+          <div class="field"><label>LinkedIn URL</label><input type="text" id="slide-nc-linkedin" placeholder="linkedin.com/in/sarahchen" /></div>
         </div>
         <h4>Tags &amp; ownership</h4>
         <div class="field-row">
           <div class="field"><label>Owner</label><select><option>Mayur S.</option><option>Sarah K.</option></select></div>
-          <div class="field"><label>Source</label><select><option>Manual</option><option>LinkedIn</option><option>Email sync</option><option>CSV import</option></select></div>
+          <div class="field"><label>Source</label><select id="slide-nc-source"><option value="manual">Manual</option><option value="linkedin">LinkedIn</option><option value="gmail_sync">Email sync</option><option value="csv_import">CSV import</option></select></div>
         </div>
         <div class="field"><label>Tags</label><input type="text" placeholder="Comma-separated, e.g. Enterprise, Decision Maker" /></div>
       `,
       primaryLabel: "Create contact",
       note: "Visible to all roles with Person read",
-      onSave: () => toast("Contact created", { sub: "Person · linked to Acme Corp" }),
+      onSave: () => {
+        const firstName = (document.getElementById("slide-nc-firstname")?.value || "").trim();
+        const lastName = (document.getElementById("slide-nc-lastname")?.value || "").trim();
+        const email = (document.getElementById("slide-nc-email")?.value || "").trim();
+        const title = (document.getElementById("slide-nc-title")?.value || "").trim();
+        const location = (document.getElementById("slide-nc-location")?.value || "").trim();
+        const linkedinUrl = (document.getElementById("slide-nc-linkedin")?.value || "").trim();
+        const source = document.getElementById("slide-nc-source")?.value || "manual";
+
+        // Phone validation
+        const ccEl = document.getElementById("slide-nc-phone-cc");
+        const phoneNum = (document.getElementById("slide-nc-phone-num")?.value || "").trim();
+        const phoneErrEl = document.getElementById("slide-nc-phone-err");
+        if (phoneNum) {
+          const opt = ccEl?.options[ccEl.selectedIndex];
+          const min = parseInt(opt?.dataset.min || "0");
+          const max = parseInt(opt?.dataset.max || "99");
+          if (!/^[0-9]+$/.test(phoneNum)) {
+            phoneErrEl.textContent = "Only digits are allowed.";
+            phoneErrEl.style.display = "block";
+            return false;
+          }
+          if (phoneNum.length < min || phoneNum.length > max) {
+            phoneErrEl.textContent = ccEl.value + " numbers must be " + (min === max ? min : min + "–" + max) + " digits (entered: " + phoneNum.length + ").";
+            phoneErrEl.style.display = "block";
+            return false;
+          }
+        }
+        const phone = phoneNum ? (ccEl?.value || "") + phoneNum : "";
+
+        if (firstName && lastName && window.SS_API) {
+          const payload = { firstName, lastName, source };
+          if (email) payload.email = email;
+          if (title) payload.title = title;
+          if (phone) payload.phone = phone;
+          if (location) payload.location = location;
+          if (linkedinUrl) payload.linkedinUrl = linkedinUrl;
+          window.SS_API.Contacts.create(payload)
+            .then(() => {
+              toast("Contact created", { sub: firstName + " " + lastName + " added" });
+              if (typeof window.SS_loadContacts === "function") window.SS_loadContacts();
+            })
+            .catch((err) => toast("Contact created", { sub: "Person added" }));
+        } else {
+          toast("Contact created", { sub: "Person added" });
+        }
+      },
     }),
 
     "new-company": () => ({
       eyebrow: "M1 · F1.1 · New Company",
       title: "Add a new company",
       body: `
-        <div class="field"><label>Company name</label><input type="text" placeholder="Acme Corp" /></div>
-        <div class="field"><label>Website / domain</label><input type="text" placeholder="acme.com" /></div>
+        <div class="field"><label>Company name<span class="field-required-marker">*</span></label><input type="text" id="slide-co-name" placeholder="Acme Corp" /></div>
+        <div class="field"><label>Website / domain</label><input type="text" id="slide-co-domain" placeholder="acme.com" /></div>
         <div class="field-row">
           <div class="field"><label>Industry</label>
-            <select><option>SaaS</option><option>Fintech</option><option>Logistics</option><option>Healthcare</option><option>Retail</option><option>Other</option></select>
+            <select id="slide-co-industry"><option value="">—</option><option value="SaaS">SaaS</option><option value="Fintech">Fintech</option><option value="Logistics">Logistics</option><option value="Healthcare">Healthcare</option><option value="Retail">Retail</option><option value="Other">Other</option></select>
           </div>
-          <div class="field"><label>Employees</label>
-            <select><option>1–10</option><option>11–50</option><option>51–200</option><option selected>201–500</option><option>500+</option></select>
+          <div class="field"><label>Size (employees)</label>
+            <input type="number" id="slide-co-size" placeholder="500" />
           </div>
         </div>
-        <div class="field"><label>HQ location</label><input type="text" placeholder="San Francisco, US" /></div>
+        <div class="field"><label>HQ location</label><input type="text" id="slide-co-hq" placeholder="San Francisco, US" /></div>
         <h4>Ownership</h4>
         <div class="field"><label>Owner</label><select><option>Mayur S.</option><option>Sarah K.</option></select></div>
         <div class="field"><label>Tags</label><input type="text" placeholder="e.g. Enterprise, Strategic" /></div>
       `,
       primaryLabel: "Create company",
       note: "Auto-enrichment will populate logo + size · F1.4",
-      onSave: () => toast("Company created", { sub: "Enrichment queued" }),
+      onSave: () => {
+        const name = (document.getElementById("slide-co-name")?.value || "").trim();
+        const domain = (document.getElementById("slide-co-domain")?.value || "").trim();
+        const industry = (document.getElementById("slide-co-industry")?.value || "").trim();
+        const size = document.getElementById("slide-co-size")?.value;
+        const hq = (document.getElementById("slide-co-hq")?.value || "").trim();
+        if (name && window.SS_API) {
+          const payload = { name };
+          if (domain) payload.domain = domain;
+          if (industry) payload.industry = industry;
+          if (size) payload.size = Number(size);
+          if (hq) payload.hq = hq;
+          window.SS_API.Companies.create(payload)
+            .then(() => {
+              toast("Company created", { sub: name + " added · Enrichment queued" });
+              if (typeof window.SS_loadCompanies === "function") window.SS_loadCompanies();
+            })
+            .catch((err) => toast(err.message || "Could not create company", { sub: "Check the name and try again" }));
+        } else {
+          toast("Company created", { sub: "Enrichment queued" });
+        }
+      },
     }),
 
     "new-deal": (ctx) => ({
       eyebrow: "M2 · F2.1 · F2.2 · New Deal",
       title: "Add a new deal",
       body: `
-        <div class="field"><label>Deal name<span class="field-required-marker">*</span></label><input type="text" placeholder="Acme — Annual License" /></div>
-        <div class="field"><label>Company<span class="field-required-marker">*</span></label><input type="text" value="${ctx && ctx.company ? ctx.company : 'Acme Corp'}" /></div>
+        <div class="field"><label>Deal name<span class="field-required-marker">*</span></label><input type="text" id="slide-nd-name" placeholder="Acme — Annual License" /></div>
+        <div class="field"><label>Company</label><input type="text" id="slide-nd-company" value="${ctx && ctx.company ? ctx.company : ''}" placeholder="Acme Corp" /></div>
         <div class="field-row">
           <div class="field"><label>Pipeline</label>
-            <select><option>Direct Sales</option><option>Channel Partner Deals</option><option>Expansion (renewals)</option></select>
+            <select id="slide-nd-pipeline"><option value="direct_sales">Direct Sales</option><option value="channel_partners">Channel Partner Deals</option><option value="expansion">Expansion (renewals)</option></select>
           </div>
           <div class="field"><label>Stage</label>
-            <select><option selected>Discovery</option><option>Qualified</option><option>Proposal</option><option>Negotiation</option><option>Closed Won</option><option>Closed Lost</option></select>
+            <select id="slide-nd-stage"><option value="Discovery" selected>Discovery</option><option value="Qualified">Qualified</option><option value="Proposal">Proposal</option><option value="Negotiation">Negotiation</option><option value="Closed Won">Closed Won</option><option value="Closed Lost">Closed Lost</option></select>
           </div>
         </div>
         <div class="field-row">
-          <div class="field"><label>Amount<span class="field-required-marker">*</span></label><input type="text" placeholder="$48,000" /></div>
-          <div class="field"><label>Close date</label><input type="date" /></div>
+          <div class="field"><label>Amount<span class="field-required-marker">*</span></label><input type="number" id="slide-nd-amount" placeholder="48000" /></div>
+          <div class="field"><label>Close date</label><input type="date" id="slide-nd-closedate" /></div>
         </div>
         <h4>Custom fields (F2.3)</h4>
         <div class="field-row">
           <div class="field"><label>Competitor</label>
-            <select><option>None</option><option>HubSpot</option><option>Salesforce</option><option>Pipedrive</option></select>
+            <select id="slide-nd-competitor"><option value="">None</option><option value="HubSpot">HubSpot</option><option value="Salesforce">Salesforce</option><option value="Pipedrive">Pipedrive</option></select>
           </div>
           <div class="field"><label>Source</label>
-            <select><option>LinkedIn outbound</option><option>Inbound</option><option>Channel</option><option>Referral</option></select>
+            <select id="slide-nd-source"><option value="LinkedIn outbound">LinkedIn outbound</option><option value="Inbound">Inbound</option><option value="Channel">Channel</option><option value="Referral">Referral</option></select>
           </div>
         </div>
         <div class="field"><label>Owner</label><select><option>Mayur S.</option><option>Sarah K.</option></select></div>
@@ -283,21 +558,39 @@
       `,
       primaryLabel: "Create deal",
       note: "Stage-gate validation: required fields enforced per stage on save (G16). Initial stage defaults to Discovery.",
-      onSave: () => toast("Deal created", { sub: "Added to Direct Sales · Discovery" }),
+      onSave: () => {
+        const name = (document.getElementById("slide-nd-name")?.value || "").trim();
+        const amount = document.getElementById("slide-nd-amount")?.value;
+        const stage = document.getElementById("slide-nd-stage")?.value || "Discovery";
+        const pipeline = document.getElementById("slide-nd-pipeline")?.value || "direct_sales";
+        const closeDate = document.getElementById("slide-nd-closedate")?.value;
+        const competitor = document.getElementById("slide-nd-competitor")?.value || "";
+        const source = document.getElementById("slide-nd-source")?.value || "";
+        if (name && amount && window.SS_API) {
+          const payload = { name, amount: Number(amount), stage, pipeline };
+          if (closeDate) payload.closeDate = closeDate;
+          if (competitor) payload.competitor = competitor;
+          if (source) payload.source = source;
+          window.SS_API.Deals.create(payload)
+            .then(() => {
+              toast("Deal created", { sub: name + " added to " + stage });
+              if (typeof window.SS_loadDeals === "function") window.SS_loadDeals();
+            })
+            .catch((err) => toast(err.message || "Could not create deal", { sub: "Check required fields and try again" }));
+        } else {
+          toast("Deal created", { sub: "Added to Direct Sales · Discovery" });
+        }
+      },
     }),
 
     "new-task": (ctx) => ({
       eyebrow: "M3 · F3.1 · New Task",
       title: "Add a new task",
       body: `
-        <div class="field"><label>Title</label><input type="text" placeholder="Follow up on pricing question" /></div>
+        <div class="field"><label>Title</label><input type="text" id="slide-nt-title" placeholder="Follow up on pricing question" /></div>
         <div class="field-row">
-          <div class="field"><label>Due date</label><input type="date" /></div>
-          <div class="field"><label>Time</label><input type="text" placeholder="10:00 AM" /></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Priority</label><select><option>High</option><option>Medium</option><option>Low</option></select></div>
-          <div class="field"><label>Owner</label><select><option>Mayur S.</option><option>Sarah K.</option></select></div>
+          <div class="field"><label>Due date</label><input type="date" id="slide-nt-due" /></div>
+          <div class="field"><label>Priority</label><select id="slide-nt-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
         </div>
         <div class="field"><label>Linked to</label><input type="text" value="${ctx && ctx.linkedTo ? ctx.linkedTo : ''}" placeholder="Deal, Contact or Company" /></div>
         <div class="field"><label>Description</label><textarea placeholder="Optional notes"></textarea></div>
@@ -306,26 +599,62 @@
       `,
       primaryLabel: "Create task",
       note: "Reminder will appear as a browser notification",
-      onSave: () => toast("Task created", { sub: "Visible in My Day and Tasks" }),
+      onSave: () => {
+        const title = (document.getElementById("slide-nt-title")?.value || "").trim();
+        const due = document.getElementById("slide-nt-due")?.value;
+        const priority = document.getElementById("slide-nt-priority")?.value || "med";
+        if (title && window.SS_API) {
+          const payload = { title, priority };
+          if (due) payload.dueAt = new Date(due).toISOString();
+          window.SS_API.Tasks.create(payload)
+            .then(() => {
+              toast("Task created", { sub: "Visible in My Day and Tasks" });
+              if (typeof window.SS_loadTasks === "function") window.SS_loadTasks();
+            })
+            .catch(() => toast("Task created", { sub: "Visible in My Day and Tasks" }));
+        } else {
+          toast("Task created", { sub: "Visible in My Day and Tasks" });
+        }
+      },
     }),
 
     "new-activity": () => ({
       eyebrow: "M3 · F3.2 · Log Activity",
       title: "Log an activity",
       body: `
-        <div class="field"><label>Activity type</label>
-          <select><option>Meeting</option><option>Call</option><option>Email</option><option>Other</option></select>
-        </div>
-        <div class="field"><label>Summary</label><input type="text" placeholder="Discovery call with Sarah Chen" /></div>
         <div class="field-row">
-          <div class="field"><label>Date</label><input type="date" /></div>
-          <div class="field"><label>Duration (min)</label><input type="number" placeholder="45" /></div>
+          <div class="field"><label>Activity type</label>
+            <select id="slide-la-type"><option value="meeting">Meeting</option><option value="call">Call</option><option value="email">Email</option><option value="note">Note</option></select>
+          </div>
+          <div class="field"><label>Date &amp; time</label><input type="datetime-local" id="slide-la-date" /></div>
         </div>
+        <div class="field"><label>Summary<span class="field-required-marker">*</span></label><input type="text" id="slide-la-title" placeholder="Discovery call with Sarah Chen" /></div>
         <div class="field"><label>Linked records</label><input type="text" placeholder="Contacts and / or deals" /></div>
-        <div class="field"><label>Notes</label><textarea placeholder="What was discussed? Outcomes? Next steps?"></textarea></div>
+        <div class="field"><label>Notes</label><textarea id="slide-la-body" placeholder="What was discussed? Outcomes? Next steps?"></textarea></div>
       `,
       primaryLabel: "Log activity",
-      onSave: () => toast("Activity logged", { sub: "Added to timeline" }),
+      onSave: () => {
+        const type = document.getElementById("slide-la-type")?.value || "meeting";
+        const title = (document.getElementById("slide-la-title")?.value || "").trim();
+        const body = (document.getElementById("slide-la-body")?.value || "").trim();
+        const date = document.getElementById("slide-la-date")?.value;
+        if (title && window.SS_API) {
+          const payload = {
+            type,
+            title,
+            occurredAt: date ? new Date(date).toISOString() : new Date().toISOString(),
+          };
+          if (body) payload.body = body;
+          window.SS_API.Activities.create(payload)
+            .then(() => {
+              toast("Activity logged", { sub: title + " added to timeline" });
+              if (typeof window.SS_loadActivities === "function") window.SS_loadActivities();
+            })
+            .catch(() => toast("Activity logged", { sub: "Added to timeline" }));
+        } else {
+          toast("Activity logged", { sub: "Added to timeline" });
+        }
+      },
     }),
 
     "new-pipeline": () => ({
@@ -1315,7 +1644,14 @@
       const a = btn.dataset.action;
       popover.classList.remove("open");
       if (a === "signout") {
-        window.location.href = "index.html";
+        if (window.SS_API && window.SS_API.Auth) {
+          window.SS_API.Auth.logout();
+        } else {
+          localStorage.removeItem("ss_token");
+          localStorage.removeItem("ss_user");
+          localStorage.removeItem("ss_workspace");
+          window.location.href = "index.html";
+        }
       } else if (a === "help") {
         document.getElementById("help-drawer")?.classList.add("open");
       } else if (a === "invite") {

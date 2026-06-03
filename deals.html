@@ -109,49 +109,6 @@
     </div>
   </div>
 
-  <!-- New Deal Modal -->
-  <div id="new-deal-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
-      <div class="row between mb-4">
-        <div class="card-title">New deal</div>
-        <button onclick="document.getElementById('new-deal-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
-      </div>
-      <div id="new-deal-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
-      <div class="field">
-        <label>Deal name *</label>
-        <input type="text" id="nd-name" placeholder="Acme — Annual License" />
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Amount *</label>
-          <input type="number" id="nd-amount" placeholder="48000" />
-        </div>
-        <div class="field">
-          <label>Stage</label>
-          <select id="nd-stage">
-            <option>Discovery</option>
-            <option>Qualified</option>
-            <option selected>Proposal</option>
-            <option>Negotiation</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Close date</label>
-          <input type="date" id="nd-closedate" />
-        </div>
-        <div class="field">
-          <label>Competitor</label>
-          <input type="text" id="nd-competitor" placeholder="HubSpot" />
-        </div>
-      </div>
-      <div class="row gap-2 mt-4 between">
-        <button class="btn" onclick="document.getElementById('new-deal-modal').style.display='none'">Cancel</button>
-        <button class="btn primary" id="nd-save-btn">Save deal</button>
-      </div>
-    </div>
-  </div>
 
       </div>
     </main>
@@ -233,55 +190,7 @@
       }
     }
 
-    // New deal modal
-    document.getElementById("new-deal-btn").addEventListener("click", function() {
-      document.getElementById("new-deal-modal").style.display = "flex";
-    });
-
-    document.getElementById("nd-save-btn").addEventListener("click", async function() {
-      var name = document.getElementById("nd-name").value.trim();
-      var amount = document.getElementById("nd-amount").value;
-      var stage = document.getElementById("nd-stage").value;
-      var closeDate = document.getElementById("nd-closedate").value;
-      var competitor = document.getElementById("nd-competitor").value.trim();
-      var errEl = document.getElementById("new-deal-error");
-      var btn = document.getElementById("nd-save-btn");
-
-      if (!name || !amount) {
-        errEl.textContent = "Deal name and amount are required.";
-        errEl.style.display = "block";
-        return;
-      }
-
-      btn.textContent = "Saving...";
-      btn.disabled = true;
-      errEl.style.display = "none";
-
-      try {
-        var payload = {
-          name: name,
-          amount: Number(amount),
-          stage: stage
-        };
-        if (closeDate) payload.closeDate = closeDate;
-        if (competitor) payload.competitor = competitor;
-
-        await SS_API.Deals.create(payload);
-        document.getElementById("new-deal-modal").style.display = "none";
-        ["nd-name","nd-amount","nd-competitor","nd-closedate"].forEach(function(id) {
-          document.getElementById(id).value = "";
-        });
-        btn.textContent = "Save deal";
-        btn.disabled = false;
-        loadDeals();
-      } catch (err) {
-        errEl.textContent = err.message || "Failed to save deal.";
-        errEl.style.display = "block";
-        btn.textContent = "Save deal";
-        btn.disabled = false;
-      }
-    });
-
+    window.SS_loadDeals = loadDeals;
     loadDeals();
   </script>
   <script src="assets/chrome.js"></script>

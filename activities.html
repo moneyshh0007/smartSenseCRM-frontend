@@ -48,43 +48,6 @@
     <div style="text-align:center; padding:40px; color:var(--ink-50);">Loading...</div>
   </div>
 
-  <!-- Log Activity Modal -->
-  <div id="log-activity-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-    <div class="card" style="width:480px; max-width:90vw; padding:24px; background:var(--paper);">
-      <div class="row between mb-4">
-        <div class="card-title">Log activity</div>
-        <button onclick="document.getElementById('log-activity-modal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
-      </div>
-      <div id="log-activity-error" style="display:none; background:#fee; border:1px solid #fcc; color:#c00; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:12px;"></div>
-      <div class="field-row">
-        <div class="field">
-          <label>Type</label>
-          <select id="la-type">
-            <option value="meeting">Meeting</option>
-            <option value="call">Call</option>
-            <option value="email">Email</option>
-            <option value="note">Note</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Date & time</label>
-          <input type="datetime-local" id="la-date" />
-        </div>
-      </div>
-      <div class="field">
-        <label>Title *</label>
-        <input type="text" id="la-title" placeholder="Discovery call — Acme Corp" />
-      </div>
-      <div class="field">
-        <label>Notes</label>
-        <textarea id="la-body" placeholder="What happened?" style="width:100%; padding:8px; border:var(--rule); border-radius:4px; font-size:13px; min-height:80px; resize:vertical;"></textarea>
-      </div>
-      <div class="row gap-2 mt-4 between">
-        <button class="btn" onclick="document.getElementById('log-activity-modal').style.display='none'">Cancel</button>
-        <button class="btn primary" id="la-save-btn">Log activity</button>
-      </div>
-    </div>
-  </div>
 
       </div>
     </main>
@@ -152,54 +115,7 @@
       }
     }
 
-    document.getElementById("log-activity-btn").addEventListener("click", function() {
-      var now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById("la-date").value = now.toISOString().slice(0, 16);
-      document.getElementById("log-activity-modal").style.display = "flex";
-    });
-
-    document.getElementById("la-save-btn").addEventListener("click", async function() {
-      var type = document.getElementById("la-type").value;
-      var title = document.getElementById("la-title").value.trim();
-      var body = document.getElementById("la-body").value.trim();
-      var date = document.getElementById("la-date").value;
-      var errEl = document.getElementById("log-activity-error");
-      var btn = document.getElementById("la-save-btn");
-
-      if (!title) {
-        errEl.textContent = "Title is required.";
-        errEl.style.display = "block";
-        return;
-      }
-
-      btn.textContent = "Saving...";
-      btn.disabled = true;
-      errEl.style.display = "none";
-
-      try {
-        var payload = {
-          type: type,
-          title: title,
-          occurredAt: date ? new Date(date).toISOString() : new Date().toISOString()
-        };
-        if (body) payload.body = body;
-
-        await SS_API.Activities.create(payload);
-        document.getElementById("log-activity-modal").style.display = "none";
-        document.getElementById("la-title").value = "";
-        document.getElementById("la-body").value = "";
-        btn.textContent = "Log activity";
-        btn.disabled = false;
-        loadActivities();
-      } catch (err) {
-        errEl.textContent = err.message || "Failed to log activity.";
-        errEl.style.display = "block";
-        btn.textContent = "Log activity";
-        btn.disabled = false;
-      }
-    });
-
+    window.SS_loadActivities = loadActivities;
     loadActivities();
   </script>
   <script src="assets/chrome.js"></script>
