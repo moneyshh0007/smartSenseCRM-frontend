@@ -86,7 +86,7 @@
 
       <div class="row gap-2 mt-4">
         <button class="btn" style="flex:1;" onclick="window.location.href='contact-detail.html'">View in CRM</button>
-        <button class="btn primary" style="flex:1;" onclick="alert('Updating fields where LinkedIn differs from CRM:\n  Title: VP Engineering (no change)\n  Location: + San Francisco Bay Area (new from LinkedIn)\nClick OK to view contact');window.location.href='contact-detail.html'">Update with diff</button>
+        <button class="btn primary" style="flex:1;" onclick="(typeof SS_toast==='function'?SS_toast('Contact updated',{sub:'Title · Location synced from LinkedIn',duration:2500}):null);setTimeout(function(){window.location.href='contact-detail.html';},1200);">Update with diff</button>
       </div>
       <div class="text-muted mt-2" style="font-size: 11px; text-align: center;">
         A7 fix: distinct flows. Existing contact = UPDATE with diff preview. New contact = CREATE (badge swaps to "NEW").

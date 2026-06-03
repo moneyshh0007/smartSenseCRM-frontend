@@ -21,7 +21,9 @@
       "Bash(findstr /V \"dist\")",
       "Bash(findstr *)",
       "Bash(Get-Content \"C:\\\\Users\\\\Manish\\\\Documents\\\\SmartSense_CRM_Phase1_Prototype\\\\assets\\\\styles.css\")",
-      "Bash(Measure-Object -Line)"
+      "Bash(Measure-Object -Line)",
+      "Bash(grep -v \"node_module\\\\|//.*filter\\\\|smart-filter\")",
+      "Bash(grep -iv \"//.*update\\\\|data-slide\\\\|url\\\\|field\")"
     ]
   }
 }

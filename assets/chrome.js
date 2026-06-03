@@ -177,6 +177,7 @@
     setTimeout(() => {
       const first = panel.querySelector("input:not([type=checkbox]):not([type=radio]), textarea, select");
       if (first) first.focus();
+      wireFormFormatters(panel);
     }, 260);
   }
 
@@ -185,6 +186,80 @@
     const panel = document.querySelector(".slide-over");
     if (backdrop) backdrop.classList.remove("open");
     if (panel) panel.classList.remove("open");
+  }
+
+  // ============================================================
+  // FORM FORMATTERS — E4 (currency) · E5 (date) · E10 (tags)
+  // ============================================================
+  function wireFormFormatters(panel) {
+    if (!panel) return;
+
+    // E4 — Currency blur: 48000 → $48,000 ; focus restores raw value
+    panel.querySelectorAll("input[id*='amount']").forEach(function (inp) {
+      inp.addEventListener("blur", function () {
+        var raw = parseFloat(String(inp.value).replace(/[^0-9.]/g, ""));
+        if (!isNaN(raw) && raw > 0) {
+          inp.dataset.raw = String(raw);
+          inp.setAttribute("type", "text");
+          inp.value = "$" + raw.toLocaleString("en-US");
+        }
+      });
+      inp.addEventListener("focus", function () {
+        if (inp.dataset.raw) {
+          inp.setAttribute("type", "number");
+          inp.value = inp.dataset.raw;
+        }
+      });
+    });
+
+    // E5 — Date friendly display: shows "03 Jun 2026" below the date picker
+    var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    panel.querySelectorAll("input[type='date']").forEach(function (inp) {
+      var disp = document.createElement("small");
+      disp.style.cssText = "color:var(--ink-50);font-size:11px;margin-top:3px;display:block;font-family:var(--mono);";
+      if (inp.parentNode) inp.parentNode.insertBefore(disp, inp.nextSibling);
+      function refreshDate() {
+        if (!inp.value) { disp.textContent = ""; return; }
+        var p = inp.value.split("-");
+        var d = parseInt(p[2], 10);
+        disp.textContent = (d < 10 ? "0" + String(d) : String(d)) + " " + MONTHS[parseInt(p[1], 10) - 1] + " " + p[0];
+      }
+      inp.addEventListener("change", refreshDate);
+      inp.addEventListener("blur", refreshDate);
+    });
+
+    // E10 — Tag input: Enter to add · suggestion chips · chip removal
+    var tagInput = panel.querySelector("#slide-nc-tags-input");
+    var tagChips = panel.querySelector("#slide-nc-tags-chips");
+    if (tagInput && tagChips) {
+      var activeTags = [];
+      function renderTagChips() {
+        tagChips.innerHTML = activeTags.map(function (t) {
+          return "<span class='chip' style='cursor:default;'>" + t +
+            " <span data-remove-tag='" + t + "' style='margin-left:4px;cursor:pointer;color:var(--ink-50);'>×</span></span>";
+        }).join("");
+        tagChips.querySelectorAll("[data-remove-tag]").forEach(function (x) {
+          x.addEventListener("click", function () {
+            activeTags = activeTags.filter(function (t) { return t !== x.dataset.removeTag; });
+            renderTagChips();
+          });
+        });
+      }
+      tagInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          var val = tagInput.value.trim();
+          if (val && activeTags.indexOf(val) === -1) { activeTags.push(val); renderTagChips(); }
+          tagInput.value = "";
+        }
+      });
+      panel.querySelectorAll(".tag-suggest").forEach(function (s) {
+        s.addEventListener("click", function () {
+          var t = s.dataset.tag;
+          if (t && activeTags.indexOf(t) === -1) { activeTags.push(t); renderTagChips(); }
+        });
+      });
+    }
   }
 
   // ============================================================
@@ -422,7 +497,19 @@
           <div class="field"><label>Owner</label><select><option>Mayur S.</option><option>Sarah K.</option></select></div>
           <div class="field"><label>Source</label><select id="slide-nc-source"><option value="manual">Manual</option><option value="linkedin">LinkedIn</option><option value="gmail_sync">Email sync</option><option value="csv_import">CSV import</option></select></div>
         </div>
-        <div class="field"><label>Tags</label><input type="text" placeholder="Comma-separated, e.g. Enterprise, Decision Maker" /></div>
+        <div class="field">
+          <label>Tags</label>
+          <div id="slide-nc-tags-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;min-height:0;"></div>
+          <input type="text" id="slide-nc-tags-input" placeholder="Type a tag and press Enter to add" autocomplete="off" />
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+            <span class="label" style="margin-right:2px;">Suggested:</span>
+            <span class="chip tag-suggest" data-tag="Enterprise" style="cursor:pointer;">Enterprise</span>
+            <span class="chip tag-suggest" data-tag="SMB" style="cursor:pointer;">SMB</span>
+            <span class="chip tag-suggest" data-tag="SaaS" style="cursor:pointer;">SaaS</span>
+            <span class="chip tag-suggest" data-tag="Decision Maker" style="cursor:pointer;">Decision Maker</span>
+            <span class="chip tag-suggest" data-tag="Champion" style="cursor:pointer;">Champion</span>
+          </div>
+        </div>
       `,
       primaryLabel: "Create contact",
       note: "Visible to all roles with Person read",
@@ -593,7 +680,31 @@
           <div class="field"><label>Due date</label><input type="date" id="slide-nt-due" /></div>
           <div class="field"><label>Priority</label><select id="slide-nt-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
         </div>
-        <div class="field"><label>Linked to</label><input type="text" value="${ctx && ctx.linkedTo ? ctx.linkedTo : ''}" placeholder="Deal, Contact or Company" /></div>
+        <div class="field"><label>Linked to</label>
+          <select id="slide-nt-linked">
+            <option value="">— None —</option>
+            <optgroup label="Deals">
+              <option value="deal:acme-annual">Acme — Annual License</option>
+              <option value="deal:northwind-multi">Northwind — Multi-year</option>
+              <option value="deal:globex-annual">Globex Inc — Annual</option>
+              <option value="deal:hooli-multi">Hooli — Multi-year</option>
+              <option value="deal:vellichor">Vellichor Ltd — Annual</option>
+            </optgroup>
+            <optgroup label="Contacts">
+              <option value="contact:sarah-chen">Sarah Chen · VP Sales, Acme</option>
+              <option value="contact:ellen-lee">Ellen Lee · Director, IT</option>
+              <option value="contact:carlos-mendes">Carlos Mendes · VP Finance</option>
+              <option value="contact:priya-n">Priya N. · Procurement Lead</option>
+            </optgroup>
+            <optgroup label="Companies">
+              <option value="company:acme">Acme Corp</option>
+              <option value="company:northwind">Northwind Corp</option>
+              <option value="company:globex">Globex Inc.</option>
+              <option value="company:hooli">Hooli</option>
+              <option value="company:initech">Initech</option>
+            </optgroup>
+          </select>
+        </div>
         <div class="field"><label>Description</label><textarea placeholder="Optional notes"></textarea></div>
         <div class="checkbox-line"><input type="checkbox" /> <span>Set a reminder 15 minutes before due time</span></div>
         <div class="checkbox-line"><input type="checkbox" /> <span>Repeat weekly</span></div>
@@ -1268,9 +1379,11 @@
         const formFn = Forms[formKey];
         if (formFn) {
           // Detect context: if deal page, prefill company; if from a contact page, etc.
-          let ctx = {};
-          if (pageId === "companies") ctx.company = "(Selected company)";
-          if (pageId === "contacts") ctx.linkedTo = "(Selected contact)";
+          var ctx = {};
+          var currentRecord = (document.querySelector(".breadcrumb .current") || {}).textContent || "";
+          var onDetail = window.location.pathname.indexOf("detail") !== -1;
+          if (pageId === "companies") ctx.company = (onDetail && currentRecord) ? currentRecord : "(Selected company)";
+          if (pageId === "contacts") ctx.linkedTo = (onDetail && currentRecord) ? currentRecord : "(Selected contact)";
           openSlide(formFn(ctx));
         } else {
           toast("Action: " + btn.textContent.trim());
@@ -1476,7 +1589,17 @@
       "my": "My Open Pipeline",
       "stalled": "Stalled Deals",
       "new": "New This Week",
+      "overdue": "Overdue Tasks",
+      "won": "Closed Won",
+      "lost": "Closed Lost",
+      "pipeline": "Open Pipeline",
+      "unassigned": "Unassigned Records",
+      "recent": "Recently Updated",
+      "high": "High Priority",
     };
+    if (!filterLabels[filter]) {
+      filterLabels[filter] = filter.charAt(0).toUpperCase() + filter.slice(1).replace(/-/g, " ");
+    }
     const banner = document.createElement("div");
     banner.className = "card";
     banner.style.cssText = "background:var(--paper-warm); border-left:3px solid var(--ink); margin-bottom:16px; padding:12px 16px; display:flex; align-items:center; gap:12px; font-size:13px;";
@@ -1487,6 +1610,27 @@
       <a href="${window.location.pathname}" style="margin-left:auto; font-size:12px;">Clear filter</a>
     `;
     pageHeader.after(banner);
+
+    // F10 — Persistent active-filter indicator in the filter row
+    var filterRow = document.querySelector(".row.mb-4");
+    if (filterRow && !filterRow.querySelector(".active-filter-chip")) {
+      var addBtn = Array.prototype.find.call(
+        filterRow.querySelectorAll("button"),
+        function (b) { return (b.textContent || "").toLowerCase().indexOf("filter") !== -1; }
+      );
+      if (addBtn) addBtn.style.cssText = "background:var(--ink);color:var(--paper);border-color:var(--ink);";
+      var chip = document.createElement("span");
+      chip.className = "chip active-filter-chip";
+      chip.style.cssText = "background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;gap:6px;";
+      chip.innerHTML = (filterLabels[filter] || filter) +
+        ' <a href="' + window.location.pathname + '" aria-label="Remove filter" style="color:var(--paper);text-decoration:none;font-weight:700;font-size:12px;">×</a>';
+      var clearBtn = document.createElement("a");
+      clearBtn.href = window.location.pathname;
+      clearBtn.className = "btn sm";
+      clearBtn.textContent = "Clear all";
+      filterRow.appendChild(chip);
+      filterRow.appendChild(clearBtn);
+    }
   }
 
   // ============================================================
@@ -2073,6 +2217,47 @@
   }
 
   // ============================================================
+  // DETAIL BACK NAV (F11) + LIST SCROLL RESTORE (F12)
+  // ============================================================
+  function wireDetailNavigation() {
+    var isDetail = window.location.pathname.indexOf("detail") !== -1;
+    var pageId = document.body.getAttribute("data-page") || "";
+    var pathname = window.location.pathname;
+
+    // F12 — Save scroll before leaving a list; restore on return
+    var listPages = ["contacts", "companies", "deals", "tasks", "activities"];
+    if (listPages.indexOf(pageId) !== -1 && !isDetail) {
+      var saved = sessionStorage.getItem("scroll:" + pathname);
+      if (saved) {
+        requestAnimationFrame(function () { window.scrollTo(0, parseInt(saved, 10)); });
+        sessionStorage.removeItem("scroll:" + pathname);
+      }
+      document.addEventListener("click", function (e) {
+        var link = e.target.closest("tr[onclick], .kanban-card, a[href*='detail']");
+        if (link) sessionStorage.setItem("scroll:" + pathname, String(Math.round(window.scrollY)));
+      }, true);
+    }
+
+    // F11 — Smart back button: history.back() or fall back to parent list
+    if (!isDetail) return;
+    var topbarActions = document.querySelector(".topbar-actions");
+    if (!topbarActions) return;
+    var parentAnchor = document.querySelector(".breadcrumb a");
+    var parentHref = parentAnchor ? parentAnchor.getAttribute("href") : "index.html";
+    var backBtn = document.createElement("button");
+    backBtn.className = "btn sm ghost";
+    backBtn.textContent = "← Back";
+    backBtn.addEventListener("click", function () {
+      if (window.history.length > 1 && document.referrer && document.referrer.indexOf("detail") === -1) {
+        window.history.back();
+      } else {
+        window.location.href = parentHref;
+      }
+    });
+    topbarActions.insertBefore(backBtn, topbarActions.firstChild);
+  }
+
+  // ============================================================
   // BOOT
   // ============================================================
   ready(() => {
@@ -2090,5 +2275,7 @@
     wireKpiClicks();
     wireNavigationOverrides();
     wireTableSearch();
+    wireDetailNavigation();
   });
+  window.SS_toast = function (msg, opts) { toast(msg, opts); };
 })();
