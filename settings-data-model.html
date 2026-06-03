@@ -183,6 +183,15 @@
         <td class="text-mono" style="font-size:11px;">buying_committee</td>
         <td><button class="btn sm">Edit</button></td>
       </tr>
+      <tr style="opacity:0.55;background:var(--ink-03);">
+        <td>—</td>
+        <td><strong>Acct Type</strong>&nbsp;<span class="badge warn" style="font-size:9px;vertical-align:middle;">DEPRECATED</span></td>
+        <td><span class="text-muted">Single-select</span></td>
+        <td>—</td>
+        <td>—</td>
+        <td class="text-mono" style="font-size:11px;text-decoration:line-through;color:var(--ink-30);">acct_type</td>
+        <td><span class="text-muted" style="font-size:11px;">Renamed &#8594; acv_tier in v2</span></td>
+      </tr>
       <tr style="background: var(--ink-03);">
         <td>—</td>
         <td colspan="6"><button class="btn sm primary">+ Add field</button></td>
@@ -197,7 +206,17 @@
       <button class="btn primary">Publish schema v4</button>
     </div>
   </div>
-  
+
+  <div class="card mt-4" style="background:var(--paper-warm);">
+    <div class="label">F6 &#183; SCHEMA DEPRECATION BEHAVIOUR</div>
+    <div class="text-muted mt-2" style="font-size:12px;">
+      Deprecated fields are removed from <strong>new record forms</strong> but preserved on existing records.
+      Affected records display a <span class="badge warn" style="font-size:9px;vertical-align:middle;">DEPRECATED</span>
+      indicator next to the field value &#8212; values remain readable and exportable.
+      The API key is retired and cannot be reused. Field history is retained in the audit log.
+    </div>
+  </div>
+
       </div>
     </main>
   </div>

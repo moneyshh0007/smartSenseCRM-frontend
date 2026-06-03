@@ -170,5 +170,70 @@
   <script src="assets/api.js"></script>
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
   <script src="assets/chrome.js"></script>
+  <script>
+    // D4 — Interactive permission matrix
+    (function () {
+      var READ_STATES  = ["ALL", "OWN", "NO"];
+      var WRITE_STATES = ["YES", "OWN", "NO"];
+      var CLASS_MAP = { ALL:"positive", OWN:"positive", YES:"positive", NO:"negative", FILTERED:"muted" };
+      var STORAGE_KEY = "ss_perm_matrix_v1";
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (err) {}
+
+      var unsavedEl = document.querySelector(".section-rule .text-mono.text-muted");
+      function markDirty() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+        if (unsavedEl) unsavedEl.textContent = "UNSAVED CHANGES";
+      }
+
+      function makeBadgeInteractive(badge, key, states) {
+        if (!badge || badge.textContent.trim() === "—") return;
+        if (saved[key]) {
+          badge.textContent = saved[key];
+          badge.className = "badge " + (CLASS_MAP[saved[key]] || "muted");
+        }
+        badge.style.cursor = "pointer";
+        badge.title = "Click to change";
+        badge.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var cur = badge.textContent.trim();
+          var idx = states.indexOf(cur);
+          var next = states[idx === -1 ? 1 : (idx + 1) % states.length];
+          badge.textContent = next;
+          badge.className = "badge " + (CLASS_MAP[next] || "muted");
+          saved[key] = next;
+          markDirty();
+          if (typeof window.SS_toast === "function")
+            window.SS_toast("Permission updated", { sub: key.replace(".", " → ") + ": " + next + " (unsaved)", duration: 2000 });
+        });
+      }
+
+      document.querySelectorAll(".table tbody tr").forEach(function (row) {
+        var cells = row.querySelectorAll("td");
+        if (cells.length < 5) return;
+        var obj = cells[0].textContent.trim().toLowerCase().replace(/\s+/g, "_");
+        makeBadgeInteractive(cells[1].querySelector(".badge"), obj + ".read",   READ_STATES);
+        makeBadgeInteractive(cells[2].querySelector(".badge"), obj + ".create", WRITE_STATES);
+        makeBadgeInteractive(cells[3].querySelector(".badge"), obj + ".update", WRITE_STATES);
+        if (cells[4]) makeBadgeInteractive(cells[4].querySelector(".badge"), obj + ".delete", WRITE_STATES);
+      });
+
+      // Save / Discard buttons
+      document.querySelectorAll("button").forEach(function (btn) {
+        var t = (btn.textContent || "").trim().toLowerCase();
+        if (t === "save role") {
+          btn.addEventListener("click", function () {
+            if (unsavedEl) { unsavedEl.textContent = "SAVED"; setTimeout(function () { unsavedEl.textContent = ""; }, 2500); }
+          });
+        }
+        if (t === "discard") {
+          btn.addEventListener("click", function () {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+            window.location.reload();
+          });
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

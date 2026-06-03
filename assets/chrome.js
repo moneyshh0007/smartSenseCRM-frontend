@@ -654,6 +654,19 @@
         const closeDate = document.getElementById("slide-nd-closedate")?.value;
         const competitor = document.getElementById("slide-nd-competitor")?.value || "";
         const source = document.getElementById("slide-nd-source")?.value || "";
+
+        // G16 — Stage-gate: enforce required fields before advancing stages
+        const STAGE_GATE = ["Discovery","Qualified","Proposal","Negotiation","Closed Won","Closed Lost"];
+        const stageIdx = STAGE_GATE.indexOf(stage);
+        if (stageIdx >= 2 && !competitor) {
+          toast("Stage-gate: Competitor required", { sub: "Set Competitor before advancing to Proposal or beyond" });
+          return false;
+        }
+        if (stageIdx >= 3 && !closeDate) {
+          toast("Stage-gate: Close date required", { sub: "Set Close date before advancing to Negotiation or beyond" });
+          return false;
+        }
+
         if (name && amount && window.SS_API) {
           const payload = { name, amount: Number(amount), stage, pipeline };
           if (closeDate) payload.closeDate = closeDate;
@@ -1492,6 +1505,13 @@
   }
 
   function setRole(role) {
+    // F9 — Last-admin guard: warn when the sole WA would be demoted
+    if (getRole() === "WA" && role !== "WA") {
+      toast("Last-admin guard triggered", {
+        sub: "No other Workspace Admin exists — production blocks this. Demo allows view-only switch.",
+        duration: 5000,
+      });
+    }
     localStorage.setItem("ss_role", role);
     applyRole(role);
   }
@@ -2276,6 +2296,30 @@
     wireNavigationOverrides();
     wireTableSearch();
     wireDetailNavigation();
+    wireLastAdminGuard();
   });
+
+  // F9 — Block destructive user-management actions against the sole WA
+  function wireLastAdminGuard() {
+    if (window.location.pathname.indexOf("settings") === -1) return;
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("button, a.btn");
+      if (!btn) return;
+      var text = (btn.textContent || "").trim().toLowerCase();
+      var destructive = text === "remove user" || text === "delete user" ||
+                        text === "remove admin" || text === "revoke admin";
+      if (!destructive) return;
+      var isLastAdmin = (localStorage.getItem("ss_role") || "WA") === "WA";
+      if (isLastAdmin) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        toast("Last-admin guard", {
+          sub: "Cannot remove the sole Workspace Admin. Add another admin first.",
+          duration: 5000,
+        });
+      }
+    }, true);
+  }
+
   window.SS_toast = function (msg, opts) { toast(msg, opts); };
 })();
