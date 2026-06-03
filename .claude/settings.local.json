@@ -15,7 +15,13 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Manish\\\\Documents\" -Recurse -Filter \"*PROTO-ANALYSIS*\" -ErrorAction SilentlyContinue)",
       "Skill(update-config)",
       "Edit(C:\\Users\\Manish\\Documents\\SmartSense_CRM_Phase1_Prototype\\deals.html)",
-      "Edit(C:\\Users\\Manish\\Documents\\SmartSense_CRM_Phase1_Prototype\\deals-table.html)"
+      "Edit(C:\\Users\\Manish\\Documents\\SmartSense_CRM_Phase1_Prototype\\deals-table.html)",
+      "Bash(findstr /V \"node_modules\")",
+      "Bash(findstr /V \".claude\")",
+      "Bash(findstr /V \"dist\")",
+      "Bash(findstr *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Manish\\\\Documents\\\\SmartSense_CRM_Phase1_Prototype\\\\assets\\\\styles.css\")",
+      "Bash(Measure-Object -Line)"
     ]
   }
 }

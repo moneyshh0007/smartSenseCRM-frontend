@@ -1011,7 +1011,7 @@
           <span class="history-version">v3</span>
           <div class="grow">
             <div style="font-weight:500;">Added Competitor (Deal) · Added Buying Committee (Deal)</div>
-            <div class="history-meta">2 days ago · Mayur S. · current</div>
+            <div class="history-meta">01 Jun 2026 · Mayur S. · current</div>
           </div>
           <span class="badge solid">CURRENT</span>
         </div>
@@ -1019,7 +1019,7 @@
           <span class="history-version">v2</span>
           <div class="grow">
             <div style="font-weight:500;">Added Source (Deal) · Renamed "Acct Type" → "ACV tier"</div>
-            <div class="history-meta">1 week ago · Sarah K.</div>
+            <div class="history-meta">27 May 2026 · Sarah K.</div>
           </div>
           <button class="btn sm">Rollback to v2</button>
         </div>

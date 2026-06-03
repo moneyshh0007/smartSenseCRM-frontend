@@ -186,11 +186,17 @@
             card.className = "kanban-card";
             if (stage === "Closed Lost") card.style.opacity = "0.55";
             if (stage === "Closed Won") card.style.opacity = "0.65";
+            if (["Qualified", "Proposal", "Negotiation"].indexOf(stage) !== -1 && d.updatedAt) {
+              var staleDays = (Date.now() - new Date(d.updatedAt).getTime()) / 86400000;
+              if (staleDays >= 21) card.classList.add("warn");
+            }
             card.style.cursor = "pointer";
             card.onclick = function() {
               window.location.href = "deal-detail.html?id=" + d.id;
             };
-            card.innerHTML = "<div class='kanban-card-title'>" + d.name + "</div>" +
+            card.innerHTML = "<div class='kanban-card-title'>" + d.name +
+              (card.classList.contains("warn") ? " <span class='badge warn' style='font-size:10px;vertical-align:middle;'>ROTTING</span>" : "") +
+              "</div>" +
               "<div class='kanban-card-meta'>" +
               "<span class='kanban-card-amount'>$" + Number(d.amount).toLocaleString() + "</span>" +
               (d.company ? "<span>" + d.company.name + "</span>" : "") +

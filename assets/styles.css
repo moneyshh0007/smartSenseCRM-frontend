@@ -1189,3 +1189,38 @@ tr.task-completed td:nth-child(2) {
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   }
 }
+
+/* ================================================================
+   BATCH 5 — COPY & CONSISTENCY
+   ================================================================ */
+
+/* F3 — Text truncation utilities */
+.truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.table td strong {
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.card-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.note-body {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* C6 — Table row warn state for rotting deals */
+tr.warn { background: var(--ink-03); }
+tr.warn > td:first-child { border-left: 3px solid var(--ink); }
