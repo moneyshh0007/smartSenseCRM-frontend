@@ -1702,7 +1702,17 @@
       if (cb.closest("th")) return;
       if (cb.checked) {
         row.classList.add("task-completed");
-        SS.toast("Task marked complete", { sub: "Moved to Completed" });
+        var completedRow = row;
+        SS.toast("Task marked complete", {
+          sub: "Moved to Completed",
+          duration: 8000,
+          action: "Undo",
+          onAction: function () {
+            completedRow.classList.remove("task-completed");
+            var cb = completedRow.querySelector("input[type='checkbox']");
+            if (cb) cb.checked = false;
+          },
+        });
       } else {
         row.classList.remove("task-completed");
       }
@@ -1935,10 +1945,23 @@
         icon.removeAttribute("onclick");
         icon.addEventListener("click", e => {
           e.stopPropagation();
-          document.getElementById("notif-drawer")?.classList.toggle("open");
+          var nd = document.getElementById("notif-drawer");
+          if (nd) {
+            nd.classList.toggle("open");
+            if (nd.classList.contains("open")) {
+              nd.querySelectorAll(".notif-item.unread").forEach(function (item) {
+                item.classList.remove("unread");
+              });
+              var badge = document.getElementById("notif-badge");
+              if (badge) badge.style.display = "none";
+            }
+          }
         });
-        // unread counter pip
-        icon.innerHTML = '<span style="position:relative;">○<span style="position:absolute;top:-4px;right:-6px;width:6px;height:6px;background:var(--ink);border-radius:50%;"></span></span>';
+        // unread count badge — min-width prevents 2-digit overlap (G17)
+        var unreadCount = document.querySelectorAll('.notif-item.unread').length || 3;
+        icon.innerHTML = '<span style="position:relative;display:inline-flex;align-items:center;justify-content:center;">○' +
+          '<span id="notif-badge" style="position:absolute;top:-6px;right:-14px;min-width:16px;height:16px;padding:0 4px;background:var(--ink);color:var(--paper);border-radius:8px;font-size:9px;font-family:var(--mono);font-weight:500;display:flex;align-items:center;justify-content:center;line-height:1;">' +
+          unreadCount + '</span></span>';
       }
       if (title.toLowerCase() === "help") {
         icon.setAttribute("data-trigger", "help");
@@ -2010,6 +2033,46 @@
   }
 
   // ============================================================
+  // TABLE SEARCH WITH EMPTY STATE (B7)
+  // ============================================================
+  function wireTableSearch() {
+    var pageId = document.body.getAttribute("data-page");
+    var listPages = ["contacts", "companies", "deals", "tasks"];
+    if (listPages.indexOf(pageId) === -1) return;
+    var filterRow = document.querySelector(".row.mb-4");
+    if (!filterRow || filterRow.querySelector(".table-search")) return;
+    var input = document.createElement("input");
+    input.type = "search";
+    input.className = "btn sm table-search";
+    input.placeholder = "Search…";
+    input.style.cssText = "padding:4px 10px;font-size:11px;width:180px;cursor:text;";
+    filterRow.appendChild(input);
+    var emptyRow = null;
+    input.addEventListener("input", function () {
+      var term = input.value.trim().toLowerCase();
+      var tbody = document.querySelector(".table tbody");
+      if (!tbody) return;
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll("tr:not(.empty-search-row)"));
+      var visible = 0;
+      rows.forEach(function (r) {
+        var show = !term || r.textContent.toLowerCase().indexOf(term) !== -1;
+        r.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+      if (!emptyRow) {
+        emptyRow = document.createElement("tr");
+        emptyRow.className = "empty-search-row no-hover";
+        var cols = rows[0] ? rows[0].querySelectorAll("td,th").length : 6;
+        emptyRow.innerHTML = "<td colspan=\"" + cols + "\" style=\"text-align:center;padding:48px 24px;color:var(--ink-30);font-size:13px;\">No records match “<strong style='color:var(--ink);'></strong>” — try a different term.</td>";
+        tbody.appendChild(emptyRow);
+      }
+      var strong = emptyRow.querySelector("strong");
+      if (strong) strong.textContent = term;
+      emptyRow.style.display = (visible === 0 && term) ? "" : "none";
+    });
+  }
+
+  // ============================================================
   // BOOT
   // ============================================================
   ready(() => {
@@ -2026,5 +2089,6 @@
     wireTopbarIcons();
     wireKpiClicks();
     wireNavigationOverrides();
+    wireTableSearch();
   });
 })();
