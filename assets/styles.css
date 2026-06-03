@@ -1105,3 +1105,87 @@ tr.task-completed td {
 tr.task-completed td:nth-child(2) {
   text-decoration: line-through;
 }
+
+/* ================================================================
+   BATCH 6 — LAYOUT POLISH
+   ================================================================ */
+
+/* H3 — Truncate long deal names in Kanban cards */
+.kanban-card-title {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* H4 — Per-column scroll so page doesn't scroll when a column has many deals */
+.kanban { align-items: start; }
+.kanban-col {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.kanban-col-head {
+  position: sticky;
+  top: 0;
+  background: var(--paper-warm);
+  z-index: 1;
+}
+
+/* H5 — Normalize table row height: top-align so single-line and wrapped rows are consistent */
+.table td { vertical-align: top; }
+
+/* H7 — Sidebar collapse button + collapsed state */
+.sidebar { position: relative; }
+.sidebar-collapse-btn {
+  position: absolute;
+  right: -13px;
+  top: 20px;
+  width: 26px;
+  height: 26px;
+  background: var(--paper-warm);
+  border: var(--rule);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  z-index: 10;
+  color: var(--ink-50);
+  transition: color 100ms;
+  line-height: 1;
+}
+.sidebar-collapse-btn:hover { color: var(--ink); }
+.sidebar-collapse-btn::after { content: "\2039"; }
+.app.sidebar-collapsed .sidebar-collapse-btn::after { content: "\203A"; }
+.app.sidebar-collapsed { grid-template-columns: 52px 1fr; }
+.app.sidebar-collapsed .sidebar .nav-group-title,
+.app.sidebar-collapsed .sidebar .brand-sub,
+.app.sidebar-collapsed .sidebar .nav-item > span:not(.nav-icon),
+.app.sidebar-collapsed .sidebar .nav-count,
+.app.sidebar-collapsed .sidebar .search-trigger > span,
+.app.sidebar-collapsed .sidebar .user-name,
+.app.sidebar-collapsed .sidebar .user-role { display: none; }
+.app.sidebar-collapsed .sidebar .nav-item { justify-content: center; }
+.app.sidebar-collapsed .sidebar .search-trigger { justify-content: center; padding: 8px 0; }
+.app.sidebar-collapsed .sidebar .sidebar-footer { padding: var(--space-3); justify-content: center; }
+.app.sidebar-collapsed .sidebar .brand { justify-content: center; padding: var(--space-3); }
+
+/* H8 — Narrow viewport: sidebar slides off-canvas instead of overlapping */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -240px;
+    width: 240px;
+    height: 100vh;
+    z-index: 200;
+    transition: left 180ms ease;
+    box-shadow: none;
+  }
+  .app.mobile-nav-open .sidebar {
+    left: 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  }
+}

@@ -11,7 +11,11 @@
       "Bash(xargs -I {} basename {})",
       "Bash(npm audit *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Manish\\\\Documents\" -Recurse -Filter \"*PROTO-ANALYSIS*\" -ErrorAction SilentlyContinue)",
+      "Skill(update-config)",
+      "Edit(C:\\Users\\Manish\\Documents\\SmartSense_CRM_Phase1_Prototype\\deals.html)",
+      "Edit(C:\\Users\\Manish\\Documents\\SmartSense_CRM_Phase1_Prototype\\deals-table.html)"
     ]
   }
 }
