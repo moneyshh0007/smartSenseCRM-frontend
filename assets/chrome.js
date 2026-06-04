@@ -36,7 +36,6 @@
   function renderSidebar(activeId) {
     let html = `
       <aside class="sidebar">
-        <button class="sidebar-collapse-btn" title="Toggle sidebar"></button>
         <div class="brand">
           <div class="brand-mark">SmartSense</div>
           <div class="brand-sub">CRM · Phase 1</div>
@@ -1276,21 +1275,10 @@
     const placeholder = document.querySelector("[data-sidebar]");
     if (placeholder) placeholder.outerHTML = renderSidebar(pageId);
 
-    // H7 — Restore sidebar collapsed state and wire toggle
+    // Ensure sidebar is never collapsed — clear any persisted collapsed state
+    localStorage.removeItem('ss_sidebar_collapsed');
     var sidebarApp = document.querySelector('.app');
-    if (sidebarApp) {
-      if (localStorage.getItem('ss_sidebar_collapsed') === '1') {
-        sidebarApp.classList.add('sidebar-collapsed');
-      }
-      var collapseBtn = document.querySelector('.sidebar-collapse-btn');
-      if (collapseBtn) {
-        collapseBtn.addEventListener('click', function () {
-          sidebarApp.classList.toggle('sidebar-collapsed');
-          localStorage.setItem('ss_sidebar_collapsed',
-            sidebarApp.classList.contains('sidebar-collapsed') ? '1' : '0');
-        });
-      }
-    }
+    if (sidebarApp) sidebarApp.classList.remove('sidebar-collapsed');
 
     // Inject proto marker
     if (!document.querySelector(".proto-marker")) {
