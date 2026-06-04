@@ -1365,7 +1365,7 @@
       // 3. Search trigger
       if (e.target.closest("[data-action='open-search']")) {
         e.preventDefault();
-        toast("Cmd+K search", { sub: "Records, filters, pages · permission-scoped" });
+        if (openGlobalSearch) openGlobalSearch();
         return;
       }
 
@@ -2297,7 +2297,213 @@
     wireTableSearch();
     wireDetailNavigation();
     wireLastAdminGuard();
+    buildGlobalSearch();
   });
+
+  // ============================================================
+  // GLOBAL SEARCH — sidebar "Search anything" + ⌘K / Ctrl+K
+  // ============================================================
+  var openGlobalSearch = null;
+
+  function buildGlobalSearch() {
+    var overlay = document.createElement("div");
+    overlay.id = "global-search-overlay";
+    overlay.className = "search-overlay";
+    overlay.innerHTML =
+      '<div class="search-dialog">' +
+        '<div class="search-input-wrap">' +
+          '<span class="search-icon">⌕</span>' +
+          '<input type="text" id="global-search-input" placeholder="Search contacts, companies, deals, tasks…" autocomplete="off" spellcheck="false" />' +
+          '<span class="search-kbd">ESC</span>' +
+        '</div>' +
+        '<div id="search-results" class="search-results">' +
+          '<div class="search-empty">Start typing to search…</div>' +
+        '</div>' +
+        '<div class="search-footer">' +
+          '<span>↑↓ navigate</span>' +
+          '<span>↵ open</span>' +
+          '<span>ESC close</span>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var input = overlay.querySelector("#global-search-input");
+    var resultsEl = overlay.querySelector("#search-results");
+    var cache = null;
+    var selectedIdx = -1;
+    var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    function esc(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return "";
+      var p = iso.slice(0, 10).split("-");
+      var d = parseInt(p[2], 10);
+      return (d < 10 ? "0" + d : "" + d) + " " + MONTHS[parseInt(p[1], 10) - 1] + " " + p[0];
+    }
+
+    function warmCache() {
+      if (cache || !window.SS_API) return;
+      Promise.all([
+        window.SS_API.Contacts.list().catch(function () { return { contacts: [] }; }),
+        window.SS_API.Companies.list().catch(function () { return { companies: [] }; }),
+        window.SS_API.Deals.list().catch(function () { return { deals: [] }; }),
+        window.SS_API.Tasks.list().catch(function () { return { tasks: [] }; }),
+      ]).then(function (res) {
+        cache = {
+          contacts:  (res[0] && res[0].contacts)  || [],
+          companies: (res[1] && res[1].companies) || [],
+          deals:     (res[2] && res[2].deals)     || [],
+          tasks:     (res[3] && res[3].tasks)     || [],
+        };
+        // If search is already open and user has typed, re-render with loaded data
+        if (overlay.classList.contains("open") && input.value.trim()) {
+          renderResults(input.value.trim());
+        }
+      }).catch(function () {});
+    }
+
+    function filterItems(arr, term, getText) {
+      var t = term.toLowerCase();
+      return arr.filter(function (x) { return getText(x).toLowerCase().indexOf(t) !== -1; });
+    }
+
+    function renderResults(term) {
+      if (!term) {
+        resultsEl.innerHTML = '<div class="search-empty">Start typing to search…</div>';
+        return;
+      }
+      if (!cache) {
+        resultsEl.innerHTML = '<div class="search-loading">Loading…</div>';
+        warmCache();
+        return;
+      }
+
+      var contacts = filterItems(cache.contacts, term, function (c) {
+        return (c.firstName || "") + " " + (c.lastName || "") + " " + (c.email || "") + " " + (c.title || "");
+      }).slice(0, 4);
+      var companies = filterItems(cache.companies, term, function (c) {
+        return c.name + " " + (c.industry || "") + " " + (c.domain || "");
+      }).slice(0, 3);
+      var deals = filterItems(cache.deals, term, function (d) {
+        return d.name + " " + (d.stage || "") + " " + ((d.company && d.company.name) || "");
+      }).slice(0, 3);
+      var tasks = filterItems(cache.tasks, term, function (t) {
+        return (t.title || "") + " " + (t.priority || "");
+      }).slice(0, 3);
+
+      if (!contacts.length && !companies.length && !deals.length && !tasks.length) {
+        resultsEl.innerHTML = '<div class="search-empty">No results for <strong>&ldquo;' + esc(term) + '&rdquo;</strong></div>';
+        return;
+      }
+
+      var html = "";
+      if (contacts.length) {
+        html += '<div class="search-group"><div class="search-group-label">Contacts</div>';
+        contacts.forEach(function (c) {
+          var name = esc(((c.firstName || "") + " " + (c.lastName || "")).trim());
+          var meta = [c.title, c.company && c.company.name].filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="contact-detail.html?id=' + esc(c.id) + '">' +
+            '<span class="search-item-icon">○</span>' +
+            '<div class="search-item-text"><strong>' + name + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (companies.length) {
+        html += '<div class="search-group"><div class="search-group-label">Companies</div>';
+        companies.forEach(function (c) {
+          var meta = [c.industry, c._count ? c._count.contacts + " contacts" : ""].filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="company-detail.html?id=' + esc(c.id) + '">' +
+            '<span class="search-item-icon">□</span>' +
+            '<div class="search-item-text"><strong>' + esc(c.name) + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (deals.length) {
+        html += '<div class="search-group"><div class="search-group-label">Deals</div>';
+        deals.forEach(function (d) {
+          var meta = esc("$" + Number(d.amount || 0).toLocaleString("en-US") + " · " + (d.stage || ""));
+          html += '<a class="search-item" href="deal-detail.html?id=' + esc(d.id) + '">' +
+            '<span class="search-item-icon">◇</span>' +
+            '<div class="search-item-text"><strong>' + esc(d.name) + '</strong>' +
+            '<span class="search-item-meta">' + meta + '</span>' +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (tasks.length) {
+        html += '<div class="search-group"><div class="search-group-label">Tasks</div>';
+        tasks.forEach(function (t) {
+          var meta = [(t.priority || "").toUpperCase(), t.dueAt ? "Due " + fmtDate(t.dueAt) : ""]
+            .filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="tasks.html">' +
+            '<span class="search-item-icon">✓</span>' +
+            '<div class="search-item-text"><strong>' + esc(t.title || "") + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      resultsEl.innerHTML = html;
+      selectedIdx = -1;
+    }
+
+    function highlightItem() {
+      var items = resultsEl.querySelectorAll(".search-item");
+      if (!items.length) return;
+      selectedIdx = Math.max(0, Math.min(selectedIdx, items.length - 1));
+      items.forEach(function (item, i) { item.classList.toggle("selected", i === selectedIdx); });
+      if (items[selectedIdx]) items[selectedIdx].scrollIntoView({ block: "nearest" });
+    }
+
+    function openSearch() {
+      overlay.classList.add("open");
+      warmCache();
+      setTimeout(function () { input.focus(); input.select(); }, 40);
+    }
+
+    function closeSearch() {
+      overlay.classList.remove("open");
+      input.value = "";
+      resultsEl.innerHTML = '<div class="search-empty">Start typing to search…</div>';
+      selectedIdx = -1;
+    }
+
+    // Expose so the sidebar click handler can call it
+    openGlobalSearch = openSearch;
+
+    // Backdrop click closes
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeSearch(); });
+
+    // Input events
+    input.addEventListener("input", function () { renderResults(input.value.trim()); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { closeSearch(); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); selectedIdx++; highlightItem(); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); selectedIdx = Math.max(0, selectedIdx - 1); highlightItem(); return; }
+      if (e.key === "Enter") {
+        var items = resultsEl.querySelectorAll(".search-item");
+        if (selectedIdx >= 0 && items[selectedIdx]) { items[selectedIdx].click(); closeSearch(); }
+      }
+    });
+
+    // ⌘K / Ctrl+K global shortcut
+    document.addEventListener("keydown", function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        overlay.classList.contains("open") ? closeSearch() : openSearch();
+      }
+    });
+
+    // Pre-warm cache 2 s after page load (non-blocking, silent)
+    setTimeout(warmCache, 2000);
+  }
 
   // F9 — Block destructive user-management actions against the sole WA
   function wireLastAdminGuard() {
