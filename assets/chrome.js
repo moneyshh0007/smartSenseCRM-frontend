@@ -1358,16 +1358,16 @@
         return;
       }
 
-      // 2. Skip clicks inside slide-over, search, links, and explicit data-action targets handled elsewhere
-      if (e.target.closest(".slide-over")) return;
-      if (e.target.closest("a")) return;
-
-      // 3. Search trigger
+      // 2. Search trigger — must come before the <a> skip
       if (e.target.closest("[data-action='open-search']")) {
         e.preventDefault();
         if (openGlobalSearch) openGlobalSearch();
         return;
       }
+
+      // 3. Skip clicks inside slide-over and plain links
+      if (e.target.closest(".slide-over")) return;
+      if (e.target.closest("a")) return;
 
       // 4. Button delegation
       const btn = e.target.closest("button");
@@ -2465,7 +2465,7 @@
     function openSearch() {
       overlay.classList.add("open");
       warmCache();
-      setTimeout(function () { input.focus(); input.select(); }, 40);
+      setTimeout(function () { input.focus(); }, 80);
     }
 
     function closeSearch() {
@@ -2477,6 +2477,28 @@
 
     // Expose so the sidebar click handler can call it
     openGlobalSearch = openSearch;
+
+    // Wire sidebar .search-trigger directly (redundant-safe: also handled in delegation)
+    var sidebarTrigger = document.querySelector("[data-action='open-search']");
+    if (sidebarTrigger) {
+      sidebarTrigger.setAttribute("tabindex", "0");
+      sidebarTrigger.addEventListener("click", function (e) {
+        e.preventDefault();
+        openSearch();
+      });
+      // Typing any printable key while the trigger is focused opens the modal and seeds it
+      sidebarTrigger.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSearch(); return; }
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          openSearch();
+          var ch = e.key;
+          setTimeout(function () {
+            input.value = ch;
+            renderResults(ch);
+          }, 60);
+        }
+      });
+    }
 
     // Backdrop click closes
     overlay.addEventListener("click", function (e) { if (e.target === overlay) closeSearch(); });
