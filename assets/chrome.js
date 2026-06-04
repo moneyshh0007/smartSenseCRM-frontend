@@ -2136,7 +2136,7 @@
       { selector: "Pipeline this quarter", href: "deals.html?filter=my" },
       { selector: "Forecast", href: "deals-forecast.html" },
       { selector: "Activities this week", href: "activities.html" },
-      { selector: "Stalled deals", href: "deals.html?filter=stalled" },
+      { selector: "Open tasks", href: "tasks.html" },
     ];
     kpis.forEach((k, i) => {
       const r = routes[i];
