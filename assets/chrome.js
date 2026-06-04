@@ -1,4 +1,4 @@
-﻿// SmartSense CRM Prototype â€” shared chrome + interaction layer.
+// SmartSense CRM Prototype — shared chrome + interaction layer.
 // Adds: sidebar injection, slide-over forms, toast notifications,
 // chip removal, and click delegation that maps button text to actions.
 
@@ -9,27 +9,27 @@
   // ============================================================
   const NAV = [
     { group: "Workspace", items: [
-      { id: "my-day", href: "my-day.html", label: "My Day", icon: "â—", count: "3" },
+      { id: "my-day", href: "my-day.html", label: "My Day", icon: "◐", count: "3" },
     ]},
     { group: "Records", items: [
-      { id: "contacts",  href: "contacts.html",   label: "Contacts",   icon: "â—‹", count: "1,847" },
-      { id: "companies", href: "companies.html",  label: "Companies",  icon: "â–¡", count: "412" },
-      { id: "deals",     href: "deals.html",      label: "Deals",      icon: "â—‡", count: "47" },
-      { id: "activities",href: "activities.html", label: "Activities", icon: "â‰¡", count: "" },
-      { id: "tasks",     href: "tasks.html",      label: "Tasks",      icon: "âœ“", count: "8" },
+      { id: "contacts",  href: "contacts.html",   label: "Contacts",   icon: "○", count: "1,847" },
+      { id: "companies", href: "companies.html",  label: "Companies",  icon: "□", count: "412" },
+      { id: "deals",     href: "deals.html",      label: "Deals",      icon: "◇", count: "47" },
+      { id: "activities",href: "activities.html", label: "Activities", icon: "≡", count: "" },
+      { id: "tasks",     href: "tasks.html",      label: "Tasks",      icon: "✓", count: "8" },
     ]},
     { group: "Smart Filters", items: [
-      { id: "filter-my-pipeline",   href: "deals.html?filter=my",         label: "My Open Pipeline", icon: "â˜…", count: "12" },
-      { id: "filter-new-this-week", href: "contacts.html?filter=new",     label: "New This Week",    icon: "â˜…", count: "47" },
-      { id: "filter-stalled",       href: "deals.html?filter=stalled",    label: "Stalled Deals",    icon: "â˜…", count: "4" },
+      { id: "filter-my-pipeline",   href: "deals.html?filter=my",         label: "My Open Pipeline", icon: "★", count: "12" },
+      { id: "filter-new-this-week", href: "contacts.html?filter=new",     label: "New This Week",    icon: "★", count: "47" },
+      { id: "filter-stalled",       href: "deals.html?filter=stalled",    label: "Stalled Deals",    icon: "★", count: "4" },
     ]},
     { group: "Tools", items: [
-      { id: "import",    href: "import.html",           label: "Import CSV",       icon: "â†“", count: "" },
-      { id: "dedup",     href: "dedup.html",            label: "Find Duplicates",  icon: "âŒ–", count: "" },
+      { id: "import",    href: "import.html",           label: "Import CSV",       icon: "↓", count: "" },
+      { id: "dedup",     href: "dedup.html",            label: "Find Duplicates",  icon: "⌖", count: "" },
       { id: "extension", href: "chrome-extension.html", label: "LinkedIn Capture", icon: "in", count: "" },
     ]},
     { group: "Admin", items: [
-      { id: "settings", href: "settings.html", label: "Settings", icon: "âš™", count: "" },
+      { id: "settings", href: "settings.html", label: "Settings", icon: "⚙", count: "" },
     ]},
   ];
 
@@ -39,11 +39,11 @@
         <button class="sidebar-collapse-btn" title="Toggle sidebar"></button>
         <div class="brand">
           <div class="brand-mark">SmartSense</div>
-          <div class="brand-sub">CRM Â· Phase 1</div>
+          <div class="brand-sub">CRM · Phase 1</div>
         </div>
         <div class="search-trigger">
           <input type="search" id="sidebar-search-input" placeholder="Search anything" autocomplete="off" spellcheck="false" />
-          <span class="kbd">âŒ˜K</span>
+          <span class="kbd">⌘K</span>
         </div>
     `;
     for (const group of NAV) {
@@ -149,7 +149,7 @@
           ${eyebrow ? `<div class="slide-eyebrow">${eyebrow}</div>` : ""}
           <h2 class="slide-title">${title}</h2>
         </div>
-        <button class="slide-close" data-slide-close aria-label="Close">Ã—</button>
+        <button class="slide-close" data-slide-close aria-label="Close">×</button>
       </header>
       <div class="slide-body">${body}</div>
       <footer class="slide-foot">
@@ -189,12 +189,12 @@
   }
 
   // ============================================================
-  // FORM FORMATTERS â€” E4 (currency) Â· E5 (date) Â· E10 (tags)
+  // FORM FORMATTERS — E4 (currency) · E5 (date) · E10 (tags)
   // ============================================================
   function wireFormFormatters(panel) {
     if (!panel) return;
 
-    // E4 â€” Currency blur: 48000 â†’ $48,000 ; focus restores raw value
+    // E4 — Currency blur: 48000 → $48,000 ; focus restores raw value
     panel.querySelectorAll("input[id*='amount']").forEach(function (inp) {
       inp.addEventListener("blur", function () {
         var raw = parseFloat(String(inp.value).replace(/[^0-9.]/g, ""));
@@ -212,7 +212,7 @@
       });
     });
 
-    // E5 â€” Date friendly display: shows "03 Jun 2026" below the date picker
+    // E5 — Date friendly display: shows "03 Jun 2026" below the date picker
     var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     panel.querySelectorAll("input[type='date']").forEach(function (inp) {
       var disp = document.createElement("small");
@@ -228,7 +228,7 @@
       inp.addEventListener("blur", refreshDate);
     });
 
-    // E10 â€” Tag input: Enter to add Â· suggestion chips Â· chip removal
+    // E10 — Tag input: Enter to add · suggestion chips · chip removal
     var tagInput = panel.querySelector("#slide-nc-tags-input");
     var tagChips = panel.querySelector("#slide-nc-tags-chips");
     if (tagInput && tagChips) {
@@ -236,7 +236,7 @@
       function renderTagChips() {
         tagChips.innerHTML = activeTags.map(function (t) {
           return "<span class='chip' style='cursor:default;'>" + t +
-            " <span data-remove-tag='" + t + "' style='margin-left:4px;cursor:pointer;color:var(--ink-50);'>Ã—</span></span>";
+            " <span data-remove-tag='" + t + "' style='margin-left:4px;cursor:pointer;color:var(--ink-50);'>×</span></span>";
         }).join("");
         tagChips.querySelectorAll("[data-remove-tag]").forEach(function (x) {
           x.addEventListener("click", function () {
@@ -267,7 +267,7 @@
   // ============================================================
   const Forms = {
     "new-contact": () => ({
-      eyebrow: "M1 Â· F1.1 Â· New Person",
+      eyebrow: "M1 · F1.1 · New Person",
       title: "Add a new contact",
       body: `
         <div class="field-row">
@@ -435,7 +435,7 @@
               <option value="+1758" data-min="7"  data-max="7" >+1758 St. Lucia</option>
               <option value="+1784" data-min="7"  data-max="7" >+1784 St. Vincent</option>
               <option value="+685"  data-min="7"  data-max="7" >+685  Samoa</option>
-              <option value="+239"  data-min="7"  data-max="7" >+239  SÃ£o TomÃ©</option>
+              <option value="+239"  data-min="7"  data-max="7" >+239  São Tomé</option>
               <option value="+966"  data-min="9"  data-max="9" >+966  Saudi Arabia</option>
               <option value="+221"  data-min="9"  data-max="9" >+221  Senegal</option>
               <option value="+381"  data-min="9"  data-max="9" >+381  Serbia</option>
@@ -536,7 +536,7 @@
             return false;
           }
           if (phoneNum.length < min || phoneNum.length > max) {
-            phoneErrEl.textContent = ccEl.value + " numbers must be " + (min === max ? min : min + "â€“" + max) + " digits (entered: " + phoneNum.length + ").";
+            phoneErrEl.textContent = ccEl.value + " numbers must be " + (min === max ? min : min + "–" + max) + " digits (entered: " + phoneNum.length + ").";
             phoneErrEl.style.display = "block";
             return false;
           }
@@ -563,14 +563,14 @@
     }),
 
     "new-company": () => ({
-      eyebrow: "M1 Â· F1.1 Â· New Company",
+      eyebrow: "M1 · F1.1 · New Company",
       title: "Add a new company",
       body: `
         <div class="field"><label>Company name<span class="field-required-marker">*</span></label><input type="text" id="slide-co-name" placeholder="Acme Corp" /></div>
         <div class="field"><label>Website / domain</label><input type="text" id="slide-co-domain" placeholder="acme.com" /></div>
         <div class="field-row">
           <div class="field"><label>Industry</label>
-            <select id="slide-co-industry"><option value="">â€”</option><option value="SaaS">SaaS</option><option value="Fintech">Fintech</option><option value="Logistics">Logistics</option><option value="Healthcare">Healthcare</option><option value="Retail">Retail</option><option value="Other">Other</option></select>
+            <select id="slide-co-industry"><option value="">—</option><option value="SaaS">SaaS</option><option value="Fintech">Fintech</option><option value="Logistics">Logistics</option><option value="Healthcare">Healthcare</option><option value="Retail">Retail</option><option value="Other">Other</option></select>
           </div>
           <div class="field"><label>Size (employees)</label>
             <input type="number" id="slide-co-size" placeholder="500" />
@@ -582,7 +582,7 @@
         <div class="field"><label>Tags</label><input type="text" placeholder="e.g. Enterprise, Strategic" /></div>
       `,
       primaryLabel: "Create company",
-      note: "Auto-enrichment will populate logo + size Â· F1.4",
+      note: "Auto-enrichment will populate logo + size · F1.4",
       onSave: () => {
         const name = (document.getElementById("slide-co-name")?.value || "").trim();
         const domain = (document.getElementById("slide-co-domain")?.value || "").trim();
@@ -597,7 +597,7 @@
           if (hq) payload.hq = hq;
           window.SS_API.Companies.create(payload)
             .then(() => {
-              toast("Company created", { sub: name + " added Â· Enrichment queued" });
+              toast("Company created", { sub: name + " added · Enrichment queued" });
               if (typeof window.SS_loadCompanies === "function") window.SS_loadCompanies();
             })
             .catch((err) => toast(err.message || "Could not create company", { sub: "Check the name and try again" }));
@@ -608,10 +608,10 @@
     }),
 
     "new-deal": (ctx) => ({
-      eyebrow: "M2 Â· F2.1 Â· F2.2 Â· New Deal",
+      eyebrow: "M2 · F2.1 · F2.2 · New Deal",
       title: "Add a new deal",
       body: `
-        <div class="field"><label>Deal name<span class="field-required-marker">*</span></label><input type="text" id="slide-nd-name" placeholder="Acme â€” Annual License" /></div>
+        <div class="field"><label>Deal name<span class="field-required-marker">*</span></label><input type="text" id="slide-nd-name" placeholder="Acme — Annual License" /></div>
         <div class="field"><label>Company</label><input type="text" id="slide-nd-company" value="${ctx && ctx.company ? ctx.company : ''}" placeholder="Acme Corp" /></div>
         <div class="field-row">
           <div class="field"><label>Pipeline</label>
@@ -638,9 +638,9 @@
         <div class="card" style="background:var(--paper-warm); padding:12px 14px; margin-top:12px;">
           <div class="label">SYSTEM-DERIVED ON CREATE (E2 note)</div>
           <div class="text-muted mt-2" style="font-size: 12px;">
-            <strong>Probability:</strong> set from stage default (Discovery = 10%) Â· editable after create<br/>
-            <strong>Forecast category:</strong> defaults to "Pipeline" Â· rep updates each week<br/>
-            <strong>ACV tier:</strong> auto-bucketed from amount (Mid-market &lt; $100k, Enterprise â‰¥ $100k)
+            <strong>Probability:</strong> set from stage default (Discovery = 10%) · editable after create<br/>
+            <strong>Forecast category:</strong> defaults to "Pipeline" · rep updates each week<br/>
+            <strong>ACV tier:</strong> auto-bucketed from amount (Mid-market &lt; $100k, Enterprise ≥ $100k)
           </div>
         </div>
       `,
@@ -655,7 +655,7 @@
         const competitor = document.getElementById("slide-nd-competitor")?.value || "";
         const source = document.getElementById("slide-nd-source")?.value || "";
 
-        // G16 â€” Stage-gate: enforce required fields before advancing stages
+        // G16 — Stage-gate: enforce required fields before advancing stages
         const STAGE_GATE = ["Discovery","Qualified","Proposal","Negotiation","Closed Won","Closed Lost"];
         const stageIdx = STAGE_GATE.indexOf(stage);
         if (stageIdx >= 2 && !competitor) {
@@ -679,13 +679,13 @@
             })
             .catch((err) => toast(err.message || "Could not create deal", { sub: "Check required fields and try again" }));
         } else {
-          toast("Deal created", { sub: "Added to Direct Sales Â· Discovery" });
+          toast("Deal created", { sub: "Added to Direct Sales · Discovery" });
         }
       },
     }),
 
     "new-task": (ctx) => ({
-      eyebrow: "M3 Â· F3.1 Â· New Task",
+      eyebrow: "M3 · F3.1 · New Task",
       title: "Add a new task",
       body: `
         <div class="field"><label>Title</label><input type="text" id="slide-nt-title" placeholder="Follow up on pricing question" /></div>
@@ -695,19 +695,19 @@
         </div>
         <div class="field"><label>Linked to</label>
           <select id="slide-nt-linked">
-            <option value="">â€” None â€”</option>
+            <option value="">— None —</option>
             <optgroup label="Deals">
-              <option value="deal:acme-annual">Acme â€” Annual License</option>
-              <option value="deal:northwind-multi">Northwind â€” Multi-year</option>
-              <option value="deal:globex-annual">Globex Inc â€” Annual</option>
-              <option value="deal:hooli-multi">Hooli â€” Multi-year</option>
-              <option value="deal:vellichor">Vellichor Ltd â€” Annual</option>
+              <option value="deal:acme-annual">Acme — Annual License</option>
+              <option value="deal:northwind-multi">Northwind — Multi-year</option>
+              <option value="deal:globex-annual">Globex Inc — Annual</option>
+              <option value="deal:hooli-multi">Hooli — Multi-year</option>
+              <option value="deal:vellichor">Vellichor Ltd — Annual</option>
             </optgroup>
             <optgroup label="Contacts">
-              <option value="contact:sarah-chen">Sarah Chen Â· VP Sales, Acme</option>
-              <option value="contact:ellen-lee">Ellen Lee Â· Director, IT</option>
-              <option value="contact:carlos-mendes">Carlos Mendes Â· VP Finance</option>
-              <option value="contact:priya-n">Priya N. Â· Procurement Lead</option>
+              <option value="contact:sarah-chen">Sarah Chen · VP Sales, Acme</option>
+              <option value="contact:ellen-lee">Ellen Lee · Director, IT</option>
+              <option value="contact:carlos-mendes">Carlos Mendes · VP Finance</option>
+              <option value="contact:priya-n">Priya N. · Procurement Lead</option>
             </optgroup>
             <optgroup label="Companies">
               <option value="company:acme">Acme Corp</option>
@@ -744,7 +744,7 @@
     }),
 
     "new-activity": () => ({
-      eyebrow: "M3 Â· F3.2 Â· Log Activity",
+      eyebrow: "M3 · F3.2 · Log Activity",
       title: "Log an activity",
       body: `
         <div class="field-row">
@@ -783,7 +783,7 @@
     }),
 
     "new-pipeline": () => ({
-      eyebrow: "M2 Â· F2.1 Â· New Pipeline",
+      eyebrow: "M2 · F2.1 · New Pipeline",
       title: "Add a new pipeline",
       body: `
         <div class="field"><label>Pipeline name</label><input type="text" placeholder="Channel Partner Deals" /></div>
@@ -812,12 +812,12 @@
         </div>
       `,
       primaryLabel: "Create pipeline",
-      note: "RBAC respects visibility Â· F9.1",
+      note: "RBAC respects visibility · F9.1",
       onSave: () => toast("Pipeline created", { sub: "Visible to assigned roles" }),
     }),
 
     "new-role": () => ({
-      eyebrow: "M9 Â· F9.1 Â· New Role",
+      eyebrow: "M9 · F9.1 · New Role",
       title: "Create a new role",
       body: `
         <div class="field"><label>Role name</label><input type="text" placeholder="Junior Rep" /></div>
@@ -849,7 +849,7 @@
         <div class="field">
           <label>Restrict to records matching</label>
           <input type="text" placeholder="e.g. amount &lt; $100k" />
-          <div class="field-hint">Applies to Deal Â· users with this role only see matching records</div>
+          <div class="field-hint">Applies to Deal · users with this role only see matching records</div>
         </div>
       `,
       primaryLabel: "Create role",
@@ -858,7 +858,7 @@
     }),
 
     "new-rule": () => ({
-      eyebrow: "M3 Â· F3.4 Â· New Selling Rule",
+      eyebrow: "M3 · F3.4 · New Selling Rule",
       title: "Create a selling rule",
       body: `
         <div class="field"><label>Rule name</label><input type="text" placeholder="Every open deal needs activity in 5 days" /></div>
@@ -887,12 +887,12 @@
         <div class="checkbox-line"><input type="checkbox" checked /> <span>Track compliance rate per rep</span></div>
       `,
       primaryLabel: "Create rule",
-      note: "Soft enforcement â€” visual flag, never blocks the rep",
+      note: "Soft enforcement — visual flag, never blocks the rep",
       onSave: () => toast("Selling rule created", { sub: "Runs nightly at 02:00" }),
     }),
 
     "new-object": () => ({
-      eyebrow: "M1 Â· F1.1 Â· New Object",
+      eyebrow: "M1 · F1.1 · New Object",
       title: "Create a custom object",
       body: `
         <div class="field-row">
@@ -900,7 +900,7 @@
           <div class="field"><label>Plural</label><input type="text" placeholder="Projects" /></div>
         </div>
         <div class="field"><label>Icon</label>
-          <select><option>â—† Diamond</option><option>â— Circle</option><option>â–¡ Square</option><option>â–² Triangle</option><option>â˜… Star</option></select>
+          <select><option>◆ Diamond</option><option>● Circle</option><option>□ Square</option><option>▲ Triangle</option><option>★ Star</option></select>
         </div>
         <div class="field"><label>Description</label><input type="text" placeholder="Used to model post-sale delivery work" /></div>
         <h4>Starter fields</h4>
@@ -912,12 +912,12 @@
         <div class="field-hint mt-3">Up to 25 custom objects per workspace.</div>
       `,
       primaryLabel: "Create object",
-      note: "Schema will version v3 â†’ v4 Â· audit-logged",
+      note: "Schema will version v3 → v4 · audit-logged",
       onSave: () => toast("Custom object created", { sub: "Add fields next" }),
     }),
 
     "new-field": () => ({
-      eyebrow: "M1 Â· F1.1 Â· F2.3 Â· New Field",
+      eyebrow: "M1 · F1.1 · F2.3 · New Field",
       title: "Add a field to Deal",
       body: `
         <div class="field"><label>Field name</label><input type="text" placeholder="ACV tier" /></div>
@@ -934,12 +934,12 @@
         <div class="field"><label>API key</label><input type="text" value="acv_tier" /></div>
       `,
       primaryLabel: "Add field",
-      note: "Schema will version v3 â†’ v4",
+      note: "Schema will version v3 → v4",
       onSave: () => toast("Field added", { sub: "Materialised view rebuilding" }),
     }),
 
     "new-filter": () => ({
-      eyebrow: "M1 Â· F1.6 Â· New Filter",
+      eyebrow: "M1 · F1.6 · New Filter",
       title: "Add filter condition",
       body: `
         <div class="field-row">
@@ -957,7 +957,7 @@
     }),
 
     "save-filter": () => ({
-      eyebrow: "M1 Â· F1.6 Â· Smart Filter",
+      eyebrow: "M1 · F1.6 · Smart Filter",
       title: "Save as smart filter",
       body: `
         <div class="field"><label>Filter name</label><input type="text" placeholder="My Enterprise Pilots" /></div>
@@ -966,35 +966,35 @@
         <div class="checkbox-line"><input type="checkbox" checked /> <span>Private to me</span></div>
         <div class="checkbox-line"><input type="checkbox" /> <span>Pin to sidebar</span></div>
         <div class="checkbox-line"><input type="checkbox" /> <span>Share with my team</span></div>
-        <div class="field-hint mt-3">Shared filters respect RBAC â€” different users see different results based on permissions.</div>
+        <div class="field-hint mt-3">Shared filters respect RBAC — different users see different results based on permissions.</div>
       `,
       primaryLabel: "Save filter",
       onSave: () => toast("Smart filter saved", { sub: "Pinned to sidebar" }),
     }),
 
     "add-seats": () => ({
-      eyebrow: "M9 Â· F9.4 Â· Billing",
+      eyebrow: "M9 · F9.4 · Billing",
       title: "Add seats",
       body: `
         <div class="field"><label>Seats to add</label><input type="number" value="5" /></div>
         <h4>Pro-ration preview</h4>
         <div class="card" style="background: var(--paper-warm);">
           <dl class="kv-grid">
-            <dt>Current plan</dt><dd>Business â€” $49 / seat / month</dd>
+            <dt>Current plan</dt><dd>Business — $49 / seat / month</dd>
             <dt>Today's charge</dt><dd class="text-mono">$122.50 (pro-rated 6 days)</dd>
             <dt>Next invoice</dt><dd class="text-mono">$2,205.00 (45 seats)</dd>
             <dt>Annual run rate</dt><dd class="text-mono">$26,460</dd>
           </dl>
         </div>
-        <div class="field-hint mt-3">Charged to VISA â€¢â€¢â€¢â€¢ 4242. Receipt emailed to billing@smartsense.io.</div>
+        <div class="field-hint mt-3">Charged to VISA •••• 4242. Receipt emailed to billing@smartsense.io.</div>
       `,
       primaryLabel: "Confirm and charge",
       note: "Stripe will charge immediately",
-      onSave: () => toast("5 seats added", { sub: "Receipt sent Â· invite users now" }),
+      onSave: () => toast("5 seats added", { sub: "Receipt sent · invite users now" }),
     }),
 
     "stage-change": () => ({
-      eyebrow: "M2 Â· F2.2 Â· Stage transition",
+      eyebrow: "M2 · F2.2 · Stage transition",
       title: "Move deal to a new stage",
       body: `
         <div class="field"><label>New stage</label>
@@ -1011,19 +1011,19 @@
         <div class="card mt-3" style="background: var(--paper-warm);">
           <div class="label">Stage-gate check (F2.3)</div>
           <div class="mt-2" style="font-size: 12px;">
-            âœ“ Competitor: HubSpot Â· set 22 May<br/>
-            âœ“ Source: LinkedIn outbound<br/>
-            âœ“ Amount: $48,000
+            ✓ Competitor: HubSpot · set 22 May<br/>
+            ✓ Source: LinkedIn outbound<br/>
+            ✓ Amount: $48,000
           </div>
         </div>
       `,
       primaryLabel: "Move stage",
-      note: "Days-in-stage will reset Â· audit-logged",
+      note: "Days-in-stage will reset · audit-logged",
       onSave: () => toast("Stage updated", { sub: "Activity logged on timeline" }),
     }),
 
     "mark-won": () => ({
-      eyebrow: "M2 Â· F2.6 Â· Close as Won",
+      eyebrow: "M2 · F2.6 · Close as Won",
       title: "Mark deal as Won",
       body: `
         <div class="field"><label>Closed amount</label><input type="text" value="$48,000" /></div>
@@ -1042,15 +1042,15 @@
         <div class="checkbox-line"><input type="checkbox" /> <span>Trigger onboarding workflow</span></div>
       `,
       primaryLabel: "Close as Won",
-      note: "Closed deals contribute to Won/Lost analysis Â· F2.6",
+      note: "Closed deals contribute to Won/Lost analysis · F2.6",
       onSave: () => {
-        toast("ðŸŽ‰ Deal closed Won", { sub: "$48,000 booked Â· CS notified", duration: 5000 });
+        toast("🎉 Deal closed Won", { sub: "$48,000 booked · CS notified", duration: 5000 });
         if (typeof window.SS_markDealWon === "function") window.SS_markDealWon();
       },
     }),
 
     "file-attachment": () => ({
-      eyebrow: "M2 Â· F2.7 Â· Attach link",
+      eyebrow: "M2 · F2.7 · Attach link",
       title: "Attach a file or link",
       body: `
         <div class="field"><label>Link URL</label><input type="text" placeholder="https://docs.google.com/document/d/..." /></div>
@@ -1088,70 +1088,70 @@
     }),
 
     "audit-detail": () => ({
-      eyebrow: "M9 Â· F9.3 Â· Audit Detail",
-      title: "Audit entry Â· field changed",
+      eyebrow: "M9 · F9.3 · Audit Detail",
+      title: "Audit entry · field changed",
       body: `
         <dl class="kv-grid mt-2">
-          <dt>When</dt><dd class="text-mono">25 May 2026 Â· 14:12:08 UTC</dd>
+          <dt>When</dt><dd class="text-mono">25 May 2026 · 14:12:08 UTC</dd>
           <dt>Actor</dt><dd>Mayur S. <span class="text-muted">(user_8x2k)</span></dd>
           <dt>Action</dt><dd><span class="badge">FIELD CHANGE</span> stage.changed</dd>
-          <dt>Object</dt><dd>Deal Â· Acme â€” Annual License <span class="text-muted">(deal_a3f9)</span></dd>
+          <dt>Object</dt><dd>Deal · Acme — Annual License <span class="text-muted">(deal_a3f9)</span></dd>
           <dt>Before</dt><dd class="text-mono">Qualified</dd>
           <dt>After</dt><dd class="text-mono">Proposal</dd>
-          <dt>Session</dt><dd class="text-mono">sess_v8mq2k Â· 12 min old</dd>
+          <dt>Session</dt><dd class="text-mono">sess_v8mq2k · 12 min old</dd>
           <dt>IP</dt><dd class="text-mono">115.241.x.x <span class="text-muted">(Mumbai, IN)</span></dd>
-          <dt>User-agent</dt><dd class="text-mono" style="font-size:11px;">Mozilla/5.0 (Mac Â· Chrome 124)</dd>
+          <dt>User-agent</dt><dd class="text-mono" style="font-size:11px;">Mozilla/5.0 (Mac · Chrome 124)</dd>
           <dt>Request ID</dt><dd class="text-mono">req_3kx9pq</dd>
         </dl>
         <h4>Cascading changes (same transaction)</h4>
         <ul class="summary-list">
           <li>
-            <div class="left-icon">â—</div>
-            <div class="grow">probability.changed Â· 30 â†’ 60</div>
+            <div class="left-icon">●</div>
+            <div class="grow">probability.changed · 30 → 60</div>
             <span class="meta">same tx</span>
           </li>
           <li>
-            <div class="left-icon">â—</div>
+            <div class="left-icon">●</div>
             <div class="grow">days_in_stage.reset</div>
             <span class="meta">same tx</span>
           </li>
           <li>
-            <div class="left-icon">â—</div>
-            <div class="grow">activity.created Â· type=StageMove</div>
+            <div class="left-icon">●</div>
+            <div class="grow">activity.created · type=StageMove</div>
             <span class="meta">same tx</span>
           </li>
         </ul>
       `,
       primaryLabel: "Export entry",
-      note: "Audit entries are immutable Â· 7-year retention",
+      note: "Audit entries are immutable · 7-year retention",
       onSave: () => toast("Entry exported", { sub: "Sent to billing@smartsense.io" }),
     }),
 
     "schema-history": () => ({
-      eyebrow: "M1 Â· F1.1 Â· Schema History",
-      title: "Data model â€” version history",
+      eyebrow: "M1 · F1.1 · Schema History",
+      title: "Data model — version history",
       body: `
         <div class="history-row">
           <span class="history-version">v3</span>
           <div class="grow">
-            <div style="font-weight:500;">Added Competitor (Deal) Â· Added Buying Committee (Deal)</div>
-            <div class="history-meta">01 Jun 2026 Â· Mayur S. Â· current</div>
+            <div style="font-weight:500;">Added Competitor (Deal) · Added Buying Committee (Deal)</div>
+            <div class="history-meta">01 Jun 2026 · Mayur S. · current</div>
           </div>
           <span class="badge solid">CURRENT</span>
         </div>
         <div class="history-row">
           <span class="history-version">v2</span>
           <div class="grow">
-            <div style="font-weight:500;">Added Source (Deal) Â· Renamed "Acct Type" â†’ "ACV tier"</div>
-            <div class="history-meta">27 May 2026 Â· Sarah K.</div>
+            <div style="font-weight:500;">Added Source (Deal) · Renamed "Acct Type" → "ACV tier"</div>
+            <div class="history-meta">27 May 2026 · Sarah K.</div>
           </div>
           <button class="btn sm">Rollback to v2</button>
         </div>
         <div class="history-row">
           <span class="history-version">v1</span>
           <div class="grow">
-            <div style="font-weight:500;">Initial schema Â· Person, Company, Deal, Task, Note</div>
-            <div class="history-meta">14 May 2026 Â· System (workspace creation)</div>
+            <div style="font-weight:500;">Initial schema · Person, Company, Deal, Task, Note</div>
+            <div class="history-meta">14 May 2026 · System (workspace creation)</div>
           </div>
           <button class="btn sm">Rollback to v1</button>
         </div>
@@ -1163,13 +1163,13 @@
         </div>
       `,
       primaryLabel: "Close",
-      note: "All schema changes are audit-logged Â· F9.3",
+      note: "All schema changes are audit-logged · F9.3",
       onSave: () => closeSlide(),
     }),
   };
 
   // ============================================================
-  // 5. ACTION REGISTRY (button text â†’ behaviour)
+  // 5. ACTION REGISTRY (button text → behaviour)
   // ============================================================
 
   // Buttons that open a slide-over with a "+ New X" form.
@@ -1205,10 +1205,10 @@
     "+ filter": "new-filter",
     "+ add seats": "add-seats",
     "save as smart filter": "save-filter",
-    "stage: proposal â–¾": "stage-change",
-    "stage: discovery â–¾": "stage-change",
-    "stage: qualified â–¾": "stage-change",
-    "stage: negotiation â–¾": "stage-change",
+    "stage: proposal ▾": "stage-change",
+    "stage: discovery ▾": "stage-change",
+    "stage: qualified ▾": "stage-change",
+    "stage: negotiation ▾": "stage-change",
     "mark won": "mark-won",
     "+ add": "tag-picker",
     "+": "tag-picker",
@@ -1217,19 +1217,19 @@
 
   // Buttons that just show a toast confirmation.
   const TOAST_TRIGGERS = {
-    "re-enrich": ["Enrichment queued", "Worker started Â· expect data in ~5s"],
+    "re-enrich": ["Enrichment queued", "Worker started · expect data in ~5s"],
     "re-scan": ["Dedup scan started", "Re-running fuzzy match on 1,847 records"],
     "re-upload": ["Re-upload", "File picker would open in production"],
     "save changes": ["Settings saved", "Applied to your workspace"],
     "save role": ["Role saved", "Takes effect on users' next login"],
     "save & enable sso": ["SSO enabled", "All non-admin users now redirect to your IdP"],
     "test sso flow": ["SSO test passed", "Round-trip with your IdP successful"],
-    "rotate token": ["SCIM token rotated", "Old token revoked Â· update your IdP"],
+    "rotate token": ["SCIM token rotated", "Old token revoked · update your IdP"],
     "enable scim": ["SCIM enabled", "Provisioning will run on next IdP sync"],
     "export csv": ["Export queued", "Link will be emailed when ready"],
     "lock snapshot": ["Forecast snapshot locked", "Changes after now tracked vs. baseline"],
-    "submit to vp": ["Forecast submitted", "Mailed to VP Â· audit-logged"],
-    "publish schema v4": ["Schema v3 â†’ v4 published", "Materialised views rebuilding"],
+    "submit to vp": ["Forecast submitted", "Mailed to VP · audit-logged"],
+    "publish schema v4": ["Schema v3 → v4 published", "Materialised views rebuilding"],
     "discard changes": ["Changes discarded", "Schema reverted to v3"],
     "discard": ["Changes discarded"],
     "view permissions": ["Opening permission matrix", "Read-only view"],
@@ -1239,7 +1239,7 @@
     "group by deal": ["Grouped by deal", "Toggle off to ungroup"],
     "settings": ["Pipeline settings", "Manage stages, probabilities, RBAC"],
     "request export": ["GDPR export queued", "Will be emailed in ~10 minutes"],
-    "request deletion": ["Workspace deletion requested", "30-day soft-delete window Â· admins notified", { duration: 5500 }],
+    "request deletion": ["Workspace deletion requested", "30-day soft-delete window · admins notified", { duration: 5500 }],
     "view audit log": ["Opening audit log"],
     "view": ["Opening detail", "Full record view"],
     "update": ["Payment method updated"],
@@ -1249,14 +1249,14 @@
     "prep": ["Meeting prep opened", "Account brief + recent activity"],
     "apply": ["Filters applied", "Result count updated"],
     "clear": ["Filters cleared"],
-    "â† prev": ["Previous page"],
-    "next â†’": ["Next page"],
-    "â† back to upload": ["Back to upload step"],
-    "continue to review â†’": ["Moving to review step"],
+    "← prev": ["Previous page"],
+    "next →": ["Next page"],
+    "← back to upload": ["Back to upload step"],
+    "continue to review →": ["Moving to review step"],
     "change": ["Re-mapping column"],
     "map": ["Mapping column"],
-    "bulk-merge all high-confidence": ["Bulk-merging 38 high-confidence clusters", "~30 seconds Â· audit-logged"],
-    "merge into selected â†’": ["Cluster merged", "Records combined Â· undo available 30d"],
+    "bulk-merge all high-confidence": ["Bulk-merging 38 high-confidence clusters", "~30 seconds · audit-logged"],
+    "merge into selected →": ["Cluster merged", "Records combined · undo available 30d"],
     "skip cluster": ["Cluster skipped", "Will appear again on next scan"],
     "open deal": ["Opening deal"],
     "capture from linkedin": ["Opening Chrome extension preview"],
@@ -1276,7 +1276,7 @@
     const placeholder = document.querySelector("[data-sidebar]");
     if (placeholder) placeholder.outerHTML = renderSidebar(pageId);
 
-    // H7 â€” Restore sidebar collapsed state and wire toggle
+    // H7 — Restore sidebar collapsed state and wire toggle
     var sidebarApp = document.querySelector('.app');
     if (sidebarApp) {
       if (localStorage.getItem('ss_sidebar_collapsed') === '1') {
@@ -1296,7 +1296,7 @@
     if (!document.querySelector(".proto-marker")) {
       const m = document.createElement("div");
       m.className = "proto-marker";
-      m.textContent = "Prototype Â· v1.1 Â· Phase 1";
+      m.textContent = "Prototype · v1.1 · Phase 1";
       document.body.appendChild(m);
     }
 
@@ -1347,7 +1347,7 @@
 
     // GLOBAL CLICK DELEGATION
     document.addEventListener("click", e => {
-      // 1. Chip Ã— removal
+      // 1. Chip × removal
       if (e.target.classList && e.target.classList.contains("chip-x")) {
         const chip = e.target.closest(".chip");
         if (chip) {
@@ -1358,7 +1358,7 @@
         return;
       }
 
-      // 2. Search trigger â€” must come before the <a> skip
+      // 2. Search trigger — must come before the <a> skip
       if (e.target.closest("[data-action='open-search']")) {
         e.preventDefault();
         if (openGlobalSearch) openGlobalSearch();
@@ -1373,12 +1373,12 @@
       const btn = e.target.closest("button");
       if (!btn) return;
 
-      // If the button has an inline onclick handler, let it run alone â€” do not add a toast on top.
+      // If the button has an inline onclick handler, let it run alone — do not add a toast on top.
       if (btn.hasAttribute("onclick")) return;
 
-      // Skip system buttons (icon-btn Â° "?", close X buttons, etc.) if no meaningful text
+      // Skip system buttons (icon-btn ° "?", close X buttons, etc.) if no meaningful text
       const text = normaliseText(btn.textContent || "");
-      if (!text || text === "?" || text === "â—‹" || text === "Ã—") return;
+      if (!text || text === "?" || text === "○" || text === "×") return;
 
       // Skip tab buttons (already wired) and toggles
       if (btn.classList.contains("record-tab")) return;
@@ -1412,7 +1412,7 @@
         return;
       }
 
-      // 7. Generic fallback for any other button â€” visible feedback so nothing feels dead
+      // 7. Generic fallback for any other button — visible feedback so nothing feels dead
       if (btn.type !== "submit" && !btn.disabled) {
         // Skip buttons that are explicitly "checkboxes" or part of a form via parent
         const label = btn.textContent.trim();
@@ -1447,7 +1447,7 @@
   window.SS_toast = toast;
 })();
 // ============================================================
-// GAP-FIX ADDITIONS â€” appended for Critical + Important resolutions
+// GAP-FIX ADDITIONS — appended for Critical + Important resolutions
 // Wrapped in its own IIFE; the original chrome.js exposes
 // `window.SS = { toast, openSlide, closeSlide }` via a tiny shim
 // added just before this block.
@@ -1478,7 +1478,7 @@
       const t = document.createElement("div");
       t.className = "toast show";
       const sub = (opts && opts.sub) ? `<div class="toast-sub">${opts.sub}</div>` : "";
-      t.innerHTML = `<div class="toast-body"><div class="toast-msg">${msg}</div>${sub}</div><button class="toast-x">Ã—</button>`;
+      t.innerHTML = `<div class="toast-body"><div class="toast-msg">${msg}</div>${sub}</div><button class="toast-x">×</button>`;
       stack.appendChild(t);
       setTimeout(() => {
         t.classList.add("dismissing");
@@ -1490,12 +1490,12 @@
   }
 
   // ============================================================
-  // ROLES (D1, A2) â€” defines roles and the "View as" switcher
+  // ROLES (D1, A2) — defines roles and the "View as" switcher
   // ============================================================
   const ROLES = {
-    WA: { name: "Workspace Admin", desc: "Tenant owner â€” billing, SSO, audit, residency" },
-    SR: { name: "Sales Rep", desc: "Daily-driver IC â€” owns contacts, deals, activities" },
-    SM: { name: "Sales Manager", desc: "Team lead â€” pipeline review, forecast, coaching" },
+    WA: { name: "Workspace Admin", desc: "Tenant owner — billing, SSO, audit, residency" },
+    SR: { name: "Sales Rep", desc: "Daily-driver IC — owns contacts, deals, activities" },
+    SM: { name: "Sales Manager", desc: "Team lead — pipeline review, forecast, coaching" },
     RO: { name: "RevOps Lead", desc: "Schema, pipelines, selling rules, data hygiene" },
     JR: { name: "Junior Rep", desc: "Restricted: cannot see deals where amount > $100k" },
   };
@@ -1505,10 +1505,10 @@
   }
 
   function setRole(role) {
-    // F9 â€” Last-admin guard: warn when the sole WA would be demoted
+    // F9 — Last-admin guard: warn when the sole WA would be demoted
     if (getRole() === "WA" && role !== "WA") {
       toast("Last-admin guard triggered", {
-        sub: "No other Workspace Admin exists â€” production blocks this. Demo allows view-only switch.",
+        sub: "No other Workspace Admin exists — production blocks this. Demo allows view-only switch.",
         duration: 5000,
       });
     }
@@ -1569,7 +1569,7 @@
     menu.className = "role-switcher-menu";
     menu.innerHTML = Object.entries(ROLES).map(([code, r]) => `
       <button class="role-option ${code === role ? 'active' : ''}" data-role-set="${code}">
-        <div class="role-code">${code} Â· ${code === role ? 'current' : 'switch to'}</div>
+        <div class="role-code">${code} · ${code === role ? 'current' : 'switch to'}</div>
         <div class="role-name">${r.name}</div>
         <div class="role-desc">${r.desc}</div>
       </button>
@@ -1626,12 +1626,12 @@
     banner.innerHTML = `
       <span class="badge solid">SMART FILTER</span>
       <strong>${filterLabels[filter] || filter}</strong>
-      <span class="text-muted">applied Â· showing matching results</span>
+      <span class="text-muted">applied · showing matching results</span>
       <a href="${window.location.pathname}" style="margin-left:auto; font-size:12px;">Clear filter</a>
     `;
     pageHeader.after(banner);
 
-    // F10 â€” Persistent active-filter indicator in the filter row
+    // F10 — Persistent active-filter indicator in the filter row
     var filterRow = document.querySelector(".row.mb-4");
     if (filterRow && !filterRow.querySelector(".active-filter-chip")) {
       var addBtn = Array.prototype.find.call(
@@ -1643,7 +1643,7 @@
       chip.className = "chip active-filter-chip";
       chip.style.cssText = "background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;gap:6px;";
       chip.innerHTML = (filterLabels[filter] || filter) +
-        ' <a href="' + window.location.pathname + '" aria-label="Remove filter" style="color:var(--paper);text-decoration:none;font-weight:700;font-size:12px;">Ã—</a>';
+        ' <a href="' + window.location.pathname + '" aria-label="Remove filter" style="color:var(--paper);text-decoration:none;font-weight:700;font-size:12px;">×</a>';
       var clearBtn = document.createElement("a");
       clearBtn.href = window.location.pathname;
       clearBtn.className = "btn sm";
@@ -1654,7 +1654,7 @@
   }
 
   // ============================================================
-  // CONFIRMATION MODAL (G1, G2, G3, G4) â€” typed/checkbox confirms
+  // CONFIRMATION MODAL (G1, G2, G3, G4) — typed/checkbox confirms
   // ============================================================
   function confirmDanger(opts) {
     const overlay = document.createElement("div");
@@ -1721,28 +1721,28 @@
       </div>
       <div class="drawer-body">
         <div class="notif-item unread">
-          <div class="notif-meta">2 min ago Â· DEAL</div>
-          <div class="notif-title">Acme â€” Annual License moved to Proposal</div>
+          <div class="notif-meta">2 min ago · DEAL</div>
+          <div class="notif-title">Acme — Annual License moved to Proposal</div>
           <div class="notif-body">Mayur S. updated the stage</div>
         </div>
         <div class="notif-item unread">
-          <div class="notif-meta">15 min ago Â· ROTTING</div>
-          <div class="notif-title">Northwind â€” Multi-year flagged as stalled</div>
+          <div class="notif-meta">15 min ago · ROTTING</div>
+          <div class="notif-title">Northwind — Multi-year flagged as stalled</div>
           <div class="notif-body">27 days in Proposal without activity</div>
         </div>
         <div class="notif-item unread">
-          <div class="notif-meta">1 hr ago Â· BILLING</div>
+          <div class="notif-meta">1 hr ago · BILLING</div>
           <div class="notif-title">Seat usage at 95%</div>
-          <div class="notif-body">38 of 40 seats used Â· auto-alert from F9.4</div>
+          <div class="notif-body">38 of 40 seats used · auto-alert from F9.4</div>
         </div>
         <div class="notif-item">
-          <div class="notif-meta">3 hr ago Â· MENTION</div>
+          <div class="notif-meta">3 hr ago · MENTION</div>
           <div class="notif-title">Sarah K. mentioned you in a note</div>
           <div class="notif-body">"@mayur please send security PDF before next call"</div>
         </div>
         <div class="notif-item">
-          <div class="notif-meta">Yesterday Â· SCHEMA</div>
-          <div class="notif-title">Schema v2 â†’ v3 published</div>
+          <div class="notif-meta">Yesterday · SCHEMA</div>
+          <div class="notif-title">Schema v2 → v3 published</div>
           <div class="notif-body">2 fields added to Deal object</div>
         </div>
       </div>
@@ -1762,21 +1762,21 @@
     drawer.innerHTML = `
       <div class="drawer-head">
         <h3>Keyboard shortcuts</h3>
-        <button class="btn sm" onclick="window.open('https://docs.smartsense.io', '_blank')">Docs â†—</button>
+        <button class="btn sm" onclick="window.open('https://docs.smartsense.io', '_blank')">Docs ↗</button>
       </div>
       <div class="drawer-body">
         <div style="padding: 14px;">
           <div class="label mb-2">Navigation</div>
           <table style="width:100%; font-size:12px; margin-bottom:16px;">
-            <tr><td>Global search</td><td style="text-align:right;"><span class="kbd">âŒ˜</span> <span class="kbd">K</span></td></tr>
+            <tr><td>Global search</td><td style="text-align:right;"><span class="kbd">⌘</span> <span class="kbd">K</span></td></tr>
             <tr><td>Go to Deals</td><td style="text-align:right;"><span class="kbd">G</span> <span class="kbd">D</span></td></tr>
             <tr><td>Go to Contacts</td><td style="text-align:right;"><span class="kbd">G</span> <span class="kbd">C</span></td></tr>
             <tr><td>Go to My Day</td><td style="text-align:right;"><span class="kbd">G</span> <span class="kbd">H</span></td></tr>
           </table>
           <div class="label mb-2">Actions</div>
           <table style="width:100%; font-size:12px; margin-bottom:16px;">
-            <tr><td>New record</td><td style="text-align:right;"><span class="kbd">âŒ˜</span> <span class="kbd">N</span></td></tr>
-            <tr><td>Save current</td><td style="text-align:right;"><span class="kbd">âŒ˜</span> <span class="kbd">S</span></td></tr>
+            <tr><td>New record</td><td style="text-align:right;"><span class="kbd">⌘</span> <span class="kbd">N</span></td></tr>
+            <tr><td>Save current</td><td style="text-align:right;"><span class="kbd">⌘</span> <span class="kbd">S</span></td></tr>
             <tr><td>Close panel</td><td style="text-align:right;"><span class="kbd">Esc</span></td></tr>
             <tr><td>Show this help</td><td style="text-align:right;"><span class="kbd">?</span></td></tr>
           </table>
@@ -1836,11 +1836,11 @@
       } else if (a === "help") {
         document.getElementById("help-drawer")?.classList.add("open");
       } else if (a === "invite") {
-        SS.toast("Invite slide-over", { sub: "Stub for prototype Â· would open invite form" });
+        SS.toast("Invite slide-over", { sub: "Stub for prototype · would open invite form" });
       } else if (a === "profile") {
         SS.toast("Profile", { sub: "User preferences (Phase 2 build)" });
       } else if (a === "theme") {
-        SS.toast("Theme", { sub: "Light / dark Â· Phase 2" });
+        SS.toast("Theme", { sub: "Light / dark · Phase 2" });
       }
     });
     document.addEventListener("click", e => {
@@ -1882,7 +1882,7 @@
       }
     });
 
-    // 2. Mark Won â†’ reveals a "won banner" + moves card (A4, G14)
+    // 2. Mark Won → reveals a "won banner" + moves card (A4, G14)
     window.SS_markDealWon = function () {
       const detailHeader = document.querySelector(".page-header");
       if (!detailHeader) return;
@@ -1890,10 +1890,10 @@
       const banner = document.createElement("div");
       banner.className = "won-banner";
       banner.innerHTML = `
-        <div class="won-icon">â˜…</div>
+        <div class="won-icon">★</div>
         <div class="won-text">
-          <div class="won-title">Deal closed Won â€” $48,000 booked</div>
-          <div class="won-sub">Customer Success notified Â· Onboarding workflow available</div>
+          <div class="won-title">Deal closed Won — $48,000 booked</div>
+          <div class="won-sub">Customer Success notified · Onboarding workflow available</div>
         </div>
         <div class="won-actions">
           <button class="btn ghost">Trigger onboarding</button>
@@ -1905,12 +1905,12 @@
       const kpis = document.querySelectorAll(".kpi");
       if (kpis[2]) {
         kpis[2].querySelector(".kpi-value").textContent = "Closed";
-        kpis[2].querySelector(".kpi-delta").textContent = "Today Â· 26 May";
+        kpis[2].querySelector(".kpi-delta").textContent = "Today · 26 May";
       }
       // Hide the action buttons for an open deal
       document.querySelectorAll(".topbar-actions .btn, .page-header .btn").forEach(btn => {
         const t = (btn.textContent || "").trim();
-        if (t === "Mark Won" || t === "Stage: Proposal â–¾") btn.style.display = "none";
+        if (t === "Mark Won" || t === "Stage: Proposal ▾") btn.style.display = "none";
       });
     };
   }
@@ -1975,7 +1975,7 @@
               },
             });
           } else {
-            SS.toast(`${label} Â· ${count} item${count !== 1 ? "s" : ""}`, { sub: "Bulk action applied" });
+            SS.toast(`${label} · ${count} item${count !== 1 ? "s" : ""}`, { sub: "Bulk action applied" });
           }
         });
       });
@@ -1996,15 +1996,15 @@
         e.preventDefault();
         e.stopImmediatePropagation();
         confirmDanger({
-          eyebrow: "Dedup Â· Bulk merge",
+          eyebrow: "Dedup · Bulk merge",
           title: "Merge 38 high-confidence clusters?",
           body: "This will merge 38 duplicate clusters covering 84 contact records. Activities and references will be combined into the highest-activity record in each cluster.",
-          callout: "Reversible for 30 days via Audit Log Â· F9.3",
+          callout: "Reversible for 30 days via Audit Log · F9.3",
           checkboxes: ["I've reviewed at least one cluster manually and trust the high-confidence threshold"],
           confirmLabel: "Merge 38 clusters",
           onConfirm: () => {
-            SS.toast("Bulk-merge running", { sub: "~30 seconds Â· audit-logged" });
-            setTimeout(() => SS.toast("38 clusters merged", { sub: "84 â†’ 38 records Â· undo available 30d", duration: 5000 }), 1500);
+            SS.toast("Bulk-merge running", { sub: "~30 seconds · audit-logged" });
+            setTimeout(() => SS.toast("38 clusters merged", { sub: "84 → 38 records · undo available 30d", duration: 5000 }), 1500);
           },
         });
       }
@@ -2014,7 +2014,7 @@
         e.preventDefault();
         e.stopImmediatePropagation();
         confirmDanger({
-          eyebrow: "Workspace deletion Â· IRREVERSIBLE",
+          eyebrow: "Workspace deletion · IRREVERSIBLE",
           title: "Delete the SmartSense workspace?",
           body: "This permanently deletes the workspace, including all records, activities, audit logs, and user accounts. A final ZIP export will be emailed to admins. Soft-delete window: 30 days.",
           callout: "All 38 users will lose access immediately on confirmation.",
@@ -2026,7 +2026,7 @@
           ],
           confirmLabel: "Request deletion",
           onConfirm: () => {
-            SS.toast("Workspace deletion requested", { sub: "30-day soft-delete window Â· admins emailed", duration: 6000 });
+            SS.toast("Workspace deletion requested", { sub: "30-day soft-delete window · admins emailed", duration: 6000 });
           },
         });
       }
@@ -2036,7 +2036,7 @@
         e.preventDefault();
         e.stopImmediatePropagation();
         confirmDanger({
-          eyebrow: "Authentication Â· Enforce SSO",
+          eyebrow: "Authentication · Enforce SSO",
           title: "Enable and enforce SSO for all non-admins?",
           body: "Once enforced, password login is disabled for all users except Workspace Admins. If the IdP is misconfigured or goes down, your team will be locked out until either the IdP is fixed or an admin disables enforcement.",
           callout: "Recommended: click \"Test SSO flow\" first and verify with a teammate before enforcing.",
@@ -2081,7 +2081,7 @@
         if (!banner) {
           banner = document.createElement("div");
           banner.className = "slide-error-banner show";
-          banner.innerHTML = `<div class="err-title">Couldn't save â€” 1 field needs attention</div><div class="err-detail">Required fields are marked with *. Fix the highlighted field below and try again.</div>`;
+          banner.innerHTML = `<div class="err-title">Couldn't save — 1 field needs attention</div><div class="err-detail">Required fields are marked with *. Fix the highlighted field below and try again.</div>`;
           slide.querySelector(".slide-body").prepend(banner);
         } else {
           banner.classList.add("show");
@@ -2098,7 +2098,7 @@
   }
 
   // ============================================================
-  // INDICATOR ICON BUTTONS (G11) â€” notification + help triggers
+  // INDICATOR ICON BUTTONS (G11) — notification + help triggers
   // ============================================================
   function wireTopbarIcons() {
     const icons = document.querySelectorAll(".topbar-actions .icon-btn");
@@ -2121,9 +2121,9 @@
             }
           }
         });
-        // unread count badge â€” min-width prevents 2-digit overlap (G17)
+        // unread count badge — min-width prevents 2-digit overlap (G17)
         var unreadCount = document.querySelectorAll('.notif-item.unread').length || 3;
-        icon.innerHTML = '<span style="position:relative;display:inline-flex;align-items:center;justify-content:center;">â—‹' +
+        icon.innerHTML = '<span style="position:relative;display:inline-flex;align-items:center;justify-content:center;">○' +
           '<span id="notif-badge" style="position:absolute;top:-6px;right:-14px;min-width:16px;height:16px;padding:0 4px;background:var(--ink);color:var(--paper);border-radius:8px;font-size:9px;font-family:var(--mono);font-weight:500;display:flex;align-items:center;justify-content:center;line-height:1;">' +
           unreadCount + '</span></span>';
       }
@@ -2208,7 +2208,7 @@
     var input = document.createElement("input");
     input.type = "search";
     input.className = "btn sm table-search";
-    input.placeholder = "Searchâ€¦";
+    input.placeholder = "Search…";
     input.style.cssText = "padding:4px 10px;font-size:11px;width:180px;cursor:text;";
     filterRow.appendChild(input);
     var emptyRow = null;
@@ -2227,7 +2227,7 @@
         emptyRow = document.createElement("tr");
         emptyRow.className = "empty-search-row no-hover";
         var cols = rows[0] ? rows[0].querySelectorAll("td,th").length : 6;
-        emptyRow.innerHTML = "<td colspan=\"" + cols + "\" style=\"text-align:center;padding:48px 24px;color:var(--ink-30);font-size:13px;\">No records match â€œ<strong style='color:var(--ink);'></strong>â€ â€” try a different term.</td>";
+        emptyRow.innerHTML = "<td colspan=\"" + cols + "\" style=\"text-align:center;padding:48px 24px;color:var(--ink-30);font-size:13px;\">No records match “<strong style='color:var(--ink);'></strong>” — try a different term.</td>";
         tbody.appendChild(emptyRow);
       }
       var strong = emptyRow.querySelector("strong");
@@ -2244,7 +2244,7 @@
     var pageId = document.body.getAttribute("data-page") || "";
     var pathname = window.location.pathname;
 
-    // F12 â€” Save scroll before leaving a list; restore on return
+    // F12 — Save scroll before leaving a list; restore on return
     var listPages = ["contacts", "companies", "deals", "tasks", "activities"];
     if (listPages.indexOf(pageId) !== -1 && !isDetail) {
       var saved = sessionStorage.getItem("scroll:" + pathname);
@@ -2258,7 +2258,7 @@
       }, true);
     }
 
-    // F11 â€” Smart back button: history.back() or fall back to parent list
+    // F11 — Smart back button: history.back() or fall back to parent list
     if (!isDetail) return;
     var topbarActions = document.querySelector(".topbar-actions");
     if (!topbarActions) return;
@@ -2266,7 +2266,7 @@
     var parentHref = parentAnchor ? parentAnchor.getAttribute("href") : "index.html";
     var backBtn = document.createElement("button");
     backBtn.className = "btn sm ghost";
-    backBtn.textContent = "â† Back";
+    backBtn.textContent = "← Back";
     backBtn.addEventListener("click", function () {
       if (window.history.length > 1 && document.referrer && document.referrer.indexOf("detail") === -1) {
         window.history.back();
@@ -2301,7 +2301,7 @@
   });
 
   // ============================================================
-  // GLOBAL SEARCH â€” inline sidebar input + fixed dropdown
+  // GLOBAL SEARCH — inline sidebar input + fixed dropdown
   // ============================================================
   var openGlobalSearch = null;
 
@@ -2309,7 +2309,6 @@
     var searchInput = document.getElementById("sidebar-search-input");
     if (!searchInput) return;
 
-    // Dropdown appended to <body> so it escapes sidebar overflow clipping
     var dropdown = document.createElement("div");
     dropdown.id = "sidebar-search-dropdown";
     dropdown.className = "sidebar-search-dropdown";
@@ -2322,21 +2321,18 @@
     function esc(s) {
       return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
-
     function fmtDate(iso) {
       if (!iso) return "";
       var p = iso.slice(0, 10).split("-");
       var d = parseInt(p[2], 10);
       return (d < 10 ? "0" + d : "" + d) + " " + MONTHS[parseInt(p[1], 10) - 1] + " " + p[0];
     }
-
     function positionDropdown() {
       var rect = searchInput.getBoundingClientRect();
       dropdown.style.top  = (rect.bottom + 4) + "px";
       dropdown.style.left = rect.left + "px";
       dropdown.style.width = Math.max(rect.width, 260) + "px";
     }
-
     function showDropdown() { positionDropdown(); dropdown.style.display = "block"; }
     function hideDropdown() { dropdown.style.display = "none"; selectedIdx = -1; }
 
@@ -2368,7 +2364,7 @@
       if (!term) { hideDropdown(); return; }
       if (!cache) {
         showDropdown();
-        dropdown.innerHTML = '<div class="search-loading">Loadingâ€¦</div>';
+        dropdown.innerHTML = '<div class="search-loading">Loading…</div>';
         warmCache();
         return;
       }
@@ -2387,7 +2383,7 @@
 
       if (!contacts.length && !companies.length && !deals.length && !tasks.length) {
         showDropdown();
-        dropdown.innerHTML = '<div class="search-empty">No results for â€œ<strong>' + esc(term) + '</strong>â€</div>';
+        dropdown.innerHTML = '<div class="search-empty">No results for &ldquo;<strong>' + esc(term) + '</strong>&rdquo;</div>';
         return;
       }
       var html = "";
@@ -2395,9 +2391,9 @@
         html += '<div class="search-group"><div class="search-group-label">Contacts</div>';
         contacts.forEach(function (c) {
           var name = esc(((c.firstName || "") + " " + (c.lastName || "")).trim());
-          var meta = [c.title, c.company && c.company.name].filter(Boolean).map(esc).join(" Â· ");
+          var meta = [c.title, c.company && c.company.name].filter(Boolean).map(esc).join(" · ");
           html += '<a class="search-item" href="contact-detail.html?id=' + esc(c.id) + '">' +
-            '<span class="search-item-icon">â—‹</span>' +
+            '<span class="search-item-icon">○</span>' +
             '<div class="search-item-text"><strong>' + name + '</strong>' +
             (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') + '</div></a>';
         });
@@ -2406,9 +2402,9 @@
       if (companies.length) {
         html += '<div class="search-group"><div class="search-group-label">Companies</div>';
         companies.forEach(function (c) {
-          var meta = [c.industry, c._count ? c._count.contacts + " contacts" : ""].filter(Boolean).map(esc).join(" Â· ");
+          var meta = [c.industry, c._count ? c._count.contacts + " contacts" : ""].filter(Boolean).map(esc).join(" · ");
           html += '<a class="search-item" href="company-detail.html?id=' + esc(c.id) + '">' +
-            '<span class="search-item-icon">â–¡</span>' +
+            '<span class="search-item-icon">□</span>' +
             '<div class="search-item-text"><strong>' + esc(c.name) + '</strong>' +
             (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') + '</div></a>';
         });
@@ -2417,9 +2413,9 @@
       if (deals.length) {
         html += '<div class="search-group"><div class="search-group-label">Deals</div>';
         deals.forEach(function (d) {
-          var meta = esc("$" + Number(d.amount || 0).toLocaleString("en-US") + " Â· " + (d.stage || ""));
+          var meta = esc("$" + Number(d.amount || 0).toLocaleString("en-US") + " · " + (d.stage || ""));
           html += '<a class="search-item" href="deal-detail.html?id=' + esc(d.id) + '">' +
-            '<span class="search-item-icon">â—‡</span>' +
+            '<span class="search-item-icon">◇</span>' +
             '<div class="search-item-text"><strong>' + esc(d.name) + '</strong>' +
             '<span class="search-item-meta">' + meta + '</span></div></a>';
         });
@@ -2429,9 +2425,9 @@
         html += '<div class="search-group"><div class="search-group-label">Tasks</div>';
         tasks.forEach(function (t) {
           var meta = [(t.priority || "").toUpperCase(), t.dueAt ? "Due " + fmtDate(t.dueAt) : ""]
-            .filter(Boolean).map(esc).join(" Â· ");
+            .filter(Boolean).map(esc).join(" · ");
           html += '<a class="search-item" href="tasks.html">' +
-            '<span class="search-item-icon">âœ“</span>' +
+            '<span class="search-item-icon">✓</span>' +
             '<div class="search-item-text"><strong>' + esc(t.title || "") + '</strong>' +
             (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') + '</div></a>';
         });
@@ -2450,7 +2446,6 @@
       if (items[selectedIdx]) items[selectedIdx].scrollIntoView({ block: "nearest" });
     }
 
-    // Input events
     searchInput.addEventListener("input", function () { renderResults(searchInput.value.trim()); });
     searchInput.addEventListener("focus", function () { warmCache(); if (searchInput.value.trim()) renderResults(searchInput.value.trim()); });
     searchInput.addEventListener("keydown", function (e) {
@@ -2467,12 +2462,10 @@
       }
     });
 
-    // Close dropdown when clicking outside the input or dropdown
     document.addEventListener("click", function (e) {
       if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) hideDropdown();
     });
 
-    // âŒ˜K / Ctrl+K focuses the sidebar input
     document.addEventListener("keydown", function (e) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -2481,14 +2474,227 @@
       }
     });
 
-    // openGlobalSearch just focuses the input
     openGlobalSearch = function () { searchInput.focus(); searchInput.select(); };
+    setTimeout(warmCache, 2000);
+    overlay.innerHTML =
+      '<div class="search-dialog">' +
+        '<div class="search-input-wrap">' +
+          '<span class="search-icon">⌕</span>' +
+          '<input type="text" id="global-search-input" placeholder="Search contacts, companies, deals, tasks…" autocomplete="off" spellcheck="false" />' +
+          '<span class="search-kbd">ESC</span>' +
+        '</div>' +
+        '<div id="search-results" class="search-results">' +
+          '<div class="search-empty">Start typing to search…</div>' +
+        '</div>' +
+        '<div class="search-footer">' +
+          '<span>↑↓ navigate</span>' +
+          '<span>↵ open</span>' +
+          '<span>ESC close</span>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
 
-    // Pre-warm cache 2 s after page load
+    var input = overlay.querySelector("#global-search-input");
+    var resultsEl = overlay.querySelector("#search-results");
+    var cache = null;
+    var selectedIdx = -1;
+    var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    function esc(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return "";
+      var p = iso.slice(0, 10).split("-");
+      var d = parseInt(p[2], 10);
+      return (d < 10 ? "0" + d : "" + d) + " " + MONTHS[parseInt(p[1], 10) - 1] + " " + p[0];
+    }
+
+    function warmCache() {
+      if (cache || !window.SS_API) return;
+      Promise.all([
+        window.SS_API.Contacts.list().catch(function () { return { contacts: [] }; }),
+        window.SS_API.Companies.list().catch(function () { return { companies: [] }; }),
+        window.SS_API.Deals.list().catch(function () { return { deals: [] }; }),
+        window.SS_API.Tasks.list().catch(function () { return { tasks: [] }; }),
+      ]).then(function (res) {
+        cache = {
+          contacts:  (res[0] && res[0].contacts)  || [],
+          companies: (res[1] && res[1].companies) || [],
+          deals:     (res[2] && res[2].deals)     || [],
+          tasks:     (res[3] && res[3].tasks)     || [],
+        };
+        // If search is already open and user has typed, re-render with loaded data
+        if (overlay.classList.contains("open") && input.value.trim()) {
+          renderResults(input.value.trim());
+        }
+      }).catch(function () {});
+    }
+
+    function filterItems(arr, term, getText) {
+      var t = term.toLowerCase();
+      return arr.filter(function (x) { return getText(x).toLowerCase().indexOf(t) !== -1; });
+    }
+
+    function renderResults(term) {
+      if (!term) {
+        resultsEl.innerHTML = '<div class="search-empty">Start typing to search…</div>';
+        return;
+      }
+      if (!cache) {
+        resultsEl.innerHTML = '<div class="search-loading">Loading…</div>';
+        warmCache();
+        return;
+      }
+
+      var contacts = filterItems(cache.contacts, term, function (c) {
+        return (c.firstName || "") + " " + (c.lastName || "") + " " + (c.email || "") + " " + (c.title || "");
+      }).slice(0, 4);
+      var companies = filterItems(cache.companies, term, function (c) {
+        return c.name + " " + (c.industry || "") + " " + (c.domain || "");
+      }).slice(0, 3);
+      var deals = filterItems(cache.deals, term, function (d) {
+        return d.name + " " + (d.stage || "") + " " + ((d.company && d.company.name) || "");
+      }).slice(0, 3);
+      var tasks = filterItems(cache.tasks, term, function (t) {
+        return (t.title || "") + " " + (t.priority || "");
+      }).slice(0, 3);
+
+      if (!contacts.length && !companies.length && !deals.length && !tasks.length) {
+        resultsEl.innerHTML = '<div class="search-empty">No results for <strong>&ldquo;' + esc(term) + '&rdquo;</strong></div>';
+        return;
+      }
+
+      var html = "";
+      if (contacts.length) {
+        html += '<div class="search-group"><div class="search-group-label">Contacts</div>';
+        contacts.forEach(function (c) {
+          var name = esc(((c.firstName || "") + " " + (c.lastName || "")).trim());
+          var meta = [c.title, c.company && c.company.name].filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="contact-detail.html?id=' + esc(c.id) + '">' +
+            '<span class="search-item-icon">○</span>' +
+            '<div class="search-item-text"><strong>' + name + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (companies.length) {
+        html += '<div class="search-group"><div class="search-group-label">Companies</div>';
+        companies.forEach(function (c) {
+          var meta = [c.industry, c._count ? c._count.contacts + " contacts" : ""].filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="company-detail.html?id=' + esc(c.id) + '">' +
+            '<span class="search-item-icon">□</span>' +
+            '<div class="search-item-text"><strong>' + esc(c.name) + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (deals.length) {
+        html += '<div class="search-group"><div class="search-group-label">Deals</div>';
+        deals.forEach(function (d) {
+          var meta = esc("$" + Number(d.amount || 0).toLocaleString("en-US") + " · " + (d.stage || ""));
+          html += '<a class="search-item" href="deal-detail.html?id=' + esc(d.id) + '">' +
+            '<span class="search-item-icon">◇</span>' +
+            '<div class="search-item-text"><strong>' + esc(d.name) + '</strong>' +
+            '<span class="search-item-meta">' + meta + '</span>' +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      if (tasks.length) {
+        html += '<div class="search-group"><div class="search-group-label">Tasks</div>';
+        tasks.forEach(function (t) {
+          var meta = [(t.priority || "").toUpperCase(), t.dueAt ? "Due " + fmtDate(t.dueAt) : ""]
+            .filter(Boolean).map(esc).join(" · ");
+          html += '<a class="search-item" href="tasks.html">' +
+            '<span class="search-item-icon">✓</span>' +
+            '<div class="search-item-text"><strong>' + esc(t.title || "") + '</strong>' +
+            (meta ? '<span class="search-item-meta">' + meta + '</span>' : '') +
+            '</div></a>';
+        });
+        html += '</div>';
+      }
+      resultsEl.innerHTML = html;
+      selectedIdx = -1;
+    }
+
+    function highlightItem() {
+      var items = resultsEl.querySelectorAll(".search-item");
+      if (!items.length) return;
+      selectedIdx = Math.max(0, Math.min(selectedIdx, items.length - 1));
+      items.forEach(function (item, i) { item.classList.toggle("selected", i === selectedIdx); });
+      if (items[selectedIdx]) items[selectedIdx].scrollIntoView({ block: "nearest" });
+    }
+
+    function openSearch() {
+      overlay.classList.add("open");
+      warmCache();
+      setTimeout(function () { input.focus(); }, 80);
+    }
+
+    function closeSearch() {
+      overlay.classList.remove("open");
+      input.value = "";
+      resultsEl.innerHTML = '<div class="search-empty">Start typing to search…</div>';
+      selectedIdx = -1;
+    }
+
+    // Expose so the sidebar click handler can call it
+    openGlobalSearch = openSearch;
+
+    // Wire sidebar .search-trigger directly (redundant-safe: also handled in delegation)
+    var sidebarTrigger = document.querySelector("[data-action='open-search']");
+    if (sidebarTrigger) {
+      sidebarTrigger.setAttribute("tabindex", "0");
+      sidebarTrigger.addEventListener("click", function (e) {
+        e.preventDefault();
+        openSearch();
+      });
+      // Typing any printable key while the trigger is focused opens the modal and seeds it
+      sidebarTrigger.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSearch(); return; }
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          openSearch();
+          var ch = e.key;
+          setTimeout(function () {
+            input.value = ch;
+            renderResults(ch);
+          }, 60);
+        }
+      });
+    }
+
+    // Backdrop click closes
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeSearch(); });
+
+    // Input events
+    input.addEventListener("input", function () { renderResults(input.value.trim()); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { closeSearch(); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); selectedIdx++; highlightItem(); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); selectedIdx = Math.max(0, selectedIdx - 1); highlightItem(); return; }
+      if (e.key === "Enter") {
+        var items = resultsEl.querySelectorAll(".search-item");
+        if (selectedIdx >= 0 && items[selectedIdx]) { items[selectedIdx].click(); closeSearch(); }
+      }
+    });
+
+    // ⌘K / Ctrl+K global shortcut
+    document.addEventListener("keydown", function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        overlay.classList.contains("open") ? closeSearch() : openSearch();
+      }
+    });
+
+    // Pre-warm cache 2 s after page load (non-blocking, silent)
     setTimeout(warmCache, 2000);
   }
 
-  // F9 â€” Block destructive user-management actions against the sole WA
+  // F9 — Block destructive user-management actions against the sole WA
   function wireLastAdminGuard() {
     if (window.location.pathname.indexOf("settings") === -1) return;
     document.addEventListener("click", function (e) {
