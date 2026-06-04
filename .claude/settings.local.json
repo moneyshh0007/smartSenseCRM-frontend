@@ -24,7 +24,8 @@
       "Bash(Measure-Object -Line)",
       "Bash(grep -v \"node_module\\\\|//.*filter\\\\|smart-filter\")",
       "Bash(grep -iv \"//.*update\\\\|data-slide\\\\|url\\\\|field\")",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(grep -v \"//\\\\|sidebarTrigger\\\\|#global-search\")"
     ]
   }
 }
