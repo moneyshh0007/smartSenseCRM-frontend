@@ -64,26 +64,28 @@
     </div>
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th style="width: 24px;"><input type="checkbox" id="select-all-contacts" onchange="document.querySelectorAll('#contacts-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this))" /></th>
-        <th>Name</th>
-        <th>Title</th>
-        <th>Company</th>
-        <th>Created</th>
-        <th>Owner</th>
-        <th>Source</th>
-      </tr>
-    </thead>
-    <tbody id="contacts-tbody">
-      <tr>
-        <td colspan="7" style="text-align:center; padding:40px; color:var(--ink-50);">
-          Loading...
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div style="max-height: 520px; overflow-y: auto; border: var(--rule); border-radius: var(--radius);">
+    <table class="table" style="border: none; border-radius: 0;">
+      <thead>
+        <tr>
+          <th style="width: 24px; position: sticky; top: 0; z-index: 1;"><input type="checkbox" id="select-all-contacts" onchange="document.querySelectorAll('#contacts-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this))" /></th>
+          <th style="position: sticky; top: 0; z-index: 1;">Name</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Title</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Company</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Created</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Owner</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Source</th>
+        </tr>
+      </thead>
+      <tbody id="contacts-tbody">
+        <tr>
+          <td colspan="7" style="text-align:center; padding:40px; color:var(--ink-50);">
+            Loading...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="row between mt-5">
     <div class="text-mono text-muted" style="font-size: 11px;" id="contacts-footer"></div>
