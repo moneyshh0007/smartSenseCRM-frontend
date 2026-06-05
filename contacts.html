@@ -67,7 +67,7 @@
   <table class="table">
     <thead>
       <tr>
-        <th style="width: 24px;"><input type="checkbox" /></th>
+        <th style="width: 24px;"><input type="checkbox" id="select-all-contacts" onchange="document.querySelectorAll('#contacts-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this))" /></th>
         <th>Name</th>
         <th>Title</th>
         <th>Company</th>
@@ -87,10 +87,6 @@
 
   <div class="row between mt-5">
     <div class="text-mono text-muted" style="font-size: 11px;" id="contacts-footer"></div>
-    <div class="row gap-2">
-      <button class="btn sm">← Prev</button>
-      <button class="btn sm">Next →</button>
-    </div>
   </div>
 
 
