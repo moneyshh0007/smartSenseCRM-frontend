@@ -63,33 +63,31 @@
     </div>
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th style="width: 24px;"><input type="checkbox" /></th>
-        <th>Company</th>
-        <th>Industry</th>
-        <th>Size</th>
-        <th>Open deals</th>
-        <th class="num">Pipeline value</th>
-        <th>Owner</th>
-      </tr>
-    </thead>
-    <tbody id="companies-tbody">
-      <tr>
-        <td colspan="7" style="text-align:center; padding:40px; color:var(--ink-50);">
-          Loading...
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div style="max-height: 520px; overflow-y: auto; border: var(--rule); border-radius: var(--radius);">
+    <table class="table" style="border: none; border-radius: 0;">
+      <thead>
+        <tr>
+          <th style="width: 24px; position: sticky; top: 0; z-index: 1;"><input type="checkbox" id="select-all-companies" onchange="document.querySelectorAll('#companies-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this))" /></th>
+          <th style="position: sticky; top: 0; z-index: 1;">Company</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Industry</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Size</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Open deals</th>
+          <th class="num" style="position: sticky; top: 0; z-index: 1;">Pipeline value</th>
+          <th style="position: sticky; top: 0; z-index: 1;">Owner</th>
+        </tr>
+      </thead>
+      <tbody id="companies-tbody">
+        <tr>
+          <td colspan="7" style="text-align:center; padding:40px; color:var(--ink-50);">
+            Loading...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="row between mt-5">
     <div class="text-mono text-muted" style="font-size: 11px;" id="companies-footer"></div>
-    <div class="row gap-2">
-      <button class="btn sm">← Prev</button>
-      <button class="btn sm">Next →</button>
-    </div>
   </div>
 
 
