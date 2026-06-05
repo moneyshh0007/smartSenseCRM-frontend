@@ -168,8 +168,10 @@ button { font-family: inherit; cursor: pointer; }
 .toggle.on::after { left: 16px; }
 
 /* Kanban */
-.kanban { display: grid; grid-template-columns: repeat(5, minmax(260px, 1fr)); gap: var(--space-4); overflow-x: auto; padding-bottom: var(--space-5); }
-.kanban-col { border: var(--rule); border-radius: var(--radius); background: var(--paper-warm); padding: var(--space-3); min-height: 400px; }
+.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 1fr); gap: var(--space-4); overflow-x: auto; padding-bottom: var(--space-5); }
+.kanban-col { border: var(--rule); border-radius: var(--radius); background: var(--paper-warm); padding: var(--space-3); min-height: 400px; transition: background 120ms, outline 120ms; }
+.kanban-col.drag-over { background: var(--ink-05); outline: 2px dashed var(--ink-30); }
+.kanban-card.dragging { opacity: 0.35; cursor: grabbing; }
 .kanban-col-head { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 6px; margin-bottom: var(--space-3); border-bottom: var(--rule-thin); padding-bottom: 10px; }
 .kanban-col-title { font-weight: 600; font-size: 12px; letter-spacing: -0.005em; }
 .kanban-col-count { font-family: var(--mono); font-size: 11px; color: var(--ink-50); }

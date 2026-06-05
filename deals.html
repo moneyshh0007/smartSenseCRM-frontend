@@ -141,6 +141,65 @@
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
+    var _draggedCard = null;
+
+    function refreshColState(col) {
+      var cards = col.querySelectorAll('.kanban-card');
+      var count = cards.length;
+      var meta = col.querySelector('.kanban-col-meta');
+      var countEl = col.querySelector('.kanban-col-count');
+      if (meta) meta.textContent = count + ' deals';
+      if (countEl) countEl.textContent = count;
+      var empty = col.querySelector('.kanban-empty');
+      if (count === 0 && !empty) {
+        var emptyEl = document.createElement('div');
+        emptyEl.className = 'kanban-empty';
+        emptyEl.style.cssText = 'padding:16px;color:var(--ink-30);font-size:12px;text-align:center;';
+        emptyEl.textContent = 'No deals';
+        col.appendChild(emptyEl);
+      } else if (count > 0 && empty) {
+        empty.remove();
+      }
+    }
+
+    function wireKanbanDragDrop() {
+      document.querySelectorAll('.kanban-card').forEach(function(card) {
+        card.setAttribute('draggable', 'true');
+        card.addEventListener('dragstart', function(e) {
+          _draggedCard = card;
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(function() { card.classList.add('dragging'); }, 0);
+        });
+        card.addEventListener('dragend', function() {
+          card.classList.remove('dragging');
+          _draggedCard = null;
+          document.querySelectorAll('.kanban-col').forEach(function(c) { c.classList.remove('drag-over'); });
+        });
+      });
+
+      document.querySelectorAll('.kanban-col').forEach(function(col) {
+        col.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', function(e) {
+          if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+        });
+        col.addEventListener('drop', function(e) {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          if (!_draggedCard || _draggedCard.parentElement === col) return;
+          var oldCol = _draggedCard.parentElement;
+          var emptyInCol = col.querySelector('.kanban-empty');
+          if (emptyInCol) col.insertBefore(_draggedCard, emptyInCol);
+          else col.appendChild(_draggedCard);
+          refreshColState(oldCol);
+          refreshColState(col);
+        });
+      });
+    }
+
     async function loadDeals() {
       try {
         const data = await SS_API.Deals.list();
@@ -207,11 +266,14 @@
           // Empty state
           if (deals.length === 0) {
             var empty = document.createElement("div");
+            empty.className = "kanban-empty";
             empty.style.cssText = "padding:16px; color:var(--ink-30); font-size:12px; text-align:center;";
             empty.textContent = "No deals";
             col.appendChild(empty);
           }
         });
+
+        wireKanbanDragDrop();
 
       } catch (err) {
         console.error("Failed to load deals:", err);
