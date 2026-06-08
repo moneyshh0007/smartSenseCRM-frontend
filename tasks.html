@@ -107,7 +107,6 @@
       count.textContent = ids.length + " selected";
       toolbar.classList.toggle("show", ids.length > 0);
 
-      // Reflect indeterminate / checked state on the header checkbox
       if (allCb) {
         allCb.indeterminate = ids.length > 0 && ids.length < total;
         allCb.checked       = total > 0 && ids.length === total;
@@ -155,14 +154,15 @@
       if (!ids.length) return;
       if (!confirm("Delete " + ids.length + " task" + (ids.length !== 1 ? "s" : "") + "? This cannot be undone.")) return;
 
-      // allSettled — attempt every delete independently so one failure never blocks the others
       var results = await Promise.allSettled(
         ids.map(function(id) { return SS_API.Tasks.delete(id); })
       );
 
-      var failed = results.filter(function(r) { return r.status === "rejected"; });
+      // null response = successful 204 No Content, not a failure
+      var failed = results.filter(function(r) {
+        return r.status === "rejected" && r.reason != null;
+      });
 
-      // Always clear selection and reload regardless of partial failures
       clearSelection();
       await loadTasks();
 
