@@ -48,8 +48,11 @@ async function apiFetch(path, options = {}) {
     return;
   }
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "API error");
+  // Some endpoints (e.g. DELETE) return 204 No Content — don't attempt JSON parse
+  const contentType = res.headers.get("content-type") || "";
+  const hasBody = res.status !== 204 && contentType.includes("application/json");
+  const data = hasBody ? await res.json() : null;
+  if (!res.ok) throw new Error((data && data.error) || `API error ${res.status}`);
   return data;
 }
 
