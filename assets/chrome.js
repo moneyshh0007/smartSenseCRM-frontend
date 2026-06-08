@@ -781,39 +781,119 @@
       },
     }),
 
-    "new-pipeline": () => ({
-      eyebrow: "M2 · F2.1 · New Pipeline",
-      title: "Add a new pipeline",
-      body: `
-        <div class="field"><label>Pipeline name</label><input type="text" placeholder="Channel Partner Deals" /></div>
-        <div class="field"><label>Description</label><input type="text" placeholder="Used for indirect deals through resellers" /></div>
-        <h4>Stages (drag to reorder)</h4>
-        <div class="field-row">
-          <div class="field" style="flex: 3;"><label>Stage name</label><input type="text" value="Identified" /></div>
-          <div class="field" style="flex: 1;"><label>Probability</label><input type="text" value="10%" /></div>
-        </div>
-        <div class="field-row">
-          <div class="field" style="flex: 3;"><input type="text" value="Qualified" /></div>
-          <div class="field" style="flex: 1;"><input type="text" value="30%" /></div>
-        </div>
-        <div class="field-row">
-          <div class="field" style="flex: 3;"><input type="text" value="Co-sell" /></div>
-          <div class="field" style="flex: 1;"><input type="text" value="60%" /></div>
-        </div>
-        <div class="field-row">
-          <div class="field" style="flex: 3;"><input type="text" value="Signed" /></div>
-          <div class="field" style="flex: 1;"><input type="text" value="85%" /></div>
-        </div>
-        <button class="btn sm">+ Add stage</button>
-        <h4>Visibility</h4>
-        <div class="field"><label>Visible to roles</label>
-          <select><option>All roles</option><option>Channel team only</option><option>Custom...</option></select>
-        </div>
-      `,
-      primaryLabel: "Create pipeline",
-      note: "RBAC respects visibility · F9.1",
-      onSave: () => toast("Pipeline created", { sub: "Visible to assigned roles" }),
-    }),
+    "new-pipeline": () => {
+      window.__npAddStage = function() {
+        var container = document.getElementById('np-stages');
+        if (!container) return;
+        var idx = container.querySelectorAll('.np-stage-row').length + 1;
+        var row = document.createElement('div');
+        row.className = 'field-row np-stage-row';
+        row.style.alignItems = 'flex-end';
+        row.innerHTML =
+          '<div class="field" style="flex:3;"><input type="text" placeholder="Stage ' + idx + '" /></div>' +
+          '<div class="field" style="flex:1;"><input type="text" placeholder="0%" /></div>' +
+          '<button type="button" class="btn sm" style="margin-bottom:4px;" ' +
+            'onclick="this.closest(\'.np-stage-row\').remove()">×</button>';
+        container.appendChild(row);
+      };
+
+      return {
+        eyebrow: "M2 · F2.1 · New Pipeline",
+        title: "Add a new pipeline",
+        body:
+          '<div class="field"><label>Pipeline name<span class="field-required-marker">*</span></label>' +
+            '<input id="np-name" type="text" placeholder="Channel Partner Deals" /></div>' +
+          '<div class="field"><label>Description</label>' +
+            '<input id="np-desc" type="text" placeholder="Used for indirect deals through resellers" /></div>' +
+          '<h4 style="margin:12px 0 8px;">Stages</h4>' +
+          '<div id="np-stages">' +
+            '<div class="field-row np-stage-row">' +
+              '<div class="field" style="flex:3;"><label>Stage name</label><input type="text" value="Identified" /></div>' +
+              '<div class="field" style="flex:1;"><label>Win %</label><input type="text" value="10%" /></div>' +
+            '</div>' +
+            '<div class="field-row np-stage-row">' +
+              '<div class="field" style="flex:3;"><input type="text" value="Qualified" /></div>' +
+              '<div class="field" style="flex:1;"><input type="text" value="30%" /></div>' +
+            '</div>' +
+            '<div class="field-row np-stage-row">' +
+              '<div class="field" style="flex:3;"><input type="text" value="Co-sell" /></div>' +
+              '<div class="field" style="flex:1;"><input type="text" value="60%" /></div>' +
+            '</div>' +
+            '<div class="field-row np-stage-row">' +
+              '<div class="field" style="flex:3;"><input type="text" value="Signed" /></div>' +
+              '<div class="field" style="flex:1;"><input type="text" value="85%" /></div>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="btn sm" onclick="window.__npAddStage()" style="margin-top:6px;">+ Add stage</button>' +
+          '<h4 style="margin:12px 0 8px;">Visibility</h4>' +
+          '<div class="field"><label>Visible to roles</label>' +
+            '<select id="np-vis"><option>All roles</option><option>Channel team only</option><option>Sales Rep, Sales Manager</option><option>CS Manager, Sales Manager</option></select>' +
+          '</div>',
+        primaryLabel: "Create pipeline",
+        note: "RBAC respects visibility · F9.1",
+        onSave: () => {
+          var nameEl = document.getElementById('np-name');
+          var descEl = document.getElementById('np-desc');
+          var visEl  = document.getElementById('np-vis');
+          var name   = nameEl && nameEl.value.trim();
+          if (!name) { toast("Pipeline name is required", { sub: "Enter a name and try again" }); return; }
+
+          var desc   = descEl ? descEl.value.trim() : '';
+          var vis    = visEl  ? visEl.value : 'All roles';
+
+          // Collect stages from rows
+          var stages = [];
+          document.querySelectorAll('#np-stages .np-stage-row').forEach(function(row) {
+            var inputs = row.querySelectorAll('input[type=text]');
+            var stageName = inputs[0] ? inputs[0].value.trim() : '';
+            var prob      = inputs[1] ? inputs[1].value.trim() : '—';
+            if (stageName) stages.push({ name: stageName, prob: prob });
+          });
+
+          var stageCount = stages.length;
+          var stageNames = stages.map(function(s) { return s.name; }).join(' · ') || '—';
+
+          // Build stage table rows
+          var stageRows = stages.map(function(s, i) {
+            return '<tr><td>' + (i + 1) + '</td><td><strong>' + s.name + '</strong></td>' +
+              '<td class="num">' + s.prob + '</td><td>0</td><td class="num">—</td><td>—</td></tr>';
+          }).join('');
+
+          // Build and inject new pipeline card
+          var cardHtml =
+            '<div class="card mb-5">' +
+              '<div class="card-head"><div>' +
+                '<div class="card-title">' + name + '</div>' +
+                '<div class="card-sub">' + stageCount + ' stages · 0 open deals · Visible to: ' + vis + '</div>' +
+              '</div>' +
+              '<div class="row gap-2"><button class="btn sm">Settings</button></div></div>' +
+              (desc ? '<div class="text-muted mt-2" style="font-size:12px;">' + desc + '</div>' : '') +
+              '<table class="table mt-3"><thead><tr>' +
+                '<th style="width:24px;"></th><th>Stage</th><th>Probability</th>' +
+                '<th>Open deals</th><th class="num">Value</th><th>Required fields</th>' +
+              '</tr></thead><tbody>' + stageRows + '</tbody></table>' +
+            '</div>';
+
+          var allCards = document.querySelectorAll('.card.mb-5');
+          var anchor   = allCards[allCards.length - 1];
+          if (anchor) {
+            anchor.insertAdjacentHTML('afterend', cardHtml);
+          } else {
+            var content = document.querySelector('.content');
+            if (content) content.insertAdjacentHTML('beforeend', cardHtml);
+          }
+
+          // Update page subtitle
+          var pageSub = document.querySelector('.page-sub');
+          if (pageSub) {
+            var total = document.querySelectorAll('.card.mb-5').length;
+            pageSub.textContent = total + ' pipelines · Each with its own stages, probabilities, and role-scoped visibility';
+          }
+
+          toast("Pipeline created", { sub: name + ' · ' + stageCount + ' stages added' });
+        },
+      };
+    },
 
     "new-role": () => ({
       eyebrow: "M9 · F9.1 · New Role",
