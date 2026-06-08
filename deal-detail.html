@@ -318,8 +318,9 @@
         if (contacts.length === 0) {
           tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts for this company.</td></tr>";
         } else {
+          var dealCtx = "&from=deal&fromId=" + encodeURIComponent(dealId) + "&fromName=" + encodeURIComponent(d.name || "Deal");
           tbody.innerHTML = contacts.map(function(c) {
-            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + dealCtx + "'\">" +
               "<td><div class='row gap-2'>" +
               "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
               "<strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong></div></td>" +
@@ -333,10 +334,11 @@
         var scLabel = document.getElementById("sidebar-contacts-label");
         var scList  = document.getElementById("sidebar-contacts-list");
         scLabel.textContent = "Contacts (" + contacts.length + ")";
+        var dealCtxSide = "&from=deal&fromId=" + encodeURIComponent(dealId) + "&fromName=" + encodeURIComponent(d.name || "Deal");
         scList.innerHTML = contacts.length === 0
           ? "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>"
           : contacts.slice(0, 4).map(function(c) {
-              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + dealCtxSide + "'\">" +
                 "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
                 "<div class='grow'><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong>" +
                 "<div class='text-muted' style='font-size:11px;'>" + (c.title||"—") + "</div></div></li>";
