@@ -25,7 +25,6 @@
     ]},
     { group: "Tools", items: [
       { id: "import",    href: "import-upload.html",    label: "Import CSV",       icon: "↓", count: "" },
-      { id: "dedup",     href: "dedup.html",            label: "Find Duplicates",  icon: "⌖", count: "" },
     ]},
     { group: "Admin", items: [
       { id: "settings", href: "settings.html", label: "Settings", icon: "⚙", count: "" },
