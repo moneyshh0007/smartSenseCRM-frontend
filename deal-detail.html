@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Acme — Annual License · SmartSense CRM</title>
+  <title id="page-title">Deal · SmartSense CRM</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body data-page="deals" class="">
@@ -11,49 +11,47 @@
     <div data-sidebar></div>
     <main class="main">
       <div class="topbar">
-        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="deals.html">Deals</a><span class="sep">/</span><span class="current">Acme — Annual License</span></div>
+        <div class="breadcrumb"><span>Records</span><span class="sep">/</span><a href="deals.html">Deals</a><span class="sep">/</span><span class="current" id="breadcrumb-name">Loading...</span></div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
           <button class="icon-btn" title="Help">?</button>
         </div>
       </div>
-      <div class="content ">
-        
+      <div class="content">
+
   <div class="page-header">
     <div>
       <div class="eyebrow">DEAL · M2 · F2.2 · F2.4 · F2.7 · F1.8</div>
-      <h1 class="page-title mt-2">Acme — Annual License</h1>
-      <div class="page-sub">
-        <a href="company-detail.html">Acme Corp</a> · Proposal stage · Owner: Mayur S. · Close: 30 Jun 2026
-      </div>
+      <h1 class="page-title mt-2" id="deal-name">Loading...</h1>
+      <div class="page-sub" id="deal-sub"></div>
     </div>
     <div class="row gap-2">
       <button class="btn">Log activity</button>
-      <button class="btn">Stage: Proposal ▾</button>
-      <button class="btn primary">Mark Won</button>
+      <button class="btn" id="stage-btn">Stage: — ▾</button>
+      <button class="btn primary" id="mark-won-btn">Mark Won</button>
     </div>
   </div>
 
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Amount</div>
-      <div class="kpi-value">$48,000</div>
-      <div class="kpi-delta">ACV — annual</div>
+      <div class="kpi-value" id="kpi-amount">—</div>
+      <div class="kpi-delta" id="kpi-amount-sub">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Probability</div>
-      <div class="kpi-value">60%</div>
+      <div class="kpi-value" id="kpi-prob">—</div>
       <div class="kpi-delta">Stage default</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Days in stage</div>
-      <div class="kpi-value">1</div>
-      <div class="kpi-delta">Healthy</div>
+      <div class="kpi-value" id="kpi-days">—</div>
+      <div class="kpi-delta" id="kpi-days-sub">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Last activity</div>
-      <div class="kpi-value" style="font-size:24px;">Today</div>
-      <div class="kpi-delta">09:32 meeting</div>
+      <div class="kpi-value" style="font-size:24px;" id="kpi-last">—</div>
+      <div class="kpi-delta" id="kpi-last-sub">—</div>
     </div>
   </div>
 
@@ -61,72 +59,43 @@
     <div>
       <div class="record-tab-bar">
         <button class="record-tab active" data-tab="activity">Activity</button>
-        <button class="record-tab" data-tab="contacts">Contacts (2)</button>
-        <button class="record-tab" data-tab="files">Files (2)</button>
+        <button class="record-tab" data-tab="contacts" id="tab-contacts-btn">Contacts</button>
+        <button class="record-tab" data-tab="files">Files</button>
         <button class="record-tab" data-tab="notes">Notes</button>
       </div>
 
+      <!-- Activity timeline -->
       <div class="tab-pane active" data-pane="activity">
-        <div class="timeline">
-          <div class="timeline-item meeting">
-            <div class="timeline-meta">
-              <span>26 May · 09:32</span><span class="badge muted">MEETING</span><span>45 min</span>
-            </div>
-            <div class="timeline-title">Discovery call — Sarah Chen, David Park</div>
-            <div class="timeline-body">Pricing tiers discussed. Buying committee identified.</div>
-          </div>
-          <div class="timeline-item email">
-            <div class="timeline-meta">
-              <span>25 May · 18:47</span><span class="badge muted">EMAIL</span>
-            </div>
-            <div class="timeline-title">Re: Pricing options for annual license</div>
-          </div>
-          <div class="timeline-item stage">
-            <div class="timeline-meta">
-              <span>25 May · 14:12</span><span class="badge muted">STAGE MOVE</span>
-            </div>
-            <div class="timeline-title">Moved Qualified → Proposal</div>
-            <div class="timeline-body">Amount set to $48,000. Probability now 60%.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-meta">
-              <span>22 May · 16:30</span><span class="badge muted">FIELD CHANGE</span>
-            </div>
-            <div class="timeline-title">Field "Competitor" changed from "—" to "HubSpot"</div>
-            <div class="timeline-body">Required field before moving to Proposal (rule: F2.3).</div>
-          </div>
+        <div class="timeline" id="activity-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading activity…</div>
         </div>
       </div>
 
+      <!-- Contacts tab -->
       <div class="tab-pane" data-pane="contacts">
-        <table class="table" style="margin-top: 8px;">
-          <thead><tr><th>Name</th><th>Role on deal</th><th>Last interaction</th><th></th></tr></thead>
-          <tbody>
-            <tr><td><a href="contact-detail.html"><strong>Sarah Chen</strong></a></td><td><span class="badge">Champion</span></td><td>Today · meeting</td><td><button class="btn sm">Log activity</button></td></tr>
-            <tr><td><strong>David Park</strong></td><td><span class="badge">Decision Maker</span></td><td>Today · meeting</td><td><button class="btn sm">Log activity</button></td></tr>
+        <table class="table" style="margin-top:8px;">
+          <thead><tr><th>Name</th><th>Title</th><th>Source</th><th>Created</th></tr></thead>
+          <tbody id="contacts-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-50);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Files tab (static placeholder) -->
       <div class="tab-pane" data-pane="files">
         <div class="files-grid">
           <div class="file-card">
             <div class="file-type">LINK · Google Docs</div>
             <div class="file-name">Proposal v3</div>
-            <div class="file-meta">Sent 25 May · 2 opens by Sarah · Last opened today 09:14</div>
-          </div>
-          <div class="file-card">
-            <div class="file-type">LINK · Google Docs</div>
-            <div class="file-name">Security Questionnaire</div>
-            <div class="file-meta">Sent today · Not yet opened</div>
+            <div class="file-meta">Sent 25 May · 2 opens</div>
           </div>
         </div>
         <button class="btn sm mt-3">+ Add link or file</button>
       </div>
+
+      <!-- Notes tab -->
       <div class="tab-pane" data-pane="notes">
-        <div class="note-card">
-          <div class="note-head"><div class="note-author">Mayur S.</div><div class="note-date">26 MAY · 09:45</div></div>
-          <div class="note-body">Post-discovery: Sarah confirmed mid-tier pricing works. David flagged EU residency as a hard requirement — we're well-positioned (F9.5). <span class="mention">/task</span> Send EU DPA by Friday. CFO sign-off targeted end of June.</div>
-        </div>
+        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this deal.</div>
       </div>
     </div>
 
@@ -134,63 +103,257 @@
       <div class="card">
         <div class="label">Deal details</div>
         <dl class="kv-grid mt-3">
-          <dt>Pipeline</dt><dd>Direct Sales</dd>
-          <dt>Stage</dt><dd>Proposal</dd>
-          <dt>Amount</dt><dd class="text-mono">$48,000</dd>
-          <dt>Probability</dt><dd class="text-mono">60%</dd>
-          <dt>Forecast</dt><dd><span class="badge solid">COMMIT</span></dd>
-          <dt>Close date</dt><dd>30 Jun 2026</dd>
-          <dt>Competitor</dt><dd>HubSpot</dd>
-          <dt>Source</dt><dd>LinkedIn outbound</dd>
-          <dt>ACV tier</dt><dd>Mid-market</dd>
-          <dt>Owner</dt><dd>Mayur S.</dd>
+          <dt>Pipeline</dt><dd id="dd-pipeline">—</dd>
+          <dt>Stage</dt><dd id="dd-stage">—</dd>
+          <dt>Amount</dt><dd class="text-mono" id="dd-amount">—</dd>
+          <dt>Probability</dt><dd class="text-mono" id="dd-prob">—</dd>
+          <dt>Forecast</dt><dd id="dd-forecast">—</dd>
+          <dt>Close date</dt><dd id="dd-close">—</dd>
+          <dt>Owner</dt><dd id="dd-owner">—</dd>
+          <dt>Created</dt><dd id="dd-created">—</dd>
+          <dt>Company</dt><dd id="dd-company">—</dd>
         </dl>
       </div>
 
       <div class="card">
-        <div class="label">Contacts (2)</div>
-        <ul class="summary-list mt-2">
-          <li>
-            <div class="avatar" style="width:24px;height:24px;font-size:9px;">SC</div>
-            <div class="grow"><a href="contact-detail.html"><strong>Sarah Chen</strong></a><div class="text-muted" style="font-size:11px;">VP Engineering · Champion</div></div>
-          </li>
-          <li>
-            <div class="avatar" style="width:24px;height:24px;font-size:9px;">DP</div>
-            <div class="grow"><strong>David Park</strong><div class="text-muted" style="font-size:11px;">CTO · Decision Maker</div></div>
-          </li>
+        <div class="label" id="sidebar-contacts-label">Contacts</div>
+        <ul class="summary-list mt-2" id="sidebar-contacts-list">
+          <li><div style="color:var(--ink-50);font-size:12px;">Loading…</div></li>
         </ul>
       </div>
 
       <div class="card">
-        <div class="card-head" style="margin-bottom: 8px;">
-          <div class="label">Files & links</div>
+        <div class="card-head" style="margin-bottom:8px;">
+          <div class="label">Files &amp; links</div>
           <button class="btn sm">+ Add</button>
         </div>
         <ul class="summary-list">
           <li>
             <div class="left-icon">↗</div>
-            <div class="grow">
-              <strong>Proposal v3</strong>
-              <div class="text-muted" style="font-size:11px;">Google Docs · Sent 25 May · 2 opens</div>
-            </div>
-          </li>
-          <li>
-            <div class="left-icon">↗</div>
-            <div class="grow">
-              <strong>Security Questionnaire</strong>
-              <div class="text-muted" style="font-size:11px;">Google Docs · Sent today · Not opened</div>
-            </div>
+            <div class="grow"><strong>Proposal v3</strong><div class="text-muted" style="font-size:11px;">Google Docs</div></div>
           </li>
         </ul>
       </div>
     </div>
   </div>
-  
+
       </div>
     </main>
   </div>
+
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) { window.location.href = "index.html"; }
+
+    var dealId = new URLSearchParams(window.location.search).get("id");
+
+    if (!dealId || dealId === "undefined" || dealId === "null") {
+      document.getElementById("deal-name").textContent = "No deal selected";
+      document.getElementById("breadcrumb-name").textContent = "Not found";
+      document.getElementById("activity-list").innerHTML =
+        "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>" +
+        "No deal ID in URL. <a href='deals.html'>Back to Deals</a></div>";
+      throw new Error("No deal ID");
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    }
+    function fmtRelative(iso) {
+      if (!iso) return "—";
+      var days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+      if (days === 0) return "Today";
+      if (days === 1) return "Yesterday";
+      if (days < 30) return days + "d ago";
+      return fmtDate(iso);
+    }
+    function fmt$(n) { return "$" + Number(n || 0).toLocaleString(); }
+    function initials(a, b) { return ((a||"")[0]+(b||"")[0]).toUpperCase(); }
+    function unwrap(resp, key) {
+      if (!resp) return resp;
+      if (resp[key]) return resp[key];
+      if (resp.data && typeof resp.data === "object") return resp.data;
+      return resp;
+    }
+
+    // Probability by stage (fallback if not in API)
+    var STAGE_PROB = { Discovery:10, Qualified:30, Proposal:60, Negotiation:85, "Closed Won":100, "Closed Lost":0 };
+
+    // ── Load deal header ─────────────────────────────────────────────────
+    async function loadDeal() {
+      try {
+        var raw = await SS_API.Deals.get(dealId);
+        var d   = unwrap(raw, "deal");
+        if (!d || !d.name) throw new Error("Empty deal response");
+
+        document.getElementById("page-title").textContent      = d.name + " · SmartSense CRM";
+        document.getElementById("breadcrumb-name").textContent = d.name;
+        document.getElementById("deal-name").textContent       = d.name;
+
+        // Sub line
+        var subParts = [];
+        if (d.company) subParts.push('<a href="company-detail?id=' + d.company.id + '">' + d.company.name + '</a>');
+        if (d.stage)   subParts.push(d.stage + " stage");
+        if (d.owner)   subParts.push("Owner: " + (d.owner.firstName||"") + " " + (d.owner.lastName||"").trim());
+        if (d.closeDate || d.expectedCloseDate) subParts.push("Close: " + fmtDate(d.closeDate || d.expectedCloseDate));
+        document.getElementById("deal-sub").innerHTML = subParts.join(" · ");
+
+        // Stage button
+        document.getElementById("stage-btn").textContent = "Stage: " + (d.stage || "—") + " ▾";
+
+        // KPIs
+        var prob = d.probability || STAGE_PROB[d.stage] || 0;
+        document.getElementById("kpi-amount").textContent     = fmt$(d.amount);
+        document.getElementById("kpi-amount-sub").textContent = d.forecastCategory ? d.forecastCategory.toUpperCase() : "—";
+        document.getElementById("kpi-prob").textContent       = prob + "%";
+
+        var daysInStage = d.updatedAt
+          ? Math.max(1, Math.floor((Date.now() - new Date(d.updatedAt).getTime()) / 86400000))
+          : "—";
+        document.getElementById("kpi-days").textContent     = daysInStage;
+        document.getElementById("kpi-days-sub").textContent = daysInStage < 21 ? "Healthy" : "Stalled";
+
+        // Sidebar deal details
+        document.getElementById("dd-pipeline").textContent = d.pipeline || "Direct Sales";
+        document.getElementById("dd-stage").textContent    = d.stage    || "—";
+        document.getElementById("dd-amount").textContent   = fmt$(d.amount);
+        document.getElementById("dd-prob").textContent     = prob + "%";
+        document.getElementById("dd-close").textContent    = fmtDate(d.closeDate || d.expectedCloseDate);
+        document.getElementById("dd-owner").textContent    = d.owner ? ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim() : "—";
+        document.getElementById("dd-created").textContent  = fmtDate(d.createdAt);
+        if (d.forecastCategory) {
+          document.getElementById("dd-forecast").innerHTML = "<span class='badge solid'>" + d.forecastCategory.toUpperCase() + "</span>";
+        }
+        if (d.company) {
+          document.getElementById("dd-company").innerHTML =
+            "<a href='company-detail?id=" + d.company.id + "'>" + d.company.name + "</a>";
+        }
+
+        // Wire Mark Won
+        document.getElementById("mark-won-btn").onclick = async function() {
+          try {
+            await SS_API.Deals.markWon(dealId);
+            document.getElementById("stage-btn").textContent = "Stage: Closed Won ▾";
+            document.getElementById("dd-stage").textContent  = "Closed Won";
+            this.textContent = "Won ✓";
+            this.disabled = true;
+          } catch(e) { alert("Could not mark deal as won."); }
+        };
+
+      } catch (err) {
+        console.error("loadDeal:", err);
+        document.getElementById("deal-name").textContent    = "Could not load deal";
+        document.getElementById("breadcrumb-name").textContent = "Error";
+      }
+    }
+
+    // ── Load activities for this deal ────────────────────────────────────
+    async function loadActivities() {
+      try {
+        var raw  = await SS_API.Activities.list();
+        var all  = (raw.activities || raw.data || raw || []);
+        var did  = String(dealId);
+        var acts = all.filter(function(a) {
+          return a.dealId && String(a.dealId) === did;
+        });
+
+        // Update last-activity KPI
+        if (acts.length > 0) {
+          var latest = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
+          document.getElementById("kpi-last").textContent     = fmtRelative(latest.createdAt);
+          document.getElementById("kpi-last-sub").textContent = latest.type || latest.title || "—";
+        } else {
+          document.getElementById("kpi-last").textContent     = "—";
+          document.getElementById("kpi-last-sub").textContent = "No activity yet";
+        }
+
+        var tlEl = document.getElementById("activity-list");
+        if (acts.length === 0) {
+          tlEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No activities logged yet for this deal.</div>";
+        } else {
+          var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+          tlEl.innerHTML = sorted.map(function(a) {
+            var type = (a.type || "NOTE").toUpperCase();
+            var who  = a.user ? ((a.user.firstName||"") + " " + (a.user.lastName||"")).trim() : "";
+            return "<div class='timeline-item'>" +
+              "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
+              "<span class='badge muted'>" + type + "</span>" +
+              (who ? "<span>By " + who + "</span>" : "") + "</div>" +
+              "<div class='timeline-title'>" + (a.title || "Activity") + "</div>" +
+              (a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "") +
+              "</div>";
+          }).join("");
+        }
+      } catch (err) {
+        console.error("loadActivities:", err);
+        document.getElementById("activity-list").innerHTML =
+          "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load activities.</div>";
+      }
+    }
+
+    // ── Load contacts linked to this deal's company ───────────────────────
+    async function loadContacts() {
+      try {
+        // First get the deal to know the company, then get contacts
+        var raw  = await SS_API.Deals.get(dealId);
+        var d    = unwrap(raw, "deal");
+        if (!d || !d.company) {
+          document.getElementById("contacts-tbody").innerHTML =
+            "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No company linked to this deal.</td></tr>";
+          return;
+        }
+
+        var craw     = await SS_API.Contacts.list();
+        var allConts = (craw.contacts || craw.data || craw || []);
+        var cid      = String(d.company.id);
+        var contacts = allConts.filter(function(c) {
+          return c.company && (String(c.company.id) === cid || String(c.companyId) === cid);
+        });
+
+        document.getElementById("tab-contacts-btn").textContent = "Contacts (" + contacts.length + ")";
+
+        var tbody = document.getElementById("contacts-tbody");
+        if (contacts.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts for this company.</td></tr>";
+        } else {
+          tbody.innerHTML = contacts.map(function(c) {
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
+              "<td><div class='row gap-2'>" +
+              "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
+              "<strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong></div></td>" +
+              "<td>" + (c.title || "—") + "</td>" +
+              "<td>" + (c.source ? "<span class='badge muted'>" + c.source + "</span>" : "—") + "</td>" +
+              "<td>" + fmtDate(c.createdAt) + "</td></tr>";
+          }).join("");
+        }
+
+        // Sidebar contacts
+        var scLabel = document.getElementById("sidebar-contacts-label");
+        var scList  = document.getElementById("sidebar-contacts-list");
+        scLabel.textContent = "Contacts (" + contacts.length + ")";
+        scList.innerHTML = contacts.length === 0
+          ? "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>"
+          : contacts.slice(0, 4).map(function(c) {
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
+                "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
+                "<div class='grow'><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong>" +
+                "<div class='text-muted' style='font-size:11px;'>" + (c.title||"—") + "</div></div></li>";
+            }).join("");
+
+      } catch (err) {
+        console.error("loadContacts:", err);
+        document.getElementById("contacts-tbody").innerHTML =
+          "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>Could not load contacts.</td></tr>";
+      }
+    }
+
+    // ── Boot ─────────────────────────────────────────────────────────────
+    loadDeal();
+    loadActivities();
+    loadContacts();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
