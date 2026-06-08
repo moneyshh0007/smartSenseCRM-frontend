@@ -26,7 +26,6 @@
     { group: "Tools", items: [
       { id: "import",    href: "import-upload.html",    label: "Import CSV",       icon: "↓", count: "" },
       { id: "dedup",     href: "dedup.html",            label: "Find Duplicates",  icon: "⌖", count: "" },
-      { id: "extension", href: "chrome-extension.html", label: "LinkedIn Capture", icon: "in", count: "" },
     ]},
     { group: "Admin", items: [
       { id: "settings", href: "settings.html", label: "Settings", icon: "⚙", count: "" },
@@ -1549,7 +1548,6 @@
     "merge into selected →": ["Cluster merged", "Records combined · undo available 30d"],
     "skip cluster": ["Cluster skipped", "Will appear again on next scan"],
     "open deal": ["Opening deal"],
-    "capture from linkedin": ["Opening Chrome extension preview"],
     "import csv": ["Opening import wizard"],
   };
 
