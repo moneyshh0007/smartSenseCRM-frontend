@@ -24,7 +24,7 @@
       { id: "filter-stalled",       href: "deals.html?filter=stalled",    label: "Stalled Deals",    icon: "★", count: "4" },
     ]},
     { group: "Tools", items: [
-      { id: "import",    href: "import.html",           label: "Import CSV",       icon: "↓", count: "" },
+      { id: "import",    href: "import-upload.html",    label: "Import CSV",       icon: "↓", count: "" },
       { id: "dedup",     href: "dedup.html",            label: "Find Duplicates",  icon: "⌖", count: "" },
       { id: "extension", href: "chrome-extension.html", label: "LinkedIn Capture", icon: "in", count: "" },
     ]},
