@@ -39,17 +39,17 @@
     <div class="kpi">
       <div class="kpi-label">Open Deals</div>
       <div class="kpi-value" id="kpi-deals">—</div>
-      <div class="kpi-delta" id="kpi-deals-sub">Loading...</div>
+      <div class="kpi-delta" id="kpi-deals-sub">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">People</div>
       <div class="kpi-value" id="kpi-people">—</div>
-      <div class="kpi-delta" id="kpi-people-sub">Contacts linked</div>
+      <div class="kpi-delta">Contacts linked</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Activities (30d)</div>
       <div class="kpi-value" id="kpi-activities">—</div>
-      <div class="kpi-delta" id="kpi-activities-sub">Loading...</div>
+      <div class="kpi-delta" id="kpi-activities-sub">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Last activity</div>
@@ -67,14 +67,12 @@
         <button class="record-tab" data-tab="notes">Notes</button>
       </div>
 
-      <!-- Timeline -->
       <div class="tab-pane active" data-pane="timeline">
         <div class="timeline" id="timeline-list">
           <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading activities…</div>
         </div>
       </div>
 
-      <!-- People -->
       <div class="tab-pane" data-pane="people">
         <table class="table" style="margin-top:8px;">
           <thead><tr><th>Name</th><th>Title</th><th>Source</th><th>Created</th></tr></thead>
@@ -84,7 +82,6 @@
         </table>
       </div>
 
-      <!-- Deals -->
       <div class="tab-pane" data-pane="deals">
         <table class="table" style="margin-top:8px;">
           <thead><tr><th>Deal</th><th>Stage</th><th class="num">Amount</th><th>Owner</th></tr></thead>
@@ -95,7 +92,6 @@
         <div class="text-muted mt-3" style="font-size:12px;" id="deals-summary"></div>
       </div>
 
-      <!-- Notes -->
       <div class="tab-pane" data-pane="notes">
         <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this company.</div>
       </div>
@@ -143,58 +139,70 @@
 
   <script src="assets/api.js"></script>
   <script>
-    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+    if (!SS_API.Auth.isLoggedIn()) { window.location.href = "index.html"; }
 
     var companyId = new URLSearchParams(window.location.search).get("id");
-    if (!companyId) window.location.href = "companies.html";
 
-    function formatDate(iso) {
-      if (!iso) return "—";
-      return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    // Guard: show error state instead of redirecting — avoids bouncing loops
+    if (!companyId || companyId === "undefined" || companyId === "null") {
+      document.getElementById("company-name").textContent = "No company selected";
+      document.getElementById("breadcrumb-name").textContent = "Not found";
+      document.getElementById("page-title").textContent = "Company · SmartSense CRM";
+      document.getElementById("timeline-list").innerHTML =
+        "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>" +
+        "No company ID found in URL. <a href='companies.html'>Back to Companies</a></div>";
+      throw new Error("No company ID");   // halt further script execution
     }
 
-    function formatRelative(iso) {
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function fmtDate(iso) {
       if (!iso) return "—";
-      var diff = Date.now() - new Date(iso).getTime();
-      var days = Math.floor(diff / 86400000);
+      return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    }
+    function fmtRelative(iso) {
+      if (!iso) return "—";
+      var days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
       if (days === 0) return "Today";
       if (days === 1) return "Yesterday";
       if (days < 30) return days + "d ago";
-      return formatDate(iso);
+      return fmtDate(iso);
+    }
+    function fmt$(n) { return "$" + Number(n || 0).toLocaleString(); }
+    function initials(a, b) { return ((a||"")[0]+(b||"")[0]).toUpperCase(); }
+
+    // Unwrap API response — handles { name } or { company: { name } } or { data: { name } }
+    function unwrap(resp, key) {
+      if (!resp) return resp;
+      if (resp[key]) return resp[key];
+      if (resp.data && typeof resp.data === "object") return resp.data;
+      return resp;
     }
 
-    function fmt$(n) {
-      return "$" + Number(n || 0).toLocaleString();
-    }
-
-    function initials(first, last) {
-      return ((first || "").charAt(0) + (last || "").charAt(0)).toUpperCase();
-    }
-
-    // ── Load company header details ──────────────────────────────────
+    // ── Load company header ───────────────────────────────────────────────
     async function loadCompany() {
       try {
-        var c = await SS_API.Companies.get(companyId);
-        var name = c.name || "Unknown";
+        var raw = await SS_API.Companies.get(companyId);
+        var c   = unwrap(raw, "company");
+        if (!c || !c.name) throw new Error("Empty company response");
 
-        document.getElementById("page-title").textContent = name + " · SmartSense CRM";
-        document.getElementById("breadcrumb-name").textContent = name;
-        document.getElementById("company-icon").textContent = name.charAt(0).toUpperCase();
-        document.getElementById("company-name").textContent = name;
+        document.getElementById("page-title").textContent      = c.name + " · SmartSense CRM";
+        document.getElementById("breadcrumb-name").textContent = c.name;
+        document.getElementById("company-icon").textContent    = c.name.charAt(0).toUpperCase();
+        document.getElementById("company-name").textContent    = c.name;
 
-        var subParts = [];
-        if (c.industry) subParts.push(c.industry);
-        if (c.size) subParts.push(c.size + " employees");
-        if (c.hq) subParts.push(c.hq);
+        var parts = [];
+        if (c.industry) parts.push(c.industry);
+        if (c.size)     parts.push(c.size + " employees");
+        if (c.hq)       parts.push(c.hq);
         var subEl = document.getElementById("company-sub");
-        subEl.textContent = subParts.join(" · ");
+        subEl.textContent = parts.join(" · ");
         if (c.domain) {
-          if (subParts.length) subEl.textContent += " · ";
-          var link = document.createElement("a");
-          link.href = "https://" + c.domain;
-          link.target = "_blank";
-          link.textContent = c.domain;
-          subEl.appendChild(link);
+          if (parts.length) subEl.textContent += " · ";
+          var a = document.createElement("a");
+          a.href = "https://" + c.domain;
+          a.target = "_blank";
+          a.textContent = c.domain;
+          subEl.appendChild(a);
         }
 
         document.getElementById("detail-domain").textContent   = c.domain   || "—";
@@ -202,174 +210,173 @@
         document.getElementById("detail-size").textContent     = c.size ? c.size + " employees" : "—";
         document.getElementById("detail-hq").textContent       = c.hq      || "—";
         document.getElementById("detail-owner").textContent    = c.owner    || "—";
-        document.getElementById("detail-created").textContent  = formatDate(c.createdAt);
+        document.getElementById("detail-created").textContent  = fmtDate(c.createdAt);
 
         if (c.tags && c.tags.length) {
-          var tagsEl = document.getElementById("sidebar-tags");
-          tagsEl.innerHTML = c.tags.map(function(t) {
-            return "<span class='chip'>" + t + " <span class='chip-x'>×</span></span>";
-          }).join("") + "<button class='btn sm'>+ Add tag</button>";
+          document.getElementById("sidebar-tags").innerHTML =
+            c.tags.map(function(t){ return "<span class='chip'>" + t + " <span class='chip-x'>×</span></span>"; }).join("") +
+            "<button class='btn sm'>+ Add tag</button>";
         }
       } catch (err) {
-        console.error("loadCompany failed:", err);
-        document.getElementById("company-name").textContent = "Company not found";
-        document.getElementById("breadcrumb-name").textContent = "Not found";
+        console.error("loadCompany:", err);
+        document.getElementById("company-name").textContent    = "Could not load company";
+        document.getElementById("breadcrumb-name").textContent = "Error";
       }
     }
 
-    // ── Load related contacts, deals, activities ─────────────────────
-    async function loadRelated() {
+    // ── Load contacts for this company ───────────────────────────────────
+    async function loadContacts() {
       try {
-        var results = await Promise.all([
-          SS_API.Contacts.list(),
-          SS_API.Deals.list(),
-          SS_API.Activities.list()
-        ]);
-
-        var allContacts   = results[0].contacts   || [];
-        var allDeals      = results[1].deals       || [];
-        var allActivities = results[2].activities  || [];
-
-        // Match by company id (coerce to string for safe comparison)
-        var cid = String(companyId);
-        var contacts = allContacts.filter(function(c) {
-          return c.company && String(c.company.id) === cid;
-        });
-        var deals = allDeals.filter(function(d) {
-          return d.company && String(d.company.id) === cid;
+        var raw      = await SS_API.Contacts.list();
+        var all      = (raw.contacts || raw.data || raw || []);
+        var cid      = String(companyId);
+        var contacts = all.filter(function(c) {
+          return c.company && (String(c.company.id) === cid || String(c.companyId) === cid);
         });
 
-        // Activities linked to any of this company's contacts or deals
-        var contactIds = new Set(contacts.map(function(c) { return String(c.id); }));
-        var dealIds    = new Set(deals.map(function(d)    { return String(d.id); }));
-        var activities = allActivities.filter(function(a) {
-          return (a.contactId && contactIds.has(String(a.contactId)))
-              || (a.dealId    && dealIds.has(String(a.dealId)));
+        document.getElementById("kpi-people").textContent    = contacts.length;
+        document.getElementById("tab-people-btn").textContent = "People (" + contacts.length + ")";
+
+        var tbody = document.getElementById("people-tbody");
+        if (contacts.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts linked yet.</td></tr>";
+        } else {
+          tbody.innerHTML = contacts.map(function(c) {
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+              "<td><div class='row gap-2'><div class='avatar' style='width:24px;height:24px;font-size:9px;'>" +
+              initials(c.firstName, c.lastName) + "</div><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong></div></td>" +
+              "<td>" + (c.title || "—") + "</td>" +
+              "<td>" + (c.source ? "<span class='badge muted'>" + c.source + "</span>" : "—") + "</td>" +
+              "<td>" + fmtDate(c.createdAt) + "</td></tr>";
+          }).join("");
+        }
+
+        // Sidebar people list
+        var spLabel = document.getElementById("sidebar-people-label");
+        var spList  = document.getElementById("sidebar-people-list");
+        spLabel.textContent = "People (" + contacts.length + ")";
+        spList.innerHTML = contacts.length === 0
+          ? "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>"
+          : contacts.slice(0, 5).map(function(c) {
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+                "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
+                "<div class='grow'><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong>" +
+                "<div class='text-muted' style='font-size:11px;'>" + (c.title||"—") + "</div></div></li>";
+            }).join("");
+      } catch (err) {
+        console.error("loadContacts:", err);
+        document.getElementById("people-tbody").innerHTML =
+          "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>Could not load contacts.</td></tr>";
+        document.getElementById("sidebar-people-list").innerHTML =
+          "<li><div style='color:var(--ink-50);font-size:12px;'>Unavailable</div></li>";
+      }
+    }
+
+    // ── Load deals for this company ───────────────────────────────────────
+    async function loadDeals() {
+      try {
+        var raw   = await SS_API.Deals.list();
+        var all   = (raw.deals || raw.data || raw || []);
+        var cid   = String(companyId);
+        var deals = all.filter(function(d) {
+          return d.company && (String(d.company.id) === cid || String(d.companyId) === cid);
         });
+        var open  = deals.filter(function(d) {
+          return d.stage !== "Closed Won" && d.stage !== "Closed Lost";
+        });
+        var total = deals.reduce(function(s, d) { return s + Number(d.amount||0); }, 0);
 
-        // ── KPIs ──────────────────────────────────────────────────
-        var openDeals     = deals.filter(function(d) { return d.stage !== "Closed Won" && d.stage !== "Closed Lost"; });
-        var totalPipeline = openDeals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+        document.getElementById("kpi-deals").textContent     = open.length;
+        document.getElementById("kpi-deals-sub").textContent = fmt$(total) + " total";
+        document.getElementById("tab-deals-btn").textContent = "Deals (" + deals.length + ")";
 
-        document.getElementById("kpi-deals").textContent      = openDeals.length;
-        document.getElementById("kpi-deals-sub").textContent  = fmt$(totalPipeline) + " total";
-        document.getElementById("kpi-people").textContent     = contacts.length;
+        var tbody = document.getElementById("deals-tbody");
+        if (deals.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No deals linked yet.</td></tr>";
+          document.getElementById("deals-summary").textContent = "";
+        } else {
+          tbody.innerHTML = deals.map(function(d) {
+            var owner = d.owner ? (d.owner.firstName||"") + " " + (d.owner.lastName||"") : "—";
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+              "<td><strong>" + d.name + "</strong></td>" +
+              "<td><span class='badge muted'>" + (d.stage||"—") + "</span></td>" +
+              "<td class='num'>" + fmt$(d.amount) + "</td>" +
+              "<td>" + owner.trim() + "</td></tr>";
+          }).join("");
+          document.getElementById("deals-summary").textContent =
+            deals.length + " deal" + (deals.length !== 1 ? "s" : "") + " · " + fmt$(total) + " total pipeline";
+        }
 
-        var thirtyDaysAgo = Date.now() - 30 * 86400000;
-        var recentActs    = activities.filter(function(a) { return new Date(a.createdAt).getTime() > thirtyDaysAgo; });
-        document.getElementById("kpi-activities").textContent     = recentActs.length;
+        // Sidebar deals
+        var sdList = document.getElementById("sidebar-deals-list");
+        sdList.innerHTML = open.length === 0
+          ? "<li><div style='color:var(--ink-50);font-size:12px;'>No open deals.</div></li>"
+          : open.slice(0, 4).map(function(d) {
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+                "<div class='left-icon'>◇</div>" +
+                "<div class='grow'><strong>" + d.name + "</strong>" +
+                "<div class='text-muted' style='font-size:11px;'>" + (d.stage||"") + " · " + fmt$(d.amount) + "</div></div></li>";
+            }).join("");
+      } catch (err) {
+        console.error("loadDeals:", err);
+        document.getElementById("deals-tbody").innerHTML =
+          "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>Could not load deals.</td></tr>";
+      }
+    }
+
+    // ── Load activities ───────────────────────────────────────────────────
+    async function loadActivities() {
+      try {
+        var raw  = await SS_API.Activities.list();
+        var acts = (raw.activities || raw.data || raw || []);
+
+        // Show all activities (no company filter on activities endpoint)
+        var thirtyDays = Date.now() - 30 * 86400000;
+        var recent = acts.filter(function(a) { return new Date(a.createdAt).getTime() > thirtyDays; });
+
+        document.getElementById("kpi-activities").textContent     = recent.length;
         document.getElementById("kpi-activities-sub").textContent = "in last 30 days";
 
-        if (activities.length > 0) {
-          var latest = activities.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
-          document.getElementById("kpi-last-activity").textContent     = formatRelative(latest.createdAt);
+        if (acts.length > 0) {
+          var latest = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
+          document.getElementById("kpi-last-activity").textContent     = fmtRelative(latest.createdAt);
           document.getElementById("kpi-last-activity-sub").textContent = latest.type || latest.title || "—";
         } else {
           document.getElementById("kpi-last-activity").textContent     = "—";
           document.getElementById("kpi-last-activity-sub").textContent = "No activity yet";
         }
 
-        // ── Tab labels ────────────────────────────────────────────
-        document.getElementById("tab-people-btn").textContent = "People (" + contacts.length + ")";
-        document.getElementById("tab-deals-btn").textContent  = "Deals (" + deals.length + ")";
-
-        // ── Timeline tab ──────────────────────────────────────────
         var tlEl = document.getElementById("timeline-list");
-        if (activities.length === 0) {
+        if (acts.length === 0) {
           tlEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No activities logged yet.</div>";
         } else {
-          var sorted = activities.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-          tlEl.innerHTML = sorted.map(function(a) {
-            var type = (a.type || "NOTE").toUpperCase();
-            var who  = a.user ? (a.user.firstName || "") + " " + (a.user.lastName || "") : "";
+          var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+          tlEl.innerHTML = sorted.slice(0, 20).map(function(a) {
+            var type = (a.type||"NOTE").toUpperCase();
+            var who  = a.user ? ((a.user.firstName||"") + " " + (a.user.lastName||"")).trim() : "";
             return "<div class='timeline-item'>" +
-              "<div class='timeline-meta'>" +
-                "<span>" + formatDate(a.createdAt) + "</span>" +
-                "<span class='badge muted'>" + type + "</span>" +
-                (who.trim() ? "<span>By " + who.trim() + "</span>" : "") +
-              "</div>" +
-              "<div class='timeline-title'>" + (a.title || "Activity") + "</div>" +
+              "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
+              "<span class='badge muted'>" + type + "</span>" +
+              (who ? "<span>By " + who + "</span>" : "") + "</div>" +
+              "<div class='timeline-title'>" + (a.title||"Activity") + "</div>" +
               (a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "") +
-            "</div>";
+              "</div>";
           }).join("");
         }
-
-        // ── People tab ────────────────────────────────────────────
-        var peopleTbody = document.getElementById("people-tbody");
-        if (contacts.length === 0) {
-          peopleTbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts linked to this company.</td></tr>";
-        } else {
-          peopleTbody.innerHTML = contacts.map(function(c) {
-            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
-              "<td><div class='row gap-2'>" +
-                "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
-                "<strong>" + c.firstName + " " + c.lastName + "</strong>" +
-              "</div></td>" +
-              "<td>" + (c.title || "—") + "</td>" +
-              "<td>" + (c.source ? "<span class='badge muted'>" + c.source + "</span>" : "—") + "</td>" +
-              "<td>" + formatDate(c.createdAt) + "</td>" +
-            "</tr>";
-          }).join("");
-        }
-
-        // ── Deals tab ─────────────────────────────────────────────
-        var dealsTbody = document.getElementById("deals-tbody");
-        if (deals.length === 0) {
-          dealsTbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No deals linked to this company.</td></tr>";
-          document.getElementById("deals-summary").textContent = "";
-        } else {
-          dealsTbody.innerHTML = deals.map(function(d) {
-            return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
-              "<td><strong>" + d.name + "</strong></td>" +
-              "<td><span class='badge muted'>" + (d.stage || "—") + "</span></td>" +
-              "<td class='num'>" + fmt$(d.amount) + "</td>" +
-              "<td>" + (d.owner ? d.owner.firstName + " " + d.owner.lastName : "—") + "</td>" +
-            "</tr>";
-          }).join("");
-          var pipelineTotal = deals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
-          document.getElementById("deals-summary").textContent =
-            deals.length + " deal" + (deals.length !== 1 ? "s" : "") + " · " + fmt$(pipelineTotal) + " total pipeline";
-        }
-
-        // ── Sidebar: People ───────────────────────────────────────
-        var spLabel = document.getElementById("sidebar-people-label");
-        var spList  = document.getElementById("sidebar-people-list");
-        spLabel.textContent = "People (" + contacts.length + ")";
-        if (contacts.length === 0) {
-          spList.innerHTML = "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>";
-        } else {
-          spList.innerHTML = contacts.slice(0, 5).map(function(c) {
-            return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
-              "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
-              "<div class='grow'><strong>" + c.firstName + " " + c.lastName + "</strong>" +
-                "<div class='text-muted' style='font-size:11px;'>" + (c.title || "—") + "</div>" +
-              "</div></li>";
-          }).join("");
-        }
-
-        // ── Sidebar: Deals ────────────────────────────────────────
-        var sdList = document.getElementById("sidebar-deals-list");
-        if (openDeals.length === 0) {
-          sdList.innerHTML = "<li><div style='color:var(--ink-50);font-size:12px;'>No open deals.</div></li>";
-        } else {
-          sdList.innerHTML = openDeals.slice(0, 4).map(function(d) {
-            return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
-              "<div class='left-icon'>◇</div>" +
-              "<div class='grow'><strong>" + d.name + "</strong>" +
-                "<div class='text-muted' style='font-size:11px;'>" + (d.stage || "") + " · " + fmt$(d.amount) + "</div>" +
-              "</div></li>";
-          }).join("");
-        }
-
       } catch (err) {
-        console.error("loadRelated failed:", err);
+        console.error("loadActivities:", err);
         document.getElementById("timeline-list").innerHTML =
-          "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load related data.</div>";
+          "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load activities.</div>";
+        document.getElementById("kpi-activities").textContent = "—";
+        document.getElementById("kpi-last-activity").textContent = "—";
       }
     }
 
+    // ── Boot ──────────────────────────────────────────────────────────────
     loadCompany();
-    loadRelated();
+    loadContacts();
+    loadDeals();
+    loadActivities();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
