@@ -937,23 +937,125 @@
       onSave: () => toast("Field added", { sub: "Materialised view rebuilding" }),
     }),
 
-    "new-filter": () => ({
-      eyebrow: "M1 · F1.6 · New Filter",
-      title: "Add filter condition",
-      body: `
-        <div class="field-row">
-          <div class="field"><label>Field</label>
-            <select><option>Owner</option><option>Created date</option><option>Tags</option><option>Company</option><option>Title</option><option>Stage</option><option>Amount</option></select>
-          </div>
-          <div class="field"><label>Operator</label>
-            <select><option>equals</option><option>contains</option><option>is greater than</option><option>is less than</option><option>is empty</option></select>
-          </div>
-        </div>
-        <div class="field"><label>Value</label><input type="text" placeholder="e.g. me, or last 7 days" /></div>
-      `,
-      primaryLabel: "Add filter",
-      onSave: () => toast("Filter added", { sub: "Result count updated" }),
-    }),
+    "new-filter": () => {
+      // ── Collect live values from the kanban board ──────────────
+      var stageVals = [];
+      document.querySelectorAll('.kanban-col[data-stage]').forEach(function(col) {
+        stageVals.push(col.getAttribute('data-stage'));
+      });
+
+      var companySet = new Set();
+      document.querySelectorAll('.kanban-card').forEach(function(card) {
+        var spans = card.querySelectorAll('.kanban-card-meta span');
+        if (spans[1]) companySet.add(spans[1].textContent.trim());
+      });
+      var companyVals = Array.from(companySet).filter(Boolean).sort();
+
+      var FIELDS = [
+        { key: 'stage',   label: 'Stage',       type: 'enum',   values: stageVals },
+        { key: 'company', label: 'Company',      type: 'enum',   values: companyVals },
+        { key: 'amount',  label: 'Amount',       type: 'number', values: [] },
+        { key: 'owner',   label: 'Owner',        type: 'text',   values: [] },
+        { key: 'created', label: 'Created date', type: 'date',   values: [] },
+      ];
+
+      var OPS = {
+        enum:   ['is', 'is not'],
+        number: ['equals', 'is greater than', 'is less than'],
+        text:   ['contains', 'equals'],
+        date:   ['is before', 'is after', 'is'],
+      };
+
+      function opHtml(type) {
+        return (OPS[type] || OPS.text).map(function(o) { return '<option>' + o + '</option>'; }).join('');
+      }
+
+      function valueHtml(field) {
+        if (field.type === 'enum' && field.values.length) {
+          return '<select id="nf-val"><option value="">— select —</option>' +
+            field.values.map(function(v) { return '<option>' + v + '</option>'; }).join('') + '</select>';
+        }
+        if (field.type === 'number') return '<input id="nf-val" type="number" placeholder="e.g. 10000" />';
+        if (field.type === 'date')   return '<input id="nf-val" type="date" />';
+        return '<input id="nf-val" type="text" placeholder="Enter value…" />';
+      }
+
+      var def = FIELDS[0];
+
+      // Expose updater globally so inline onchange can reach it
+      window.__nfFields = FIELDS;
+      window.__nfChange = function(sel) {
+        var field = FIELDS.find(function(f) { return f.key === sel.value; }) || FIELDS[0];
+        var opEl = document.getElementById('nf-op');
+        var vwEl = document.getElementById('nf-vw');
+        if (opEl) opEl.innerHTML = opHtml(field.type);
+        if (vwEl) vwEl.innerHTML = valueHtml(field);
+      };
+
+      return {
+        eyebrow: "M1 · F1.6 · New Filter",
+        title: "Add filter condition",
+        body: '<div class="field-row">' +
+          '<div class="field"><label>Field</label>' +
+          '<select id="nf-field" onchange="window.__nfChange(this)">' +
+          FIELDS.map(function(f) { return '<option value="' + f.key + '">' + f.label + '</option>'; }).join('') +
+          '</select></div>' +
+          '<div class="field"><label>Operator</label>' +
+          '<select id="nf-op">' + opHtml(def.type) + '</select></div>' +
+          '</div>' +
+          '<div class="field"><label>Value</label>' +
+          '<div id="nf-vw">' + valueHtml(def) + '</div></div>',
+        primaryLabel: "Add filter",
+        onSave: () => {
+          var fieldEl = document.getElementById('nf-field');
+          var opEl    = document.getElementById('nf-op');
+          var valEl   = document.getElementById('nf-val');
+          if (!fieldEl || !valEl) { toast("Filter added"); return; }
+
+          var fieldKey = fieldEl.value;
+          var op       = opEl ? opEl.value : 'is';
+          var val      = valEl.value;
+          var field    = (window.__nfFields || []).find(function(f) { return f.key === fieldKey; });
+          var fieldLabel = field ? field.label : fieldKey;
+
+          if (!val) { toast("No value selected", { sub: "Pick a value to filter by" }); return; }
+
+          // ── Apply filter to kanban cards ──────────────────────
+          document.querySelectorAll('.kanban-card').forEach(function(card) {
+            var match = true;
+            if (fieldKey === 'stage') {
+              var col = card.closest('.kanban-col');
+              var stage = col ? col.getAttribute('data-stage') : '';
+              match = (op === 'is not') ? stage !== val : stage === val;
+            } else if (fieldKey === 'company') {
+              var spans = card.querySelectorAll('.kanban-card-meta span');
+              var co = spans[1] ? spans[1].textContent.trim() : '';
+              match = (op === 'is not') ? co !== val : co === val;
+            } else if (fieldKey === 'amount') {
+              var amtEl = card.querySelector('.kanban-card-amount');
+              var amt = amtEl ? parseFloat(amtEl.textContent.replace(/[^0-9.]/g, '')) : 0;
+              var target = parseFloat(val) || 0;
+              if (op === 'is greater than') match = amt > target;
+              else if (op === 'is less than') match = amt < target;
+              else match = amt === target;
+            }
+            card.style.display = match ? '' : 'none';
+          });
+
+          // ── Update column counts ──────────────────────────────
+          document.querySelectorAll('.kanban-col').forEach(function(col) {
+            var visible = Array.from(col.querySelectorAll('.kanban-card'))
+              .filter(function(c) { return c.style.display !== 'none'; }).length;
+            var meta    = col.querySelector('.kanban-col-meta');
+            var countEl = col.querySelector('.kanban-col-count');
+            if (meta)    meta.textContent    = visible + ' deals';
+            if (countEl) countEl.textContent = visible;
+          });
+
+          toast("Filter applied", { sub: fieldLabel + ' ' + op + ' “' + val + '”' });
+        },
+      };
+    },
 
     "save-filter": () => ({
       eyebrow: "M1 · F1.6 · Smart Filter",
