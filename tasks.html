@@ -154,13 +154,23 @@
       var ids = getSelectedIds();
       if (!ids.length) return;
       if (!confirm("Delete " + ids.length + " task" + (ids.length !== 1 ? "s" : "") + "? This cannot be undone.")) return;
-      try {
-        await Promise.all(ids.map(function(id) { return SS_API.Tasks.delete(id); }));
-        clearSelection();
-        loadTasks();
-      } catch (err) {
-        console.error("Bulk delete failed:", err);
-        alert("Some tasks could not be deleted.");
+
+      // allSettled — attempt every delete independently so one failure never blocks the others
+      var results = await Promise.allSettled(
+        ids.map(function(id) { return SS_API.Tasks.delete(id); })
+      );
+
+      var failed = results.filter(function(r) { return r.status === "rejected"; });
+
+      // Always clear selection and reload regardless of partial failures
+      clearSelection();
+      await loadTasks();
+
+      if (failed.length > 0) {
+        var reason = failed[0].reason && failed[0].reason.message
+          ? failed[0].reason.message
+          : "Unknown error";
+        alert(failed.length + " task(s) could not be deleted: " + reason);
       }
     }
 
