@@ -954,12 +954,9 @@
             visOpts.map(function(v) {
               return '<option' + (pVisibility.includes(v) || (v === "All roles" && pVisibility === "All roles") ? ' selected' : '') + '>' + v + '</option>';
             }).join("") +
-          '</select></div>' +
-          '<div style="margin-top:24px;padding-top:16px;border-top:var(--rule);">' +
-            '<button type="button" class="btn" onclick="window.__psDelete()" ' +
-              'style="border-color:var(--ink);color:var(--ink);">Delete pipeline</button>' +
-          '</div>',
+          '</select></div>',
         primaryLabel: "Save changes",
+        note: '<button type="button" class="btn" onclick="window.__psDelete()" style="border-color:var(--ink);color:var(--ink);">Delete pipeline</button>',
         onSave: () => {
           if (!cardEl) { toast("Pipeline updated"); return; }
           var nameEl = document.getElementById("ps-name");
