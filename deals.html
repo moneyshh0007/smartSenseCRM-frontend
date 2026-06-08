@@ -251,7 +251,7 @@
             }
             card.style.cursor = "pointer";
             card.onclick = function() {
-              window.location.href = "deal-detail.html?id=" + d.id;
+              window.location.href = "deal-detail?id=" + d.id;
             };
             card.innerHTML = "<div class='kanban-card-title'>" + d.name +
               (card.classList.contains("warn") ? " <span class='badge warn' style='font-size:10px;vertical-align:middle;'>ROTTING</span>" : "") +

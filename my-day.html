@@ -189,7 +189,7 @@
           dealsList.innerHTML = "<li><div class='grow' style='color:var(--ink-50);font-size:13px;'>No deals yet.</div></li>";
         } else {
           dealsList.innerHTML = recentDeals.map(function(d) {
-            return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+            return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
               "<div class='left-icon'>◇</div>" +
               "<div class='grow'>" +
               "<div><strong>" + d.name + "</strong></div>" +

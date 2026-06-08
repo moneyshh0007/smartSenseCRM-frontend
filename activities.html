@@ -95,8 +95,8 @@
           var typeLabel = a.type.toUpperCase();
           var autoLabel = a.autoLogged ? "Auto-logged" : "Manual";
           var body = a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "";
-          var contact = a.contact ? " · <a href='contact-detail.html?id=" + a.contact.id + "'>" + a.contact.firstName + " " + a.contact.lastName + "</a>" : "";
-          var deal = a.deal ? " · <a href='deal-detail.html?id=" + a.deal.id + "'>" + a.deal.name + "</a>" : "";
+          var contact = a.contact ? " · <a href='contact-detail?id=" + a.contact.id + "'>" + a.contact.firstName + " " + a.contact.lastName + "</a>" : "";
+          var deal = a.deal ? " · <a href='deal-detail?id=" + a.deal.id + "'>" + a.deal.name + "</a>" : "";
 
           return "<div class='" + getTypeClass(a.type) + "'>" +
             "<div class='timeline-meta'>" +

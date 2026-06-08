@@ -133,7 +133,7 @@
           var industry = c.industry || "—";
           var size = c.size || "—";
           var deals = c._count ? c._count.deals : "0";
-          return "<tr style='cursor:pointer;' onclick=\"window.location.href='company-detail.html?id=" + c.id + "'\">" +
+          return "<tr style='cursor:pointer;' onclick=\"window.location.href='company-detail?id=" + c.id + "'\">" +
             "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
             "<td><strong>" + c.name + "</strong>" + domain + "</td>" +
             "<td>" + industry + "</td>" +

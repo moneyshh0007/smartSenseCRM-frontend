@@ -242,7 +242,7 @@
           tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts linked yet.</td></tr>";
         } else {
           tbody.innerHTML = contacts.map(function(c) {
-            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
               "<td><div class='row gap-2'><div class='avatar' style='width:24px;height:24px;font-size:9px;'>" +
               initials(c.firstName, c.lastName) + "</div><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong></div></td>" +
               "<td>" + (c.title || "—") + "</td>" +
@@ -258,7 +258,7 @@
         spList.innerHTML = contacts.length === 0
           ? "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>"
           : contacts.slice(0, 5).map(function(c) {
-              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
                 "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
                 "<div class='grow'><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong>" +
                 "<div class='text-muted' style='font-size:11px;'>" + (c.title||"—") + "</div></div></li>";
@@ -297,7 +297,7 @@
         } else {
           tbody.innerHTML = deals.map(function(d) {
             var owner = d.owner ? (d.owner.firstName||"") + " " + (d.owner.lastName||"") : "—";
-            return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
               "<td><strong>" + d.name + "</strong></td>" +
               "<td><span class='badge muted'>" + (d.stage||"—") + "</span></td>" +
               "<td class='num'>" + fmt$(d.amount) + "</td>" +
@@ -312,7 +312,7 @@
         sdList.innerHTML = open.length === 0
           ? "<li><div style='color:var(--ink-50);font-size:12px;'>No open deals.</div></li>"
           : open.slice(0, 4).map(function(d) {
-              return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
                 "<div class='left-icon'>◇</div>" +
                 "<div class='grow'><strong>" + d.name + "</strong>" +
                 "<div class='text-muted' style='font-size:11px;'>" + (d.stage||"") + " · " + fmt$(d.amount) + "</div></div></li>";
