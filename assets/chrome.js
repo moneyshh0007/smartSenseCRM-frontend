@@ -895,6 +895,118 @@
       };
     },
 
+    "pipeline-settings": (ctx) => {
+      ctx = ctx || {};
+      var pName       = ctx.name       || "Pipeline";
+      var pStages     = ctx.stages     || [];
+      var pVisibility = ctx.visibility || "All roles";
+      var cardEl      = ctx.cardEl     || null;
+
+      window.__psAddStage = function() {
+        var container = document.getElementById("ps-stages");
+        if (!container) return;
+        var idx = container.querySelectorAll(".ps-stage-row").length + 1;
+        var row = document.createElement("div");
+        row.className = "field-row ps-stage-row";
+        row.style.alignItems = "flex-end";
+        row.innerHTML =
+          '<div class="field" style="flex:3;"><input type="text" placeholder="Stage ' + idx + '" /></div>' +
+          '<div class="field" style="flex:1;"><input type="text" placeholder="0%" /></div>' +
+          '<button type="button" class="btn sm" style="margin-bottom:4px;" ' +
+            'onclick="this.closest(\'.ps-stage-row\').remove()">×</button>';
+        container.appendChild(row);
+      };
+
+      window.__psDelete = function() {
+        if (!cardEl) { toast("Pipeline not found"); return; }
+        if (!confirm('Delete "' + pName + '"? This cannot be undone.')) return;
+        cardEl.remove();
+        var pageSub = document.querySelector(".page-sub");
+        if (pageSub) {
+          var total = document.querySelectorAll(".card.mb-5").length;
+          pageSub.textContent = total + " pipelines · Each with its own stages, probabilities, and role-scoped visibility";
+        }
+        if (window.SS_closeSlide) window.SS_closeSlide();
+        toast("Pipeline deleted", { sub: '"' + pName + '" has been removed' });
+      };
+
+      var visOpts = ["All roles", "Channel team only", "Sales Rep, Sales Manager", "CS Manager, Sales Manager"];
+      var stageRowsHtml = pStages.map(function(s) {
+        return '<div class="field-row ps-stage-row" style="align-items:flex-end;">' +
+          '<div class="field" style="flex:3;"><input type="text" value="' + s.name.replace(/"/g, "&quot;") + '" /></div>' +
+          '<div class="field" style="flex:1;"><input type="text" value="' + s.prob.replace(/"/g, "&quot;") + '" /></div>' +
+          '<button type="button" class="btn sm" style="margin-bottom:4px;" ' +
+            'onclick="this.closest(\'.ps-stage-row\').remove()">×</button>' +
+          '</div>';
+      }).join("");
+
+      return {
+        eyebrow: "M2 · F2.1 · Pipeline Settings",
+        title: pName,
+        body:
+          '<div class="field"><label>Pipeline name</label>' +
+            '<input id="ps-name" type="text" value="' + pName.replace(/"/g, "&quot;") + '" /></div>' +
+          '<h4 style="margin:12px 0 8px;">Stages</h4>' +
+          '<div id="ps-stages">' + stageRowsHtml + '</div>' +
+          '<button type="button" class="btn sm" onclick="window.__psAddStage()" style="margin-top:6px;">+ Add stage</button>' +
+          '<h4 style="margin:12px 0 8px;">Visibility</h4>' +
+          '<div class="field"><label>Visible to roles</label><select id="ps-vis">' +
+            visOpts.map(function(v) {
+              return '<option' + (pVisibility.includes(v) || (v === "All roles" && pVisibility === "All roles") ? ' selected' : '') + '>' + v + '</option>';
+            }).join("") +
+          '</select></div>' +
+          '<div style="margin-top:24px;padding-top:16px;border-top:var(--rule);">' +
+            '<button type="button" class="btn" onclick="window.__psDelete()" ' +
+              'style="border-color:var(--ink);color:var(--ink);">Delete pipeline</button>' +
+          '</div>',
+        primaryLabel: "Save changes",
+        onSave: () => {
+          if (!cardEl) { toast("Pipeline updated"); return; }
+          var nameEl = document.getElementById("ps-name");
+          var visEl  = document.getElementById("ps-vis");
+          var newName = (nameEl && nameEl.value.trim()) || pName;
+          var newVis  = visEl ? visEl.value : pVisibility;
+
+          var newStages = [];
+          document.querySelectorAll("#ps-stages .ps-stage-row").forEach(function(row) {
+            var inputs = row.querySelectorAll("input[type=text]");
+            var sName = inputs[0] ? inputs[0].value.trim() : "";
+            var sProb = inputs[1] ? inputs[1].value.trim() : "—";
+            if (sName) newStages.push({ name: sName, prob: sProb });
+          });
+
+          // Update card title + subtitle
+          var titleEl = cardEl.querySelector(".card-title");
+          var subEl   = cardEl.querySelector(".card-sub");
+          if (titleEl) titleEl.textContent = newName;
+          if (subEl) {
+            var dealMatch = subEl.textContent.match(/(\d+)\s+open deals/);
+            var openDeals = dealMatch ? dealMatch[1] : "0";
+            subEl.textContent = newStages.length + " stages · " + openDeals + " open deals · Visible to: " + newVis;
+          }
+
+          // Rebuild stage table if card has one
+          var tbody = cardEl.querySelector("table tbody");
+          if (tbody) {
+            tbody.innerHTML = newStages.map(function(s, i) {
+              return "<tr><td>" + (i + 1) + "</td><td><strong>" + s.name + "</strong></td>" +
+                "<td class='num'>" + s.prob + "</td><td>0</td><td class='num'>—</td><td>—</td></tr>";
+            }).join("");
+          }
+
+          // Update compact stage list if card uses text format
+          var stagesSpan = Array.from(cardEl.querySelectorAll(".text-muted span"))
+            .find(function(el) { return el.textContent.includes("Stages:"); });
+          if (stagesSpan) {
+            stagesSpan.innerHTML = "<strong>Stages:</strong> " +
+              newStages.map(function(s) { return s.name; }).join(" · ");
+          }
+
+          toast("Pipeline updated", { sub: newName + " · " + newStages.length + " stages" });
+        },
+      };
+    },
+
     "new-role": () => ({
       eyebrow: "M9 · F9.1 · New Role",
       title: "Create a new role",
@@ -2338,6 +2450,50 @@
       if (!btn) return;
       const text = (btn.textContent || "").trim().toLowerCase();
       const pageId = document.body.getAttribute("data-page");
+
+      // Pipeline "Settings" button → open pipeline-settings slide-over
+      if (text === "settings") {
+        var card = btn.closest(".card.mb-5");
+        if (card) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+
+          // Read name
+          var titleEl = card.querySelector(".card-title");
+          var pName   = titleEl ? titleEl.textContent.trim() : "Pipeline";
+
+          // Read sub for visibility
+          var subEl = card.querySelector(".card-sub");
+          var subTxt = subEl ? subEl.textContent : "";
+          var visMatch = subTxt.match(/Visible to:\s*(.+?)(?:\s*·|$)/i)
+                      || subTxt.match(/Restricted to:\s*(.+?)(?:\s*·|$)/i);
+          var pVisibility = visMatch ? visMatch[1].trim() : "All roles";
+
+          // Read stages from table rows, or from compact text span
+          var pStages = [];
+          card.querySelectorAll("table tbody tr").forEach(function(row) {
+            var tds = row.querySelectorAll("td");
+            if (tds[1]) pStages.push({
+              name: tds[1].textContent.trim(),
+              prob: tds[2] ? tds[2].textContent.trim() : "—"
+            });
+          });
+          if (pStages.length === 0) {
+            var stagesSpan = Array.from(card.querySelectorAll(".text-muted span"))
+              .find(function(el) { return el.textContent.includes("Stages:"); });
+            if (stagesSpan) {
+              stagesSpan.textContent.replace(/Stages:\s*/i, "").split("·").forEach(function(s) {
+                var n = s.trim(); if (n) pStages.push({ name: n, prob: "—" });
+              });
+            }
+          }
+
+          if (window.SS_openSlide) {
+            window.SS_openSlide("pipeline-settings", { name: pName, stages: pStages, visibility: pVisibility, cardEl: card });
+          }
+          return;
+        }
+      }
 
       // Context-aware: "View" inside the audit log table opens the audit-detail slide-over
       if (pageId === "settings-audit-log" && text === "view") {
