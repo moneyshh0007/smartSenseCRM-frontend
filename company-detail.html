@@ -17,8 +17,8 @@
           <button class="icon-btn" title="Help">?</button>
         </div>
       </div>
-      <div class="content ">
-        
+      <div class="content">
+
   <div class="page-header">
     <div class="row gap-4 items-center">
       <div class="geo-icon" style="width:72px;height:72px;font-size:28px;" id="company-icon">?</div>
@@ -38,23 +38,23 @@
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Open Deals</div>
-      <div class="kpi-value">1</div>
-      <div class="kpi-delta">$48k total</div>
+      <div class="kpi-value" id="kpi-deals">—</div>
+      <div class="kpi-delta" id="kpi-deals-sub">Loading...</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">People</div>
-      <div class="kpi-value">5</div>
-      <div class="kpi-delta">2 decision makers</div>
+      <div class="kpi-value" id="kpi-people">—</div>
+      <div class="kpi-delta" id="kpi-people-sub">Contacts linked</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Activities (30d)</div>
-      <div class="kpi-value">23</div>
-      <div class="kpi-delta up">7 meetings</div>
+      <div class="kpi-value" id="kpi-activities">—</div>
+      <div class="kpi-delta" id="kpi-activities-sub">Loading...</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Last activity</div>
-      <div class="kpi-value" style="font-size:24px;">Today</div>
-      <div class="kpi-delta">9:32 — Discovery</div>
+      <div class="kpi-value" style="font-size:24px;" id="kpi-last-activity">—</div>
+      <div class="kpi-delta" id="kpi-last-activity-sub">—</div>
     </div>
   </div>
 
@@ -62,78 +62,42 @@
     <div>
       <div class="record-tab-bar">
         <button class="record-tab active" data-tab="timeline">Timeline</button>
-        <button class="record-tab" data-tab="people">People (5)</button>
-        <button class="record-tab" data-tab="deals">Deals (1)</button>
+        <button class="record-tab" data-tab="people" id="tab-people-btn">People</button>
+        <button class="record-tab" data-tab="deals" id="tab-deals-btn">Deals</button>
         <button class="record-tab" data-tab="notes">Notes</button>
       </div>
 
+      <!-- Timeline -->
       <div class="tab-pane active" data-pane="timeline">
-        <div class="timeline">
-          <div class="timeline-item meeting">
-            <div class="timeline-meta">
-              <span>26 May · 09:32</span><span class="badge muted">MEETING</span><span>By Mayur</span>
-            </div>
-            <div class="timeline-title">Discovery call with Sarah Chen, David Park</div>
-            <div class="timeline-body">Pricing tiers discussed. Buying committee identified. Next: send security questionnaire.</div>
-          </div>
-          <div class="timeline-item email">
-            <div class="timeline-meta">
-              <span>25 May · 18:47</span><span class="badge muted">EMAIL</span><span>Outbound · to sarah.chen@acme.com</span>
-            </div>
-            <div class="timeline-title">Re: Pricing options for annual license</div>
-          </div>
-          <div class="timeline-item stage">
-            <div class="timeline-meta">
-              <span>25 May · 14:12</span><span class="badge muted">STAGE MOVE</span>
-            </div>
-            <div class="timeline-title">Acme — Annual License moved Qualified → Proposal</div>
-          </div>
-          <div class="timeline-item email">
-            <div class="timeline-meta">
-              <span>22 May · 11:30</span><span class="badge muted">EMAIL</span><span>Inbound · from david.park@acme.com</span>
-            </div>
-            <div class="timeline-title">Intro from Sarah — happy to chat on architecture</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-meta">
-              <span>20 May · 09:15</span><span class="badge muted">NOTE</span><span>By Mayur</span>
-            </div>
-            <div class="timeline-title">Discovery prep</div>
-            <div class="timeline-body">Acme uses Salesforce today, looking to migrate. SOC2 is a hard requirement.</div>
-          </div>
+        <div class="timeline" id="timeline-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading activities…</div>
         </div>
       </div>
 
+      <!-- People -->
       <div class="tab-pane" data-pane="people">
-        <table class="table" style="margin-top: 8px;">
-          <thead><tr><th>Name</th><th>Title</th><th>Tags</th><th>Last activity</th></tr></thead>
-          <tbody>
-            <tr><td><a href="contact-detail.html"><strong>Sarah Chen</strong></a></td><td>VP Engineering</td><td><span class="chip">Champion</span></td><td>Today 09:32</td></tr>
-            <tr><td><strong>David Park</strong></td><td>CTO</td><td><span class="chip">Decision Maker</span></td><td>Today 09:32</td></tr>
-            <tr><td><strong>Ellen Lee</strong></td><td>Director, IT</td><td><span class="chip">Influencer</span></td><td>31 May 2026</td></tr>
-            <tr><td><strong>Carlos Mendes</strong></td><td>VP Finance</td><td><span class="chip">Economic Buyer</span></td><td>26 May 2026</td></tr>
-            <tr><td><strong>Priya N.</strong></td><td>Procurement Lead</td><td>—</td><td>20 May 2026</td></tr>
+        <table class="table" style="margin-top:8px;">
+          <thead><tr><th>Name</th><th>Title</th><th>Source</th><th>Created</th></tr></thead>
+          <tbody id="people-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-50);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Deals -->
       <div class="tab-pane" data-pane="deals">
-        <table class="table" style="margin-top: 8px;">
-          <thead><tr><th>Deal</th><th>Stage</th><th class="num">Amount</th><th>Close</th><th>Owner</th></tr></thead>
-          <tbody>
-            <tr><td><a href="deal-detail.html"><strong>Annual License</strong></a></td><td><span class="badge">Proposal</span></td><td class="num">$48,000</td><td>30 Jun 2026</td><td>Mayur S.</td></tr>
+        <table class="table" style="margin-top:8px;">
+          <thead><tr><th>Deal</th><th>Stage</th><th class="num">Amount</th><th>Owner</th></tr></thead>
+          <tbody id="deals-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-50);">Loading…</td></tr>
           </tbody>
         </table>
-        <div class="text-muted mt-3" style="font-size:12px;">1 deal · $48,000 in pipeline · 60% weighted = $28,800</div>
+        <div class="text-muted mt-3" style="font-size:12px;" id="deals-summary"></div>
       </div>
+
+      <!-- Notes -->
       <div class="tab-pane" data-pane="notes">
-        <div class="note-card">
-          <div class="note-head"><div class="note-author">Mayur S.</div><div class="note-date">20 MAY · 09:15</div></div>
-          <div class="note-body">Acme uses Salesforce today, looking to migrate. SOC2 is a hard requirement. Buying signal: their head of engineering left negative review for Salesforce on G2 last quarter.</div>
-        </div>
-        <div class="note-card">
-          <div class="note-head"><div class="note-author">Sarah K.</div><div class="note-date">14 MAY · 14:00</div></div>
-          <div class="note-body">Discovered Acme on a LinkedIn engagement post about engineering scaling pains. Sent intro via Sarah Chen (mutual connection at Stanford).</div>
-        </div>
+        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this company.</div>
       </div>
     </div>
 
@@ -151,50 +115,32 @@
       </div>
 
       <div class="card">
-        <div class="label">People (5)</div>
-        <ul class="summary-list mt-2">
-          <li>
-            <div class="avatar" style="width:24px;height:24px;font-size:9px;">SC</div>
-            <div class="grow"><a href="contact-detail.html"><strong>Sarah Chen</strong></a><div class="text-muted" style="font-size:11px;">VP Engineering</div></div>
-          </li>
-          <li>
-            <div class="avatar" style="width:24px;height:24px;font-size:9px;">DP</div>
-            <div class="grow"><strong>David Park</strong><div class="text-muted" style="font-size:11px;">CTO</div></div>
-          </li>
-          <li>
-            <div class="avatar" style="width:24px;height:24px;font-size:9px;">EL</div>
-            <div class="grow"><strong>Ellen Lee</strong><div class="text-muted" style="font-size:11px;">Director, IT</div></div>
-          </li>
+        <div class="label" id="sidebar-people-label">People</div>
+        <ul class="summary-list mt-2" id="sidebar-people-list">
+          <li><div style="color:var(--ink-50);font-size:12px;">Loading…</div></li>
         </ul>
       </div>
 
       <div class="card">
         <div class="label">Open Deals</div>
-        <ul class="summary-list mt-2">
-          <li>
-            <div class="left-icon">◇</div>
-            <div class="grow">
-              <a href="deal-detail.html"><strong>Annual License</strong></a>
-              <div class="text-muted" style="font-size:11px;">Proposal · $48k · Closes 30 Jun</div>
-            </div>
-          </li>
+        <ul class="summary-list mt-2" id="sidebar-deals-list">
+          <li><div style="color:var(--ink-50);font-size:12px;">Loading…</div></li>
         </ul>
       </div>
 
       <div class="card">
         <div class="label">Tags</div>
-        <div class="row mt-2 gap-2" style="flex-wrap: wrap;">
-          <span class="chip">Enterprise <span class="chip-x">×</span></span>
-          <span class="chip">SaaS <span class="chip-x">×</span></span>
-          <button class="btn sm">+</button>
+        <div class="row mt-2 gap-2" style="flex-wrap:wrap;" id="sidebar-tags">
+          <button class="btn sm">+ Add tag</button>
         </div>
       </div>
     </div>
   </div>
-  
+
       </div>
     </main>
   </div>
+
   <script src="assets/api.js"></script>
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
@@ -204,19 +150,36 @@
 
     function formatDate(iso) {
       if (!iso) return "—";
-      var d = new Date(iso);
-      return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
     }
 
+    function formatRelative(iso) {
+      if (!iso) return "—";
+      var diff = Date.now() - new Date(iso).getTime();
+      var days = Math.floor(diff / 86400000);
+      if (days === 0) return "Today";
+      if (days === 1) return "Yesterday";
+      if (days < 30) return days + "d ago";
+      return formatDate(iso);
+    }
+
+    function fmt$(n) {
+      return "$" + Number(n || 0).toLocaleString();
+    }
+
+    function initials(first, last) {
+      return ((first || "").charAt(0) + (last || "").charAt(0)).toUpperCase();
+    }
+
+    // ── Load company header details ──────────────────────────────────
     async function loadCompany() {
       try {
         var c = await SS_API.Companies.get(companyId);
         var name = c.name || "Unknown";
-        var initial = name.charAt(0).toUpperCase();
 
         document.getElementById("page-title").textContent = name + " · SmartSense CRM";
         document.getElementById("breadcrumb-name").textContent = name;
-        document.getElementById("company-icon").textContent = initial;
+        document.getElementById("company-icon").textContent = name.charAt(0).toUpperCase();
         document.getElementById("company-name").textContent = name;
 
         var subParts = [];
@@ -229,24 +192,184 @@
           if (subParts.length) subEl.textContent += " · ";
           var link = document.createElement("a");
           link.href = "https://" + c.domain;
+          link.target = "_blank";
           link.textContent = c.domain;
           subEl.appendChild(link);
         }
 
-        document.getElementById("detail-domain").textContent = c.domain || "—";
+        document.getElementById("detail-domain").textContent   = c.domain   || "—";
         document.getElementById("detail-industry").textContent = c.industry || "—";
-        document.getElementById("detail-size").textContent = c.size ? c.size + " employees" : "—";
-        document.getElementById("detail-hq").textContent = c.hq || "—";
-        document.getElementById("detail-owner").textContent = c.owner || "—";
-        document.getElementById("detail-created").textContent = formatDate(c.createdAt);
+        document.getElementById("detail-size").textContent     = c.size ? c.size + " employees" : "—";
+        document.getElementById("detail-hq").textContent       = c.hq      || "—";
+        document.getElementById("detail-owner").textContent    = c.owner    || "—";
+        document.getElementById("detail-created").textContent  = formatDate(c.createdAt);
+
+        if (c.tags && c.tags.length) {
+          var tagsEl = document.getElementById("sidebar-tags");
+          tagsEl.innerHTML = c.tags.map(function(t) {
+            return "<span class='chip'>" + t + " <span class='chip-x'>×</span></span>";
+          }).join("") + "<button class='btn sm'>+ Add tag</button>";
+        }
       } catch (err) {
-        console.error("Failed to load company:", err);
+        console.error("loadCompany failed:", err);
         document.getElementById("company-name").textContent = "Company not found";
         document.getElementById("breadcrumb-name").textContent = "Not found";
       }
     }
 
+    // ── Load related contacts, deals, activities ─────────────────────
+    async function loadRelated() {
+      try {
+        var results = await Promise.all([
+          SS_API.Contacts.list(),
+          SS_API.Deals.list(),
+          SS_API.Activities.list()
+        ]);
+
+        var allContacts   = results[0].contacts   || [];
+        var allDeals      = results[1].deals       || [];
+        var allActivities = results[2].activities  || [];
+
+        // Match by company id (coerce to string for safe comparison)
+        var cid = String(companyId);
+        var contacts = allContacts.filter(function(c) {
+          return c.company && String(c.company.id) === cid;
+        });
+        var deals = allDeals.filter(function(d) {
+          return d.company && String(d.company.id) === cid;
+        });
+
+        // Activities linked to any of this company's contacts or deals
+        var contactIds = new Set(contacts.map(function(c) { return String(c.id); }));
+        var dealIds    = new Set(deals.map(function(d)    { return String(d.id); }));
+        var activities = allActivities.filter(function(a) {
+          return (a.contactId && contactIds.has(String(a.contactId)))
+              || (a.dealId    && dealIds.has(String(a.dealId)));
+        });
+
+        // ── KPIs ──────────────────────────────────────────────────
+        var openDeals     = deals.filter(function(d) { return d.stage !== "Closed Won" && d.stage !== "Closed Lost"; });
+        var totalPipeline = openDeals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+
+        document.getElementById("kpi-deals").textContent      = openDeals.length;
+        document.getElementById("kpi-deals-sub").textContent  = fmt$(totalPipeline) + " total";
+        document.getElementById("kpi-people").textContent     = contacts.length;
+
+        var thirtyDaysAgo = Date.now() - 30 * 86400000;
+        var recentActs    = activities.filter(function(a) { return new Date(a.createdAt).getTime() > thirtyDaysAgo; });
+        document.getElementById("kpi-activities").textContent     = recentActs.length;
+        document.getElementById("kpi-activities-sub").textContent = "in last 30 days";
+
+        if (activities.length > 0) {
+          var latest = activities.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
+          document.getElementById("kpi-last-activity").textContent     = formatRelative(latest.createdAt);
+          document.getElementById("kpi-last-activity-sub").textContent = latest.type || latest.title || "—";
+        } else {
+          document.getElementById("kpi-last-activity").textContent     = "—";
+          document.getElementById("kpi-last-activity-sub").textContent = "No activity yet";
+        }
+
+        // ── Tab labels ────────────────────────────────────────────
+        document.getElementById("tab-people-btn").textContent = "People (" + contacts.length + ")";
+        document.getElementById("tab-deals-btn").textContent  = "Deals (" + deals.length + ")";
+
+        // ── Timeline tab ──────────────────────────────────────────
+        var tlEl = document.getElementById("timeline-list");
+        if (activities.length === 0) {
+          tlEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No activities logged yet.</div>";
+        } else {
+          var sorted = activities.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+          tlEl.innerHTML = sorted.map(function(a) {
+            var type = (a.type || "NOTE").toUpperCase();
+            var who  = a.user ? (a.user.firstName || "") + " " + (a.user.lastName || "") : "";
+            return "<div class='timeline-item'>" +
+              "<div class='timeline-meta'>" +
+                "<span>" + formatDate(a.createdAt) + "</span>" +
+                "<span class='badge muted'>" + type + "</span>" +
+                (who.trim() ? "<span>By " + who.trim() + "</span>" : "") +
+              "</div>" +
+              "<div class='timeline-title'>" + (a.title || "Activity") + "</div>" +
+              (a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "") +
+            "</div>";
+          }).join("");
+        }
+
+        // ── People tab ────────────────────────────────────────────
+        var peopleTbody = document.getElementById("people-tbody");
+        if (contacts.length === 0) {
+          peopleTbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts linked to this company.</td></tr>";
+        } else {
+          peopleTbody.innerHTML = contacts.map(function(c) {
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+              "<td><div class='row gap-2'>" +
+                "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
+                "<strong>" + c.firstName + " " + c.lastName + "</strong>" +
+              "</div></td>" +
+              "<td>" + (c.title || "—") + "</td>" +
+              "<td>" + (c.source ? "<span class='badge muted'>" + c.source + "</span>" : "—") + "</td>" +
+              "<td>" + formatDate(c.createdAt) + "</td>" +
+            "</tr>";
+          }).join("");
+        }
+
+        // ── Deals tab ─────────────────────────────────────────────
+        var dealsTbody = document.getElementById("deals-tbody");
+        if (deals.length === 0) {
+          dealsTbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No deals linked to this company.</td></tr>";
+          document.getElementById("deals-summary").textContent = "";
+        } else {
+          dealsTbody.innerHTML = deals.map(function(d) {
+            return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+              "<td><strong>" + d.name + "</strong></td>" +
+              "<td><span class='badge muted'>" + (d.stage || "—") + "</span></td>" +
+              "<td class='num'>" + fmt$(d.amount) + "</td>" +
+              "<td>" + (d.owner ? d.owner.firstName + " " + d.owner.lastName : "—") + "</td>" +
+            "</tr>";
+          }).join("");
+          var pipelineTotal = deals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+          document.getElementById("deals-summary").textContent =
+            deals.length + " deal" + (deals.length !== 1 ? "s" : "") + " · " + fmt$(pipelineTotal) + " total pipeline";
+        }
+
+        // ── Sidebar: People ───────────────────────────────────────
+        var spLabel = document.getElementById("sidebar-people-label");
+        var spList  = document.getElementById("sidebar-people-list");
+        spLabel.textContent = "People (" + contacts.length + ")";
+        if (contacts.length === 0) {
+          spList.innerHTML = "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>";
+        } else {
+          spList.innerHTML = contacts.slice(0, 5).map(function(c) {
+            return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail.html?id=" + c.id + "'\">" +
+              "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
+              "<div class='grow'><strong>" + c.firstName + " " + c.lastName + "</strong>" +
+                "<div class='text-muted' style='font-size:11px;'>" + (c.title || "—") + "</div>" +
+              "</div></li>";
+          }).join("");
+        }
+
+        // ── Sidebar: Deals ────────────────────────────────────────
+        var sdList = document.getElementById("sidebar-deals-list");
+        if (openDeals.length === 0) {
+          sdList.innerHTML = "<li><div style='color:var(--ink-50);font-size:12px;'>No open deals.</div></li>";
+        } else {
+          sdList.innerHTML = openDeals.slice(0, 4).map(function(d) {
+            return "<li style='cursor:pointer;' onclick=\"window.location.href='deal-detail.html?id=" + d.id + "'\">" +
+              "<div class='left-icon'>◇</div>" +
+              "<div class='grow'><strong>" + d.name + "</strong>" +
+                "<div class='text-muted' style='font-size:11px;'>" + (d.stage || "") + " · " + fmt$(d.amount) + "</div>" +
+              "</div></li>";
+          }).join("");
+        }
+
+      } catch (err) {
+        console.error("loadRelated failed:", err);
+        document.getElementById("timeline-list").innerHTML =
+          "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load related data.</div>";
+      }
+    }
+
     loadCompany();
+    loadRelated();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
