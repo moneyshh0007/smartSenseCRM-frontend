@@ -1699,6 +1699,7 @@
 
       // 3. Skip clicks inside slide-over and plain links
       if (e.target.closest(".slide-over")) return;
+      if (e.target.closest(".role-switcher-menu")) return;
       if (e.target.closest("a")) return;
 
       // 4. Button delegation
