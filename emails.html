@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    /* ── Email layout ─────────────────────────────────── */
+    .email-layout {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+    /* Folder sidebar */
+    .email-folders {
+      border-right: var(--rule);
+      padding: var(--space-4) var(--space-3);
+      background: var(--paper-warm);
+      overflow-y: auto;
+    }
+    .compose-btn {
+      display: block; width: 100%; margin-bottom: var(--space-4);
+      padding: 8px 12px; background: var(--ink); color: var(--paper);
+      border: none; border-radius: var(--radius); font-size: 12px;
+      font-family: var(--body); font-weight: 500; cursor: pointer;
+      text-align: left;
+    }
+    .compose-btn:hover { background: #222; }
+    .folder-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 8px; border-radius: var(--radius); cursor: pointer;
+      font-size: 12px; color: var(--ink-70); margin-bottom: 2px;
+      border: none; background: none; width: 100%; text-align: left;
+      font-family: var(--body);
+    }
+    .folder-item:hover { background: var(--ink-05); color: var(--ink); }
+    .folder-item.active { background: var(--paper); color: var(--ink); font-weight: 500; border: var(--rule); }
+    .folder-count { font-family: var(--mono); font-size: 10px; color: var(--ink-50); }
+    .folder-divider { height: 1px; background: var(--ink-10); margin: var(--space-3) 0; }
+
+    /* Email main area (list + detail) */
+    .email-main {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      overflow: hidden;
+    }
+    /* Email list pane */
+    .email-list-pane {
+      border-right: var(--rule);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .email-list-toolbar {
+      padding: 10px var(--space-4);
+      border-bottom: var(--rule);
+      display: flex; align-items: center; gap: 8px;
+      background: var(--paper);
+    }
+    .email-list-toolbar input[type=search] {
+      flex: 1; border: var(--rule); border-radius: var(--radius);
+      padding: 5px 10px; font-size: 12px; background: var(--paper-warm);
+      outline: none; font-family: var(--body);
+    }
+    .email-list-toolbar input[type=search]:focus { border-color: var(--ink); }
+    .email-list { overflow-y: auto; flex: 1; }
+    .email-row {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 0 10px;
+      padding: 12px var(--space-4);
+      border-bottom: var(--rule);
+      cursor: pointer;
+      background: var(--paper);
+      align-items: start;
+      transition: background 80ms;
+    }
+    .email-row:hover { background: var(--ink-03); }
+    .email-row.active { background: var(--ink-05); border-left: 3px solid var(--ink); }
+    .email-row.unread .email-subject { font-weight: 600; color: var(--ink); }
+    .email-row.unread .email-sender { font-weight: 600; }
+    .email-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--ink); color: var(--paper);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; font-family: var(--mono);
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .email-sender { font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+    .email-subject { font-size: 12px; color: var(--ink-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .email-preview { font-size: 11px; color: var(--ink-50); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 2px; }
+    .email-time { font-family: var(--mono); font-size: 10px; color: var(--ink-50); white-space: nowrap; }
+    .email-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+    .email-link-badge {
+      display: inline-block; padding: 1px 5px; border: var(--rule);
+      border-radius: 2px; font-family: var(--mono); font-size: 9px;
+      color: var(--ink-50); white-space: nowrap; margin-top: 2px;
+    }
+
+    /* Email detail pane */
+    .email-detail-pane {
+      display: flex; flex-direction: column; overflow: hidden;
+      background: var(--paper);
+    }
+    .email-detail-empty {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: var(--ink-30); font-size: 13px; flex-direction: column; gap: 8px;
+    }
+    .email-detail-content { flex: 1; overflow-y: auto; padding: var(--space-6); }
+    .email-detail-header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: var(--rule);
+      background: var(--paper);
+    }
+    .email-detail-subject { font-size: 20px; font-weight: 600; margin-bottom: var(--space-3); }
+    .email-detail-meta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-70); }
+    .email-detail-meta span { display: flex; gap: 6px; }
+    .email-detail-meta strong { color: var(--ink); min-width: 32px; }
+    .email-detail-actions {
+      padding: 10px var(--space-6);
+      border-bottom: var(--rule);
+      display: flex; gap: var(--space-3);
+      background: var(--paper-warm);
+    }
+    .email-body {
+      font-size: 14px; line-height: 1.7; color: var(--ink-70);
+      white-space: pre-wrap;
+    }
+    .email-thread-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: var(--space-5) 0; color: var(--ink-30); font-size: 11px;
+      font-family: var(--mono);
+    }
+    .email-thread-divider::before, .email-thread-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--rule-thin);
+    }
+    .email-linked-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border: var(--rule); border-radius: var(--radius);
+      margin-top: var(--space-4); font-size: 12px; cursor: pointer;
+      background: var(--paper-warm);
+    }
+    .email-linked-card:hover { border-color: var(--ink); }
+    .email-linked-card .left-icon { font-size: 16px; color: var(--ink-50); }
+
+    /* Compose panel */
+    .compose-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35);
+      z-index: 200; align-items: flex-end; justify-content: flex-end;
+      padding: 0 var(--space-5) 0 0;
+    }
+    .compose-overlay.open { display: flex; }
+    .compose-panel {
+      width: 520px; height: 580px; background: var(--paper);
+      border-radius: var(--radius) var(--radius) 0 0;
+      border: var(--rule-strong); border-bottom: none;
+      display: flex; flex-direction: column;
+      box-shadow: var(--shadow-pop);
+    }
+    .compose-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: var(--ink); color: var(--paper);
+      border-radius: var(--radius) var(--radius) 0 0; font-size: 13px; font-weight: 500;
+    }
+    .compose-head button { background: none; border: none; color: rgba(255,255,255,.7); cursor: pointer; font-size: 18px; line-height: 1; }
+    .compose-head button:hover { color: var(--paper); }
+    .compose-field {
+      display: flex; align-items: center; padding: 0 14px;
+      border-bottom: var(--rule); gap: 8px; min-height: 38px;
+    }
+    .compose-field label { font-size: 11px; font-family: var(--mono); color: var(--ink-50); min-width: 24px; }
+    .compose-field input {
+      flex: 1; border: none; outline: none; font-size: 13px;
+      font-family: var(--body); background: transparent; padding: 8px 0;
+    }
+    .compose-body-area {
+      flex: 1; padding: 12px 14px; overflow-y: auto;
+    }
+    .compose-body-area textarea {
+      width: 100%; height: 100%; border: none; outline: none;
+      font-size: 13px; font-family: var(--body); resize: none;
+      background: transparent; line-height: 1.6;
+    }
+    .compose-footer {
+      padding: 10px 14px; border-top: var(--rule);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--paper-warm);
+    }
+  </style>
+</head>
+<body data-page="emails" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main" style="overflow:hidden;">
+      <div class="topbar">
+        <div class="breadcrumb"><a href="contacts.html">Records</a><span class="sep">/</span><a href="emails.html" class="current">Email</a></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+
+      <div class="email-layout">
+
+        <!-- ── Folder sidebar ─────────────────────────── -->
+        <div class="email-folders">
+          <button class="compose-btn" onclick="openCompose()">✎ &nbsp;Compose</button>
+
+          <button class="folder-item active" onclick="switchFolder('inbox', this)">
+            <span>Inbox</span><span class="folder-count" id="cnt-inbox">3</span>
+          </button>
+          <button class="folder-item" onclick="switchFolder('starred', this)">
+            <span>Starred</span><span class="folder-count"></span>
+          </button>
+          <button class="folder-item" onclick="switchFolder('sent', this)">
+            <span>Sent</span><span class="folder-count"></span>
+          </button>
+          <button class="folder-item" onclick="switchFolder('drafts', this)">
+            <span>Drafts</span><span class="folder-count">1</span>
+          </button>
+
+          <div class="folder-divider"></div>
+
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-30);padding:0 8px 6px;">Labels</div>
+          <button class="folder-item" onclick="switchFolder('deals', this)">
+            <span>Deal emails</span>
+          </button>
+          <button class="folder-item" onclick="switchFolder('contacts', this)">
+            <span>Contact emails</span>
+          </button>
+        </div>
+
+        <!-- ── Email list + detail ────────────────────── -->
+        <div class="email-main">
+
+          <!-- List pane -->
+          <div class="email-list-pane">
+            <div class="email-list-toolbar">
+              <input type="search" placeholder="Search emails…" oninput="filterEmails(this.value)" />
+              <button class="btn sm" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div class="email-list" id="email-list">
+              <!-- populated by JS -->
+            </div>
+          </div>
+
+          <!-- Detail pane -->
+          <div class="email-detail-pane" id="email-detail-pane">
+            <div class="email-detail-empty" id="detail-empty">
+              <div style="font-size:32px;">✉</div>
+              <div>Select an email to read</div>
+            </div>
+            <div id="detail-content" style="display:none;flex:1;overflow:hidden;display:none;flex-direction:column;">
+              <div class="email-detail-header">
+                <div class="email-detail-subject" id="detail-subject"></div>
+                <div class="email-detail-meta" id="detail-meta"></div>
+              </div>
+              <div class="email-detail-actions">
+                <button class="btn sm" onclick="replyEmail()">← Reply</button>
+                <button class="btn sm" onclick="replyAllEmail()">← Reply all</button>
+                <button class="btn sm" onclick="forwardEmail()">→ Forward</button>
+                <button class="btn sm" style="margin-left:auto;" onclick="deleteEmail()">Delete</button>
+              </div>
+              <div class="email-detail-content" id="detail-body"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Compose overlay ──────────────────────────── -->
+      <div class="compose-overlay" id="compose-overlay" onclick="if(event.target===this)closeCompose()">
+        <div class="compose-panel">
+          <div class="compose-head">
+            <span>New email</span>
+            <div style="display:flex;gap:8px;">
+              <button onclick="minimiseCompose()" title="Minimise">─</button>
+              <button onclick="closeCompose()" title="Close">×</button>
+            </div>
+          </div>
+          <div class="compose-field">
+            <label>To</label>
+            <input id="compose-to" type="email" placeholder="recipient@company.com" list="contacts-list" />
+            <datalist id="contacts-list"></datalist>
+          </div>
+          <div class="compose-field">
+            <label>CC</label>
+            <input id="compose-cc" type="email" placeholder="" />
+          </div>
+          <div class="compose-field">
+            <label>Subj</label>
+            <input id="compose-subject" type="text" placeholder="Subject" />
+          </div>
+          <div class="compose-body-area">
+            <textarea id="compose-body" placeholder="Write your message…"></textarea>
+          </div>
+          <div class="compose-footer">
+            <button class="btn primary" onclick="sendEmail()">Send</button>
+            <button class="btn" onclick="saveDraft()">Save draft</button>
+            <button class="btn sm" style="margin-left:auto;" onclick="closeCompose()">Discard</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    // ── Mock email data ─────────────────────────────────────────────
+    var EMAILS = [
+      {
+        id: 1, folder: "inbox", unread: true, starred: false,
+        from: "Sarah Chen", fromEmail: "sarah.chen@acme.com",
+        to: "Mayur S.", toEmail: "mayur@smartsense.io",
+        subject: "Re: Pricing options for annual license",
+        preview: "Thanks for the breakdown. The mid-tier looks right for us…",
+        body: "Hi Mayur,\n\nThanks for the breakdown. The mid-tier looks right for us, but our CFO wants to confirm the data residency commitment — can you send the EU DPA?\n\nAlso, David flagged that they need SSO (Okta) and audit log export before sign-off. Can you confirm these are on your roadmap?\n\nLooking forward to moving this forward.\n\nBest,\nSarah Chen\nVP Engineering, Acme Corp",
+        date: "2026-06-08T09:32:00", dateLabel: "09:32",
+        linkedContact: "Sarah Chen", linkedDeal: "Acme — Annual License",
+        linkedContactId: "", linkedDealId: ""
+      },
+      {
+        id: 2, folder: "inbox", unread: true, starred: true,
+        from: "Riya Gupta", fromEmail: "riya.gupta@northwind.com",
+        to: "Mayur S.", toEmail: "mayur@smartsense.io",
+        subject: "Follow-up: Northwind Multi-year deal",
+        preview: "Hi Mayur, just checking in on the multi-year proposal you sent…",
+        body: "Hi Mayur,\n\nJust checking in on the multi-year proposal you sent over last week. Our procurement team has reviewed it and we have a few questions:\n\n1. Can you offer a volume discount for the 500-seat tier?\n2. What are the SLA terms for enterprise support?\n3. Is there flexibility on the payment schedule — we prefer quarterly billing.\n\nWe're hoping to get this wrapped up by end of June.\n\nThanks,\nRiya Gupta\nHead of Sales, Northwind Corp",
+        date: "2026-06-07T14:20:00", dateLabel: "Yesterday",
+        linkedContact: "Riya Gupta", linkedDeal: "Northwind — Multi-year",
+        linkedContactId: "", linkedDealId: ""
+      },
+      {
+        id: 3, folder: "inbox", unread: true, starred: false,
+        from: "Hana Kim", fromEmail: "hana.kim@initech.com",
+        to: "Mayur S.", toEmail: "mayur@smartsense.io",
+        subject: "Initech Enterprise — Security questionnaire",
+        preview: "Please find attached our standard security questionnaire…",
+        body: "Hi Mayur,\n\nPlease find attached our standard security questionnaire for new SaaS vendors. Our security team requires this to be completed before we can proceed with any contract.\n\nKey areas they'll focus on:\n- SOC 2 Type II compliance\n- Data residency options (we need EU hosting)\n- Penetration testing reports from the last 12 months\n- Incident response SLA\n\nPlease complete and return within 5 business days.\n\nBest,\nHana Kim\nHead of People, Initech",
+        date: "2026-06-06T10:45:00", dateLabel: "2 Jun",
+        linkedContact: "Hana Kim", linkedDeal: "Initech — Enterprise",
+        linkedContactId: "", linkedDealId: ""
+      },
+      {
+        id: 4, folder: "sent", unread: false, starred: false,
+        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
+        to: "Sarah Chen", toEmail: "sarah.chen@acme.com",
+        subject: "Pricing options for annual license",
+        preview: "Hi Sarah, attached are the three tier options we discussed…",
+        body: "Hi Sarah,\n\nAttached are the three tier options we discussed on yesterday's call:\n\n• Starter (up to 50 seats): $24,000/yr\n• Mid-tier (up to 200 seats): $48,000/yr  \n• Enterprise (unlimited): $96,000/yr\n\nAll tiers include SSO, audit logging, and 99.9% SLA. EU data residency is available on mid-tier and above.\n\nHappy to set up a follow-up call this week to walk through the details.\n\nBest,\nMayur S.\nSmartSense CRM",
+        date: "2026-06-05T18:47:00", dateLabel: "5 Jun",
+        linkedContact: "Sarah Chen", linkedDeal: "Acme — Annual License",
+        linkedContactId: "", linkedDealId: ""
+      },
+      {
+        id: 5, folder: "sent", unread: false, starred: false,
+        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
+        to: "Riya Gupta", toEmail: "riya.gupta@northwind.com",
+        subject: "Northwind — Multi-year proposal",
+        preview: "Hi Riya, please find attached the multi-year pricing proposal…",
+        body: "Hi Riya,\n\nPlease find attached the multi-year pricing proposal for Northwind Corp.\n\nHighlights:\n- 3-year deal at $96,000/year (saves $18,000 vs monthly billing)\n- Dedicated CSM from day one\n- Quarterly business reviews\n- Custom onboarding program\n\nThis pricing is valid until 30 June 2026. Let me know if you'd like to discuss further.\n\nBest,\nMayur S.",
+        date: "2026-06-02T11:30:00", dateLabel: "2 Jun",
+        linkedContact: "Riya Gupta", linkedDeal: "Northwind — Multi-year",
+        linkedContactId: "", linkedDealId: ""
+      },
+      {
+        id: 6, folder: "drafts", unread: false, starred: false,
+        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
+        to: "Aiko Liu", toEmail: "aiko.liu@globex.io",
+        subject: "Globex Inc — Annual contract renewal",
+        preview: "Hi Aiko, I wanted to touch base on Globex's upcoming renewal…",
+        body: "Hi Aiko,\n\nI wanted to touch base on Globex's upcoming renewal — your current contract expires on 31 July 2026.\n\n[DRAFT — need to add pricing details]",
+        date: "2026-06-09T08:00:00", dateLabel: "Draft",
+        linkedContact: "Aiko Liu", linkedDeal: "",
+        linkedContactId: "", linkedDealId: ""
+      }
+    ];
+
+    var currentFolder = "inbox";
+    var selectedEmailId = null;
+
+    // ── Folder switching ───────────────────────────────────────────
+    function switchFolder(folder, btn) {
+      currentFolder = folder;
+      document.querySelectorAll(".folder-item").forEach(function(f) { f.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      selectedEmailId = null;
+      showDetailEmpty();
+      renderEmailList();
+    }
+
+    // ── Render email list ──────────────────────────────────────────
+    function renderEmailList(filter) {
+      var list = document.getElementById("email-list");
+      var emails = EMAILS.filter(function(e) {
+        if (currentFolder === "starred") return e.starred;
+        if (currentFolder === "deals")    return !!e.linkedDeal;
+        if (currentFolder === "contacts") return !!e.linkedContact;
+        return e.folder === currentFolder;
+      });
+      if (filter) {
+        var q = filter.toLowerCase();
+        emails = emails.filter(function(e) {
+          return (e.from + e.subject + e.preview).toLowerCase().includes(q);
+        });
+      }
+      if (emails.length === 0) {
+        list.innerHTML = "<div style='padding:40px;text-align:center;color:var(--ink-50);font-size:13px;'>No emails in this folder.</div>";
+        return;
+      }
+      list.innerHTML = emails.map(function(e) {
+        var inits = e.from.split(" ").map(function(w) { return w[0]; }).join("").toUpperCase().slice(0,2);
+        var linkBadge = e.linkedDeal
+          ? "<span class='email-link-badge'>◇ " + e.linkedDeal + "</span>"
+          : e.linkedContact
+          ? "<span class='email-link-badge'>○ " + e.linkedContact + "</span>"
+          : "";
+        return "<div class='email-row" + (e.unread ? " unread" : "") + (e.id === selectedEmailId ? " active" : "") + "' onclick='selectEmail(" + e.id + ")'>" +
+          "<div class='email-avatar' style='background:" + avatarColor(e.from) + ";'>" + inits + "</div>" +
+          "<div style='min-width:0;'>" +
+            "<div class='email-sender'>" + e.from + "</div>" +
+            "<div class='email-subject'>" + e.subject + "</div>" +
+            "<div class='email-preview'>" + e.preview + "</div>" +
+            linkBadge +
+          "</div>" +
+          "<div class='email-meta'>" +
+            "<span class='email-time'>" + e.dateLabel + "</span>" +
+            (e.unread ? "<span class='email-unread-dot'></span>" : "") +
+            (e.starred ? "<span style='font-size:11px;color:var(--ink-50);'>★</span>" : "") +
+          "</div>" +
+        "</div>";
+      }).join("");
+    }
+
+    function avatarColor(name) {
+      var colors = ["#1d3461","#1b5e37","#5a3e85","#663c1f","#2a4858","#5c3d1e"];
+      var h = 0;
+      for (var i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+      return colors[Math.abs(h) % colors.length];
+    }
+
+    function filterEmails(q) { renderEmailList(q); }
+
+    function markAllRead() {
+      EMAILS.forEach(function(e) { if (e.folder === currentFolder) e.unread = false; });
+      document.getElementById("cnt-inbox").textContent =
+        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
+      renderEmailList();
+    }
+
+    // ── Select & show email ────────────────────────────────────────
+    function selectEmail(id) {
+      var email = EMAILS.find(function(e) { return e.id === id; });
+      if (!email) return;
+      email.unread = false;
+      selectedEmailId = id;
+      renderEmailList();
+      showDetail(email);
+      // Update inbox unread count
+      document.getElementById("cnt-inbox").textContent =
+        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
+    }
+
+    function showDetail(email) {
+      document.getElementById("detail-empty").style.display = "none";
+      var dc = document.getElementById("detail-content");
+      dc.style.display = "flex";
+
+      document.getElementById("detail-subject").textContent = email.subject;
+
+      var meta = "<span><strong>From</strong>" + email.from + " &lt;" + email.fromEmail + "&gt;</span>" +
+                 "<span><strong>To</strong>" + email.to + " &lt;" + email.toEmail + "&gt;</span>" +
+                 "<span><strong>Date</strong>" + new Date(email.date).toLocaleString() + "</span>";
+      document.getElementById("detail-meta").innerHTML = meta;
+
+      var bodyHtml = "<div class='email-body'>" + escHtml(email.body) + "</div>";
+
+      // Linked contact/deal cards
+      var linked = "";
+      if (email.linkedContact) {
+        linked += "<div class='email-linked-card' onclick='void(0)'>" +
+          "<span class='left-icon'>○</span>" +
+          "<div><div style='font-weight:500;'>" + email.linkedContact + "</div>" +
+          "<div class='text-muted' style='font-size:11px;'>Linked contact</div></div>" +
+          "</div>";
+      }
+      if (email.linkedDeal) {
+        linked += "<div class='email-linked-card' onclick='void(0)'>" +
+          "<span class='left-icon'>◇</span>" +
+          "<div><div style='font-weight:500;'>" + email.linkedDeal + "</div>" +
+          "<div class='text-muted' style='font-size:11px;'>Linked deal</div></div>" +
+          "</div>";
+      }
+      if (linked) linked = "<div style='margin-top:var(--space-5);'><div class='text-muted mb-2' style='font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;'>Linked records</div>" + linked + "</div>";
+
+      document.getElementById("detail-body").innerHTML = bodyHtml + linked;
+    }
+
+    function showDetailEmpty() {
+      document.getElementById("detail-empty").style.display = "flex";
+      var dc = document.getElementById("detail-content");
+      dc.style.display = "none";
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    // ── Email actions ──────────────────────────────────────────────
+    function replyEmail() {
+      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
+      if (!email) return;
+      document.getElementById("compose-to").value = email.fromEmail;
+      document.getElementById("compose-subject").value = "Re: " + email.subject.replace(/^Re:\s*/i, "");
+      document.getElementById("compose-body").value = "\n\n--- Original message ---\n" + email.body;
+      openCompose();
+    }
+
+    function replyAllEmail() { replyEmail(); }
+
+    function forwardEmail() {
+      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
+      if (!email) return;
+      document.getElementById("compose-to").value = "";
+      document.getElementById("compose-subject").value = "Fwd: " + email.subject.replace(/^Fwd:\s*/i, "");
+      document.getElementById("compose-body").value = "\n\n--- Forwarded message ---\nFrom: " + email.from + " <" + email.fromEmail + ">\n\n" + email.body;
+      openCompose();
+    }
+
+    function deleteEmail() {
+      if (!selectedEmailId) return;
+      EMAILS = EMAILS.filter(function(e) { return e.id !== selectedEmailId; });
+      selectedEmailId = null;
+      showDetailEmpty();
+      renderEmailList();
+      if (window.SS_toast) window.SS_toast("Email deleted");
+    }
+
+    // ── Compose ────────────────────────────────────────────────────
+    function openCompose() {
+      document.getElementById("compose-overlay").classList.add("open");
+      setTimeout(function() { document.getElementById("compose-to").focus(); }, 100);
+    }
+
+    function closeCompose() {
+      document.getElementById("compose-overlay").classList.remove("open");
+      document.getElementById("compose-to").value = "";
+      document.getElementById("compose-cc").value = "";
+      document.getElementById("compose-subject").value = "";
+      document.getElementById("compose-body").value = "";
+    }
+
+    function minimiseCompose() {
+      document.getElementById("compose-overlay").classList.remove("open");
+    }
+
+    function sendEmail() {
+      var to      = document.getElementById("compose-to").value.trim();
+      var subject = document.getElementById("compose-subject").value.trim();
+      var body    = document.getElementById("compose-body").value.trim();
+      if (!to)      { alert("Please enter a recipient."); return; }
+      if (!subject) { alert("Please enter a subject."); return; }
+      if (!body)    { alert("Please write a message."); return; }
+
+      // Add to Sent folder
+      var newEmail = {
+        id: Date.now(), folder: "sent", unread: false, starred: false,
+        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
+        to: to, toEmail: to,
+        subject: subject,
+        preview: body.slice(0, 80) + (body.length > 80 ? "…" : ""),
+        body: body,
+        date: new Date().toISOString(), dateLabel: "Just now",
+        linkedContact: "", linkedDeal: ""
+      };
+      EMAILS.unshift(newEmail);
+      closeCompose();
+      if (window.SS_toast) window.SS_toast("Email sent", { sub: "To: " + to });
+    }
+
+    function saveDraft() {
+      var to      = document.getElementById("compose-to").value.trim();
+      var subject = document.getElementById("compose-subject").value.trim() || "(no subject)";
+      var body    = document.getElementById("compose-body").value.trim();
+
+      var draft = {
+        id: Date.now(), folder: "drafts", unread: false, starred: false,
+        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
+        to: to || "", toEmail: to || "",
+        subject: subject,
+        preview: body.slice(0, 80),
+        body: body,
+        date: new Date().toISOString(), dateLabel: "Draft",
+        linkedContact: "", linkedDeal: ""
+      };
+      EMAILS.unshift(draft);
+      closeCompose();
+      if (window.SS_toast) window.SS_toast("Draft saved");
+    }
+
+    // ── Populate contacts datalist ─────────────────────────────────
+    async function loadContactSuggestions() {
+      try {
+        var data = await SS_API.Contacts.list();
+        var dl   = document.getElementById("contacts-list");
+        (data.contacts || []).forEach(function(c) {
+          if (c.email) {
+            var opt = document.createElement("option");
+            opt.value = c.email;
+            opt.label = c.firstName + " " + c.lastName;
+            dl.appendChild(opt);
+          }
+        });
+      } catch(e) {}
+    }
+
+    // ── Init ───────────────────────────────────────────────────────
+    renderEmailList();
+    loadContactSuggestions();
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>

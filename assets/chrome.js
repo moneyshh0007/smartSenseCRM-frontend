@@ -16,6 +16,7 @@
       { id: "companies", href: "companies.html",  label: "Companies",  icon: "□", count: "412" },
       { id: "deals",     href: "deals.html",      label: "Deals",      icon: "◇", count: "47" },
       { id: "activities",href: "activities.html", label: "Activities", icon: "≡", count: "" },
+      { id: "emails",    href: "emails.html",     label: "Email",      icon: "✉", count: "3" },
       { id: "tasks",     href: "tasks.html",      label: "Tasks",      icon: "✓", count: "8" },
     ]},
     { group: "Tools", items: [
