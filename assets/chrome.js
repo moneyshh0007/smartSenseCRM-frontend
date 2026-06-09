@@ -2161,39 +2161,74 @@
     const drawer = document.createElement("div");
     drawer.className = "notif-drawer";
     drawer.id = "notif-drawer";
+    const NOTIFS = [
+      {
+        unread: true,
+        meta: "2 min ago · DEAL",
+        title: "Acme — Annual License moved to Proposal",
+        body: "Mayur S. updated the stage",
+        href: "deals.html"
+      },
+      {
+        unread: true,
+        meta: "15 min ago · ROTTING",
+        title: "Northwind — Multi-year flagged as stalled",
+        body: "27 days in Proposal without activity",
+        href: "deals.html"
+      },
+      {
+        unread: true,
+        meta: "1 hr ago · BILLING",
+        title: "Seat usage at 95%",
+        body: "38 of 40 seats used · auto-alert from F9.4",
+        href: "settings-billing.html"
+      },
+      {
+        unread: false,
+        meta: "3 hr ago · MENTION",
+        title: "Sarah K. mentioned you in a note",
+        body: '"@mayur please send security PDF before next call"',
+        href: "activities.html"
+      },
+      {
+        unread: false,
+        meta: "Yesterday · SCHEMA",
+        title: "Schema v2 → v3 published",
+        body: "2 fields added to Deal object",
+        href: "settings-data-model.html"
+      },
+    ];
+
     drawer.innerHTML = `
       <div class="drawer-head">
         <h3>Notifications</h3>
-        <button class="btn sm">Mark all read</button>
+        <button class="btn sm" id="notif-mark-all">Mark all read</button>
       </div>
       <div class="drawer-body">
-        <div class="notif-item unread">
-          <div class="notif-meta">2 min ago · DEAL</div>
-          <div class="notif-title">Acme — Annual License moved to Proposal</div>
-          <div class="notif-body">Mayur S. updated the stage</div>
-        </div>
-        <div class="notif-item unread">
-          <div class="notif-meta">15 min ago · ROTTING</div>
-          <div class="notif-title">Northwind — Multi-year flagged as stalled</div>
-          <div class="notif-body">27 days in Proposal without activity</div>
-        </div>
-        <div class="notif-item unread">
-          <div class="notif-meta">1 hr ago · BILLING</div>
-          <div class="notif-title">Seat usage at 95%</div>
-          <div class="notif-body">38 of 40 seats used · auto-alert from F9.4</div>
-        </div>
-        <div class="notif-item">
-          <div class="notif-meta">3 hr ago · MENTION</div>
-          <div class="notif-title">Sarah K. mentioned you in a note</div>
-          <div class="notif-body">"@mayur please send security PDF before next call"</div>
-        </div>
-        <div class="notif-item">
-          <div class="notif-meta">Yesterday · SCHEMA</div>
-          <div class="notif-title">Schema v2 → v3 published</div>
-          <div class="notif-body">2 fields added to Deal object</div>
-        </div>
+        ${NOTIFS.map((n, i) => `
+          <div class="notif-item ${n.unread ? 'unread' : ''}" data-notif-idx="${i}" style="cursor:pointer;">
+            <div class="notif-meta">${n.meta}</div>
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-body">${n.body}</div>
+          </div>
+        `).join("")}
       </div>
     `;
+
+    // Click a notification → mark read, close drawer, navigate
+    drawer.querySelectorAll(".notif-item[data-notif-idx]").forEach(function(item) {
+      item.addEventListener("click", function() {
+        var idx = parseInt(item.getAttribute("data-notif-idx"));
+        item.classList.remove("unread");
+        var badge = document.getElementById("notif-badge");
+        var remaining = drawer.querySelectorAll(".notif-item.unread").length;
+        if (badge) badge.style.display = remaining > 0 ? "" : "none";
+        drawer.classList.remove("open");
+        if (NOTIFS[idx] && NOTIFS[idx].href) {
+          window.location.href = NOTIFS[idx].href;
+        }
+      });
+    });
     document.body.appendChild(drawer);
     document.addEventListener("click", e => {
       if (!drawer.contains(e.target) && !e.target.closest("[data-trigger='notifications']")) {
