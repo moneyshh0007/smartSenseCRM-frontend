@@ -49,7 +49,7 @@
     </div>
     <div class="kpi">
       <div class="kpi-label">Stalled deals</div>
-      <div class="kpi-value">12</div>
+      <div class="kpi-value" id="kpi-stalled">—</div>
       <div class="kpi-delta">21+ days inactive</div>
     </div>
     <div class="kpi">
@@ -274,6 +274,32 @@
         });
 
         wireKanbanDragDrop();
+
+        // ── Compute stalled count and sync KPI tile + sidebar ────────────
+        var activeStages = ["Discovery", "Qualified", "Proposal", "Negotiation"];
+        var stalledCount = data.deals.filter(function(d) {
+          if (activeStages.indexOf(d.stage) === -1) return false;
+          if (!d.updatedAt) return false;
+          return (Date.now() - new Date(d.updatedAt).getTime()) / 86400000 >= 21;
+        }).length;
+
+        // Update KPI tile
+        var kpiStalled = document.getElementById("kpi-stalled");
+        if (kpiStalled) kpiStalled.textContent = stalledCount;
+
+        // Update sidebar "Stalled Deals" count
+        var sidebarItem = document.querySelector('a.nav-item[href="deals.html?filter=stalled"]');
+        if (sidebarItem) {
+          var navCount = sidebarItem.querySelector(".nav-count");
+          if (navCount) {
+            navCount.textContent = stalledCount;
+          } else {
+            var nc = document.createElement("span");
+            nc.className = "nav-count";
+            nc.textContent = stalledCount;
+            sidebarItem.appendChild(nc);
+          }
+        }
 
       } catch (err) {
         console.error("Failed to load deals:", err);
