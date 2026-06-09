@@ -1899,6 +1899,11 @@
 
     switcher.addEventListener("click", e => {
       e.stopPropagation();
+      // Close any other open panels before toggling
+      var nd = document.getElementById("notif-drawer");
+      var hd = document.getElementById("help-drawer");
+      if (nd) nd.classList.remove("open");
+      if (hd) hd.classList.remove("open");
       menu.classList.toggle("open");
     });
     menu.addEventListener("click", e => {
@@ -2373,6 +2378,11 @@
         icon.removeAttribute("onclick");
         icon.addEventListener("click", e => {
           e.stopPropagation();
+          // Close any other open panels before toggling
+          var rm = document.querySelector(".role-switcher-menu");
+          var hd = document.getElementById("help-drawer");
+          if (rm) rm.classList.remove("open");
+          if (hd) hd.classList.remove("open");
           var nd = document.getElementById("notif-drawer");
           if (nd) {
             nd.classList.toggle("open");
