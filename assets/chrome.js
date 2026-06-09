@@ -2040,21 +2040,15 @@
     });
   }
 
-  function injectRoleSwitcher() {
-    const topbarActions = document.querySelector(".topbar-actions");
-    if (!topbarActions) return;
-    const role = getRole();
-    const switcher = document.createElement("button");
-    switcher.className = "role-switcher";
-    switcher.setAttribute("aria-label", "View as");
-    const currentRoleData = ROLES[role];
-    switcher.innerHTML = `<span>View as</span><span class="role-pill" style="background:${currentRoleData.badgeBg};color:${currentRoleData.badgeFg};">${role}</span>`;
-    topbarActions.insertBefore(switcher, topbarActions.firstChild);
-
-    const menu = document.createElement("div");
-    menu.className = "role-switcher-menu";
-    menu.innerHTML = Object.entries(ROLES).map(([code, r]) => {
-      const isActive = code === role;
+  // Build role menu HTML with the active role pinned to the top
+  function buildRoleMenuHTML(activeRole) {
+    const entries = Object.entries(ROLES);
+    const sorted = [
+      ...entries.filter(([code]) => code === activeRole),
+      ...entries.filter(([code]) => code !== activeRole),
+    ];
+    return sorted.map(([code, r]) => {
+      const isActive = code === activeRole;
       const dots = Array.from({length: 5}, (_, i) =>
         `<span class="access-dot ${i < r.level ? 'on' : ''}"></span>`
       ).join('');
@@ -2073,11 +2067,26 @@
         </button>
       `;
     }).join('');
+  }
+
+  function injectRoleSwitcher() {
+    const topbarActions = document.querySelector(".topbar-actions");
+    if (!topbarActions) return;
+    const role = getRole();
+    const switcher = document.createElement("button");
+    switcher.className = "role-switcher";
+    switcher.setAttribute("aria-label", "View as");
+    const currentRoleData = ROLES[role];
+    switcher.innerHTML = `<span>View as</span><span class="role-pill" style="background:${currentRoleData.badgeBg};color:${currentRoleData.badgeFg};">${role}</span>`;
+    topbarActions.insertBefore(switcher, topbarActions.firstChild);
+
+    const menu = document.createElement("div");
+    menu.className = "role-switcher-menu";
+    menu.innerHTML = buildRoleMenuHTML(role);
     document.body.appendChild(menu);
 
     switcher.addEventListener("click", e => {
       e.stopPropagation();
-      // Close any other open panels before toggling
       var nd = document.getElementById("notif-drawer");
       var hd = document.getElementById("help-drawer");
       if (nd) nd.classList.remove("open");
@@ -2090,9 +2099,9 @@
       if (opt) {
         const newRole = opt.dataset.roleSet;
         menu.classList.remove("open");
-        menu.querySelectorAll(".role-option").forEach(o => o.classList.remove("active"));
-        opt.classList.add("active");
         setRole(newRole);
+        // Re-render menu: move newly active role to top and update labels
+        menu.innerHTML = buildRoleMenuHTML(newRole);
         toast("Now viewing as " + ROLES[newRole].name, { sub: "Access level changed — some features may be hidden." });
       }
     });
