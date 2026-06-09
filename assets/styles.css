@@ -523,13 +523,36 @@ select.btn:hover {
   border-radius: 2px;
 }
 
-/* Role-gated content visibility (driven by body[data-role]) */
+/* ── Role-gated visibility (data-role-only attribute) ── */
 body[data-role="SR"] [data-role-only~="WA"]:not([data-role-only*="SR"]),
 body[data-role="SR"] [data-role-only~="RO"]:not([data-role-only*="SR"]) { display: none !important; }
 body[data-role="JR"] [data-role-only~="WA"]:not([data-role-only*="JR"]),
 body[data-role="JR"] [data-role-only~="RO"]:not([data-role-only*="JR"]),
 body[data-role="JR"] [data-role-only~="SM"]:not([data-role-only*="JR"]),
 body[data-role="JR"] [data-role-only~="SR"]:not([data-role-only*="JR"]) { display: none !important; }
+
+/* ── Role-specific UI rules ────────────────────────────────── */
+
+/* JR: mute deal cards (visual signal they're restricted view) */
+body[data-role="JR"] .kanban-card { border-style: dashed; }
+
+/* SM/RO: settings pages show a "read-only" chip on WA-only settings */
+body[data-role="SM"] .wa-only-settings,
+body[data-role="RO"] .wa-only-settings { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
+
+/* SR/JR: disable Settings links in any nav */
+body[data-role="SR"] a[href*="settings"],
+body[data-role="JR"] a[href*="settings"] { display: none !important; }
+
+/* JR: hide bulk-delete and single-delete action buttons */
+body[data-role="JR"] .bulk-action.danger { display: none !important; }
+
+/* SR/JR: hide the Forecast tab link */
+body[data-role="JR"] a[href*="forecast"],
+body[data-role="JR"] a[href*="forecast"] { display: none !important; }
+
+/* Role context banner refinement */
+.role-context-banner { border-radius: 0; border-left: none; border-right: none; }
 
 /* Field-level restriction (RBAC demo for Junior Rep) */
 .restricted-value {

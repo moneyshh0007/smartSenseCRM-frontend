@@ -1591,6 +1591,34 @@
     const placeholder = document.querySelector("[data-sidebar]");
     if (placeholder) placeholder.outerHTML = renderSidebar(pageId);
 
+    // ── Page-level access control ──────────────────────────────
+    const currentRole = getRole();
+    const allowedPages = ROLE_CAPS.settingsPages[currentRole] || [];
+    const isSettingsPage = pageId === "settings" ||
+      window.location.pathname.replace(/.*\//, "").replace(".html", "").startsWith("settings-");
+    if (isSettingsPage && allowedPages.length === 0) {
+      // SR / JR cannot access Settings at all — show toast and redirect
+      setTimeout(function() {
+        toast("Access restricted", {
+          sub: ROLES[currentRole].name + " does not have access to Settings.",
+          duration: 3000
+        });
+        setTimeout(function() { window.location.href = "my-day.html"; }, 1800);
+      }, 300);
+    } else if (isSettingsPage && allowedPages.length > 0) {
+      // SM / RO — check specific page
+      const thisPage = window.location.pathname.replace(/.*\//, "").replace(".html", "") || "settings";
+      if (!allowedPages.includes(thisPage)) {
+        setTimeout(function() {
+          toast("Access restricted", {
+            sub: ROLES[currentRole].name + " can only access: " + allowedPages.slice(1).join(", "),
+            duration: 3500
+          });
+          setTimeout(function() { window.location.href = "settings-pipelines.html"; }, 2000);
+        }, 300);
+      }
+    }
+
     // Ensure sidebar is never collapsed — clear any persisted collapsed state
     localStorage.removeItem('ss_sidebar_collapsed');
     var sidebarApp = document.querySelector('.app');
@@ -1820,10 +1848,43 @@
     applyRole(role);
   }
 
+  // ── Role capability matrix ───────────────────────────────────────
+  const ROLE_CAPS = {
+    // canSeeAllDeals: see every rep's deals (not just own)
+    canSeeAllDeals:     { WA: true,  SM: true,  RO: true,  SR: false, JR: false },
+    // dealAmountLimit: max deal amount visible (null = no limit)
+    dealAmountLimit:    { WA: null,  SM: null,  RO: null,  SR: null,  JR: 100000 },
+    // canAccessSettings: can navigate to /settings
+    canAccessSettings:  { WA: true,  SM: true,  RO: true,  SR: false, JR: false },
+    // settingsPages: which settings sub-pages are allowed
+    settingsPages: {
+      WA: ["settings","settings-pipelines","settings-billing","settings-authentication",
+           "settings-data-model","settings-roles","settings-selling-rules",
+           "settings-workspace","settings-audit-log"],
+      SM: ["settings","settings-pipelines"],
+      RO: ["settings","settings-pipelines","settings-data-model",
+           "settings-selling-rules","settings-audit-log"],
+      SR: [], JR: []
+    },
+    // canDelete: can delete records
+    canDelete:      { WA: true,  SM: true,  RO: true,  SR: true,  JR: false },
+    // canImport: can use Import CSV / LinkedIn Capture tools
+    canImport:      { WA: true,  SM: true,  RO: true,  SR: true,  JR: false },
+    // canManagePipelines: sees "Manage pipelines" button
+    canManagePipelines: { WA: true, SM: true, RO: true, SR: false, JR: false },
+    // canSeeForecast: can access Forecast tab
+    canSeeForecast: { WA: true,  SM: true,  RO: true,  SR: true,  JR: false },
+    // canCreateCompanies: can add new companies
+    canCreateCompanies: { WA: true, SM: true, RO: true, SR: true, JR: false },
+  };
+
+  function cap(name, role) { return !!(ROLE_CAPS[name] && ROLE_CAPS[name][role]); }
+
   function applyRole(role) {
     document.body.setAttribute("data-role", role);
     const r = ROLES[role];
-    // Update user chip
+
+    // ── User chip ────────────────────────────────────────────────
     const chip = document.querySelector(".user-role");
     if (chip) chip.textContent = r.name;
     const avatar = document.querySelector(".user-chip .avatar");
@@ -1836,14 +1897,124 @@
       const names = { WA: "Mayur S.", SR: "Aria R.", SM: "Priya K.", RO: "Niko D.", JR: "Jordan L." };
       userName.textContent = names[role];
     }
-    // Update role switcher pill colour + label
+
+    // ── Role-switcher pill colour ────────────────────────────────
     const pill = document.querySelector(".role-switcher .role-pill");
     if (pill) {
       pill.textContent = role;
       const rd = ROLES[role];
       if (rd) { pill.style.background = rd.badgeBg; pill.style.color = rd.badgeFg; }
     }
-    // Update Junior-Rep restricted values
+
+    // ── Sidebar visibility ───────────────────────────────────────
+    document.querySelectorAll(".nav-group").forEach(function(group) {
+      const title = (group.querySelector(".nav-group-title") || {}).textContent || "";
+
+      if (title.trim() === "Admin") {
+        // Hide entire Admin group (Settings) for SR / JR
+        group.style.display = cap("canAccessSettings", role) ? "" : "none";
+      }
+
+      if (title.trim() === "Tools") {
+        // Hide Import CSV & LinkedIn Capture for JR
+        group.querySelectorAll("a.nav-item").forEach(function(item) {
+          const href = item.getAttribute("href") || "";
+          if (href.includes("import-upload") || href.includes("linkedin-capture")) {
+            item.style.display = cap("canImport", role) ? "" : "none";
+          }
+        });
+      }
+    });
+
+    // ── Settings sub-page restrictions ───────────────────────────
+    // If SM is viewing settings, only Pipelines link is active; others are greyed
+    const pageId = document.body.getAttribute("data-page") || "";
+    const allowed = (ROLE_CAPS.settingsPages[role] || []);
+    document.querySelectorAll(".settings-nav a, a.settings-tab").forEach(function(link) {
+      var href = link.getAttribute("href") || "";
+      var page = href.replace(".html", "");
+      if (allowed.length > 0 && !allowed.includes(page)) {
+        link.style.opacity  = "0.35";
+        link.style.pointerEvents = "none";
+        link.title = "Your role (" + role + ") cannot access this settings area.";
+      } else {
+        link.style.opacity  = "";
+        link.style.pointerEvents = "";
+        link.title = "";
+      }
+    });
+
+    // ── Persistent role banner (non-WA) ──────────────────────────
+    document.querySelectorAll(".role-context-banner").forEach(function(b) { b.remove(); });
+
+    if (role !== "WA") {
+      const messages = {
+        SM: "Viewing as <strong>Sales Manager</strong> — full pipeline visible. Settings limited to Pipelines.",
+        RO: "Viewing as <strong>RevOps Lead</strong> — full data access. Billing &amp; SSO settings hidden.",
+        SR: "Viewing as <strong>Sales Rep</strong> — showing your deals only. Settings hidden.",
+        JR: "Viewing as <strong>Junior Rep</strong> — deals above $100k hidden. Import tools &amp; Settings hidden.",
+      };
+      const banner = document.createElement("div");
+      banner.className = "role-banner role-context-banner";
+      banner.style.cssText = "margin:0;border-radius:0;border-left:none;border-right:none;border-top:none;";
+      banner.innerHTML =
+        '<span class="badge" style="background:' + r.badgeBg + ';color:' + r.badgeFg + ';">' + role + '</span>' +
+        '<span>' + (messages[role] || "") + '</span>' +
+        '<a href="#" onclick="document.querySelector(\'[data-role-set=WA]\')&&document.querySelector(\'[data-role-set=WA]\').click();return false;" style="margin-left:auto;font-size:11px;">Switch back to Admin ×</a>';
+      const topbar = document.querySelector(".topbar");
+      if (topbar) topbar.after(banner);
+    }
+
+    // ── Page-level action restrictions ───────────────────────────
+    // "Manage pipelines" button — hide for SR/JR
+    document.querySelectorAll("button, a").forEach(function(el) {
+      var txt = (el.textContent || "").trim().toLowerCase();
+      if (txt === "manage pipelines") {
+        el.style.display = cap("canManagePipelines", role) ? "" : "none";
+      }
+      // Delete / destructive buttons for JR
+      if (!cap("canDelete", role)) {
+        if (txt === "delete" || txt === "delete pipeline" || txt === "delete deal" ||
+            txt === "delete contact" || txt === "delete task") {
+          el.style.display = "none";
+        }
+      }
+      // Forecast tab — hidden for JR
+      if (!cap("canSeeForecast", role)) {
+        if (txt === "forecast") el.style.display = "none";
+      }
+      // + New company — hidden for JR
+      if (!cap("canCreateCompanies", role)) {
+        if (txt === "+ new company") el.style.display = "none";
+      }
+    });
+
+    // ── Deals: hide high-value cards for JR ─────────────────────
+    const limit = ROLE_CAPS.dealAmountLimit[role];
+    if (limit !== null) {
+      document.querySelectorAll(".kanban-card").forEach(function(card) {
+        const amtEl = card.querySelector(".kanban-card-amount");
+        if (!amtEl) return;
+        const amt = parseFloat(amtEl.textContent.replace(/[^0-9.]/g, ""));
+        card.style.display = (amt > limit) ? "none" : "";
+      });
+      document.querySelectorAll("tr[onclick]").forEach(function(row) {
+        const cells = row.querySelectorAll("td");
+        cells.forEach(function(td) {
+          if (/^\$[\d,]+$/.test(td.textContent.trim())) {
+            const amt = parseFloat(td.textContent.replace(/[^0-9.]/g, ""));
+            if (amt > limit) row.style.display = "none";
+          }
+        });
+      });
+    } else {
+      // Restore hidden rows/cards when switching away from JR
+      document.querySelectorAll(".kanban-card[style*='none'], tr[style*='none']").forEach(function(el) {
+        el.style.display = "";
+      });
+    }
+
+    // ── Legacy attribute-based restrictions ─────────────────────
     document.querySelectorAll("[data-junior-restricted]").forEach(el => {
       if (role === "JR") {
         if (!el.dataset.origValue) el.dataset.origValue = el.innerHTML;
@@ -1852,11 +2023,9 @@
         el.innerHTML = el.dataset.origValue;
       }
     });
-    // Update Junior-Rep filtered rows
     document.querySelectorAll("[data-jr-hidden]").forEach(el => {
       el.style.display = (role === "JR") ? "none" : "";
     });
-    // Update role-aware copy
     document.querySelectorAll("[data-role-text]").forEach(el => {
       const map = JSON.parse(el.dataset.roleText);
       el.textContent = map[role] || map.default || el.textContent;
