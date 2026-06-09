@@ -1845,7 +1845,13 @@
       });
     }
     localStorage.setItem("ss_role", role);
-    applyRole(role);
+    try {
+      applyRole(role);
+    } catch (err) {
+      console.error("applyRole error:", err);
+      // Ensure at minimum the data-role attribute is set even if other steps fail
+      document.body.setAttribute("data-role", role);
+    }
   }
 
   // ── Role capability matrix ───────────────────────────────────────
@@ -2027,8 +2033,10 @@
       el.style.display = (role === "JR") ? "none" : "";
     });
     document.querySelectorAll("[data-role-text]").forEach(el => {
-      const map = JSON.parse(el.dataset.roleText);
-      el.textContent = map[role] || map.default || el.textContent;
+      try {
+        const map = JSON.parse(el.dataset.roleText);
+        el.textContent = map[role] || map.default || el.textContent;
+      } catch(e) {}
     });
   }
 
@@ -2077,15 +2085,15 @@
       menu.classList.toggle("open");
     });
     menu.addEventListener("click", e => {
+      e.stopPropagation();
       const opt = e.target.closest("[data-role-set]");
       if (opt) {
         const newRole = opt.dataset.roleSet;
-        setRole(newRole);
         menu.classList.remove("open");
-        SS.toast(`Now viewing as ${ROLES[newRole].name}`, { sub: "Some screens and fields will change" });
-        // Re-style active option
         menu.querySelectorAll(".role-option").forEach(o => o.classList.remove("active"));
         opt.classList.add("active");
+        setRole(newRole);
+        toast("Now viewing as " + ROLES[newRole].name, { sub: "Access level changed — some features may be hidden." });
       }
     });
     document.addEventListener("click", () => menu.classList.remove("open"));
