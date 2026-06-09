@@ -35,12 +35,12 @@
     .empty-results { padding:48px; text-align:center; color:var(--ink-50); font-size:13px; }
   </style>
 </head>
-<body data-page="contacts" class="">
+<body data-page="linkedin" class="">
   <div class="app">
     <div data-sidebar></div>
     <main class="main">
       <div class="topbar">
-        <div class="breadcrumb"><span>Tools</span><span class="sep">/</span><span class="current">LinkedIn Capture</span></div>
+        <div class="breadcrumb" id="lc-breadcrumb"><span>Tools</span><span class="sep">/</span><span class="current">LinkedIn Capture</span></div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
           <button class="icon-btn" title="Help">?</button>
@@ -164,6 +164,22 @@
 
   <script src="assets/api.js"></script>
   <script>
+    // ── Context detection (runs before chrome.js renders the sidebar) ──
+    // If opened from Contacts, make "Contacts" bold; otherwise "LinkedIn Capture" bold.
+    (function() {
+      var fromContacts = new URLSearchParams(window.location.search).get("from") === "contacts";
+      if (fromContacts) {
+        document.body.setAttribute("data-page", "contacts");
+        // Update breadcrumb to show Contacts context
+        var bc = document.getElementById("lc-breadcrumb");
+        if (bc) bc.innerHTML =
+          "<span>Records</span><span class='sep'>/</span>" +
+          "<a href='contacts.html'>Contacts</a><span class='sep'>/</span>" +
+          "<span class='current'>LinkedIn Capture</span>";
+      }
+      // else data-page="linkedin" (set on body) → "LinkedIn Capture" bold in Tools
+    })();
+
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
     // ── State ──────────────────────────────────────────────────
