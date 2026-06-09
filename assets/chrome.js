@@ -19,7 +19,7 @@
       { id: "tasks",     href: "tasks.html",      label: "Tasks",      icon: "✓", count: "8" },
     ]},
     { group: "Tools", items: [
-      { id: "import",    href: "import-upload.html",    label: "Import CSV",       icon: "↓", count: "" },
+      { id: "import",    href: "import-upload.html",    label: "Add Contact - Import CSV", icon: "↓", count: "" },
     ]},
     { group: "Admin", items: [
       { id: "settings", href: "settings.html", label: "Settings", icon: "⚙", count: "" },
