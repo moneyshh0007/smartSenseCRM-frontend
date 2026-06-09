@@ -938,6 +938,9 @@
           '</div>';
       }).join("");
 
+      // Detect if this pipeline already has the DEFAULT badge
+      var isDefault = !!(cardEl && cardEl.querySelector('.badge.solid'));
+
       return {
         eyebrow: "M2 · F2.1 · Pipeline Settings",
         title: pName,
@@ -952,7 +955,13 @@
             visOpts.map(function(v) {
               return '<option' + (pVisibility.includes(v) || (v === "All roles" && pVisibility === "All roles") ? ' selected' : '') + '>' + v + '</option>';
             }).join("") +
-          '</select></div>',
+          '</select></div>' +
+          '<h4 style="margin:12px 0 8px;">Default</h4>' +
+          '<div class="field" style="flex-direction:row;align-items:center;gap:10px;">' +
+            '<input type="checkbox" id="ps-default"' + (isDefault ? ' checked' : '') + ' style="width:16px;height:16px;cursor:pointer;" />' +
+            '<label for="ps-default" style="cursor:pointer;font-size:13px;">Set as default pipeline</label>' +
+          '</div>' +
+          (isDefault ? '<div class="text-muted" style="font-size:11px;margin-top:4px;">This is currently the default pipeline.</div>' : ''),
         primaryLabel: "Save changes",
         note: '<button type="button" class="btn" onclick="window.__psDelete()" style="border-color:var(--ink);color:var(--ink);">Delete pipeline</button>',
         onSave: () => {
@@ -995,6 +1004,28 @@
           if (stagesSpan) {
             stagesSpan.innerHTML = "<strong>Stages:</strong> " +
               newStages.map(function(s) { return s.name; }).join(" · ");
+          }
+
+          // ── Handle default pipeline badge ────────────────────────────
+          var defaultCb = document.getElementById("ps-default");
+          if (defaultCb && defaultCb.checked) {
+            // Remove DEFAULT badge from every pipeline card
+            document.querySelectorAll(".card.mb-5 .badge.solid").forEach(function(b) {
+              if (b.textContent.trim() === "DEFAULT") b.remove();
+            });
+            // Insert DEFAULT badge into this card's header button row (before Settings button)
+            var cardHead = cardEl.querySelector(".card-head .row, .card-head div.row");
+            if (!cardHead) cardHead = cardEl.querySelector(".card-head");
+            if (cardHead) {
+              var badge = document.createElement("span");
+              badge.className = "badge solid";
+              badge.textContent = "DEFAULT";
+              cardHead.insertBefore(badge, cardHead.firstChild);
+            }
+          } else if (defaultCb && !defaultCb.checked && isDefault) {
+            // User explicitly unchecked default — remove the badge
+            var existing = cardEl.querySelector(".badge.solid");
+            if (existing && existing.textContent.trim() === "DEFAULT") existing.remove();
           }
 
           toast("Pipeline updated", { sub: newName + " · " + newStages.length + " stages" });
