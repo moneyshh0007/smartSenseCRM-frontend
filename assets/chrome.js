@@ -18,11 +18,6 @@
       { id: "activities",href: "activities.html", label: "Activities", icon: "≡", count: "" },
       { id: "tasks",     href: "tasks.html",      label: "Tasks",      icon: "✓", count: "8" },
     ]},
-    { group: "Smart Filters", items: [
-      { id: "filter-my-pipeline",   href: "deals.html?filter=my",         label: "My Open Pipeline", icon: "★", count: "12" },
-      { id: "filter-new-this-week", href: "contacts.html?filter=new",     label: "New This Week",    icon: "★", count: "47" },
-      { id: "filter-stalled",       href: "deals.html?filter=stalled",    label: "Stalled Deals",    icon: "★", count: "4" },
-    ]},
     { group: "Tools", items: [
       { id: "import",    href: "import-upload.html",    label: "Import CSV",       icon: "↓", count: "" },
     ]},
@@ -1902,63 +1897,6 @@
     document.addEventListener("click", () => menu.classList.remove("open"));
   }
 
-  // ============================================================
-  // SMART FILTER URL HANDLING (A6)
-  // ============================================================
-  function applySmartFilter() {
-    const params = new URLSearchParams(window.location.search);
-    const filter = params.get("filter");
-    if (!filter) return;
-    // Display a "smart filter active" banner near the page header
-    const pageHeader = document.querySelector(".page-header");
-    if (!pageHeader) return;
-    const filterLabels = {
-      "my": "My Open Pipeline",
-      "stalled": "Stalled Deals",
-      "new": "New This Week",
-      "overdue": "Overdue Tasks",
-      "won": "Closed Won",
-      "lost": "Closed Lost",
-      "pipeline": "Open Pipeline",
-      "unassigned": "Unassigned Records",
-      "recent": "Recently Updated",
-      "high": "High Priority",
-    };
-    if (!filterLabels[filter]) {
-      filterLabels[filter] = filter.charAt(0).toUpperCase() + filter.slice(1).replace(/-/g, " ");
-    }
-    const banner = document.createElement("div");
-    banner.className = "card";
-    banner.style.cssText = "background:var(--paper-warm); border-left:3px solid var(--ink); margin-bottom:16px; padding:12px 16px; display:flex; align-items:center; gap:12px; font-size:13px;";
-    banner.innerHTML = `
-      <span class="badge solid">SMART FILTER</span>
-      <strong>${filterLabels[filter] || filter}</strong>
-      <span class="text-muted">applied · showing matching results</span>
-      <a href="${window.location.pathname}" style="margin-left:auto; font-size:12px;">Clear filter</a>
-    `;
-    pageHeader.after(banner);
-
-    // F10 — Persistent active-filter indicator in the filter row
-    var filterRow = document.querySelector(".row.mb-4");
-    if (filterRow && !filterRow.querySelector(".active-filter-chip")) {
-      var addBtn = Array.prototype.find.call(
-        filterRow.querySelectorAll("button"),
-        function (b) { return (b.textContent || "").toLowerCase().indexOf("filter") !== -1; }
-      );
-      if (addBtn) addBtn.style.cssText = "background:var(--ink);color:var(--paper);border-color:var(--ink);";
-      var chip = document.createElement("span");
-      chip.className = "chip active-filter-chip";
-      chip.style.cssText = "background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;gap:6px;";
-      chip.innerHTML = (filterLabels[filter] || filter) +
-        ' <a href="' + window.location.pathname + '" aria-label="Remove filter" style="color:var(--paper);text-decoration:none;font-weight:700;font-size:12px;">×</a>';
-      var clearBtn = document.createElement("a");
-      clearBtn.href = window.location.pathname;
-      clearBtn.className = "btn sm";
-      clearBtn.textContent = "Clear all";
-      filterRow.appendChild(chip);
-      filterRow.appendChild(clearBtn);
-    }
-  }
 
   // ============================================================
   // CONFIRMATION MODAL (G1, G2, G3, G4) — typed/checkbox confirms
@@ -2634,7 +2572,6 @@
   ready(() => {
     injectRoleSwitcher();
     applyRole(getRole());
-    applySmartFilter();
     buildNotifications();
     buildHelpDrawer();
     buildUserPopover();

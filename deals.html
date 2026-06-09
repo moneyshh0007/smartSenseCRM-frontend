@@ -287,19 +287,6 @@
         var kpiStalled = document.getElementById("kpi-stalled");
         if (kpiStalled) kpiStalled.textContent = stalledCount;
 
-        // Update sidebar "Stalled Deals" count
-        var sidebarItem = document.querySelector('a.nav-item[href="deals.html?filter=stalled"]');
-        if (sidebarItem) {
-          var navCount = sidebarItem.querySelector(".nav-count");
-          if (navCount) {
-            navCount.textContent = stalledCount;
-          } else {
-            var nc = document.createElement("span");
-            nc.className = "nav-count";
-            nc.textContent = stalledCount;
-            sidebarItem.appendChild(nc);
-          }
-        }
 
       } catch (err) {
         console.error("Failed to load deals:", err);
