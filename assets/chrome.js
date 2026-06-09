@@ -20,6 +20,7 @@
     ]},
     { group: "Tools", items: [
       { id: "import",    href: "import-upload.html",    label: "Add Contact - Import CSV", icon: "↓", count: "" },
+      { id: "linkedin",  href: "linkedin-capture.html", label: "LinkedIn Capture",         icon: "in", count: "" },
     ]},
     { group: "Admin", items: [
       { id: "settings", href: "settings.html", label: "Settings", icon: "⚙", count: "" },
