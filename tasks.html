@@ -36,7 +36,6 @@
       <a href="#" class="active" id="tab-open" onclick="switchTab('open')">Open</a>
       <a href="#" id="tab-completed" onclick="switchTab('completed')">Completed</a>
     </div>
-    <input type="search" id="tasks-search" placeholder="Search..." style="margin-left:12px;width:220px;padding:6px 10px;border:var(--rule);font-size:12px;border-radius:var(--radius);" oninput="filterTasks(this.value)" />
   </div>
 
   <!-- Bulk action toolbar (hidden until tasks are selected) -->
@@ -197,11 +196,11 @@
           var due        = t.dueAt ? new Date(t.dueAt).toLocaleString() : "No due date";
           var priority   = t.priority || "med";
           var badgeClass = priority === "high" ? "badge" : "badge muted";
-          var isOverdue  = t.dueAt && !t.completedAt && new Date(t.dueAt) < new Date();
+          var isOverdue  = t.dueAt && !t.completed && new Date(t.dueAt) < new Date();
           return "<tr>" +
             "<td><input type='checkbox' data-id='" + t.id + "' onchange=\"updateBulkBar()\" /></td>" +
             "<td>" +
-              "<strong style='" + (t.completedAt ? "text-decoration:line-through;opacity:0.5;" : "") + "'>" + t.title + "</strong>" +
+              "<strong style='" + (t.completed ? "text-decoration:line-through;opacity:0.5;" : "") + "'>" + t.title + "</strong>" +
               (isOverdue ? " <span class='badge warn'>OVERDUE</span>" : "") +
             "</td>" +
             "<td style='" + (isOverdue ? "color:var(--ink);font-weight:500;" : "") + "'>" + due + "</td>" +

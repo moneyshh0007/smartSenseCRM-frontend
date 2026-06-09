@@ -32,7 +32,8 @@ function setUser(user, workspace) {
 async function apiFetch(path, options = {}) {
   const token = getToken();
   const headers = {
-    "Content-Type": "application/json",
+    // Only set Content-Type when there is a body — DELETE/GET with no body + this header causes Fastify 400
+    ...(options.body !== undefined ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
