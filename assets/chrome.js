@@ -1890,6 +1890,10 @@
     document.body.setAttribute("data-role", role);
     const r = ROLES[role];
 
+    // ── Re-render role menu: active role pinned to top with ● Current ──
+    const roleMenu = document.querySelector(".role-switcher-menu");
+    if (roleMenu) roleMenu.innerHTML = buildRoleMenuHTML(role);
+
     // ── User chip ────────────────────────────────────────────────
     const chip = document.querySelector(".user-role");
     if (chip) chip.textContent = r.name;
@@ -2099,9 +2103,7 @@
       if (opt) {
         const newRole = opt.dataset.roleSet;
         menu.classList.remove("open");
-        setRole(newRole);
-        // Re-render menu: move newly active role to top and update labels
-        menu.innerHTML = buildRoleMenuHTML(newRole);
+        setRole(newRole);   // applyRole() inside setRole() re-renders the menu
         toast("Now viewing as " + ROLES[newRole].name, { sub: "Access level changed — some features may be hidden." });
       }
     });
