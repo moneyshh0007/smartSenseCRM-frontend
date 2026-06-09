@@ -469,6 +469,38 @@ select.btn:hover {
 .role-switcher-menu .role-option .role-desc {
   color: var(--ink-50); font-size: 11px; margin-top: 2px;
 }
+
+/* Role menu — differentiated layout */
+.role-switcher-menu { width: 320px; }
+.role-option .role-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.role-option .role-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; height: 24px; padding: 0 6px;
+  border-radius: 4px; font-family: var(--mono); font-size: 11px;
+  font-weight: 700; letter-spacing: 0.05em; flex-shrink: 0;
+}
+.role-option .role-meta {
+  flex: 1; min-width: 0;
+}
+.role-option .role-category-tag {
+  display: inline-block; margin-top: 2px;
+  padding: 1px 6px; border-radius: 2px; border: 1px solid var(--ink-20);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-50);
+}
+.role-option .role-access-bar {
+  display: flex; gap: 3px; align-items: center; flex-shrink: 0;
+}
+.access-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ink-20); border: 1px solid var(--ink-20);
+  transition: background 120ms;
+}
+.access-dot.on { background: var(--ink); border-color: var(--ink); }
+.role-option.active .role-code { color: var(--ink); font-weight: 600; }
+.role-option + .role-option { border-top: var(--rule); }
 .role-banner {
   background: var(--ink-03);
   border: var(--rule);

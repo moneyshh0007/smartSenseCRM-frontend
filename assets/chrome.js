@@ -1796,11 +1796,11 @@
   // ROLES (D1, A2) — defines roles and the "View as" switcher
   // ============================================================
   const ROLES = {
-    WA: { name: "Workspace Admin", desc: "Tenant owner — billing, SSO, audit, residency" },
-    SR: { name: "Sales Rep", desc: "Daily-driver IC — owns contacts, deals, activities" },
-    SM: { name: "Sales Manager", desc: "Team lead — pipeline review, forecast, coaching" },
-    RO: { name: "RevOps Lead", desc: "Schema, pipelines, selling rules, data hygiene" },
-    JR: { name: "Junior Rep", desc: "Restricted: cannot see deals where amount > $100k" },
+    WA: { name: "Workspace Admin", desc: "Tenant owner — billing, SSO, audit, residency",     level: 5, category: "Owner",      badgeBg: "#000000", badgeFg: "#ffffff" },
+    SM: { name: "Sales Manager",   desc: "Team lead — pipeline review, forecast, coaching",    level: 4, category: "Management", badgeBg: "#1d3461", badgeFg: "#ffffff" },
+    RO: { name: "RevOps Lead",     desc: "Schema, pipelines, selling rules, data hygiene",     level: 3, category: "Operations",  badgeBg: "#1b5e37", badgeFg: "#ffffff" },
+    SR: { name: "Sales Rep",       desc: "Daily-driver IC — owns contacts, deals, activities", level: 2, category: "Standard",    badgeBg: "#5a3e85", badgeFg: "#ffffff" },
+    JR: { name: "Junior Rep",      desc: "Restricted: cannot see deals where amount > $100k",  level: 1, category: "Restricted",  badgeBg: "#e8e8e8", badgeFg: "#555555" },
   };
 
   function getRole() {
@@ -1835,9 +1835,13 @@
       const names = { WA: "Mayur S.", SR: "Aria R.", SM: "Priya K.", RO: "Niko D.", JR: "Jordan L." };
       userName.textContent = names[role];
     }
-    // Update role switcher pill
+    // Update role switcher pill colour + label
     const pill = document.querySelector(".role-switcher .role-pill");
-    if (pill) pill.textContent = role;
+    if (pill) {
+      pill.textContent = role;
+      const rd = ROLES[role];
+      if (rd) { pill.style.background = rd.badgeBg; pill.style.color = rd.badgeFg; }
+    }
     // Update Junior-Rep restricted values
     document.querySelectorAll("[data-junior-restricted]").forEach(el => {
       if (role === "JR") {
@@ -1865,18 +1869,32 @@
     const switcher = document.createElement("button");
     switcher.className = "role-switcher";
     switcher.setAttribute("aria-label", "View as");
-    switcher.innerHTML = `<span>View as</span><span class="role-pill">${role}</span>`;
+    const currentRoleData = ROLES[role];
+    switcher.innerHTML = `<span>View as</span><span class="role-pill" style="background:${currentRoleData.badgeBg};color:${currentRoleData.badgeFg};">${role}</span>`;
     topbarActions.insertBefore(switcher, topbarActions.firstChild);
 
     const menu = document.createElement("div");
     menu.className = "role-switcher-menu";
-    menu.innerHTML = Object.entries(ROLES).map(([code, r]) => `
-      <button class="role-option ${code === role ? 'active' : ''}" data-role-set="${code}">
-        <div class="role-code">${code} · ${code === role ? 'current' : 'switch to'}</div>
-        <div class="role-name">${r.name}</div>
-        <div class="role-desc">${r.desc}</div>
-      </button>
-    `).join("");
+    menu.innerHTML = Object.entries(ROLES).map(([code, r]) => {
+      const isActive = code === role;
+      const dots = Array.from({length: 5}, (_, i) =>
+        `<span class="access-dot ${i < r.level ? 'on' : ''}"></span>`
+      ).join('');
+      return `
+        <button class="role-option ${isActive ? 'active' : ''}" data-role-set="${code}">
+          <div class="role-header">
+            <span class="role-badge" style="background:${r.badgeBg};color:${r.badgeFg};">${code}</span>
+            <div class="role-meta">
+              <div class="role-name">${r.name}</div>
+              <span class="role-category-tag">${r.category}</span>
+            </div>
+            <div class="role-access-bar" title="Access level ${r.level} of 5">${dots}</div>
+          </div>
+          <div class="role-code">${isActive ? '● Current' : '○ Switch to'}</div>
+          <div class="role-desc">${r.desc}</div>
+        </button>
+      `;
+    }).join('');
     document.body.appendChild(menu);
 
     switcher.addEventListener("click", e => {
