@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="page-title">Object · Data Model · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb">
+          <a href="settings.html">Workspace Admin</a><span class="sep">/</span>
+          <a href="settings.html">Settings</a><span class="sep">/</span>
+          <a href="settings-data-model.html">Data Model</a><span class="sep">/</span>
+          <span class="current" id="breadcrumb-object">Loading…</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M1 · F1.1 · F2.3 · Object Settings</div>
+      <h1 class="page-title mt-2" id="object-heading">Loading…</h1>
+      <div class="page-sub" id="object-sub"></div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn" onclick="window.location.href='settings-data-model.html'">← Data Model</button>
+      <button class="btn primary" id="publish-btn">Publish schema</button>
+    </div>
+  </div>
+
+  <!-- Field table -->
+  <div class="card mb-5" style="padding:0; overflow:hidden;">
+    <div style="padding:var(--space-5) var(--space-5) 0; display:flex; align-items:center; justify-content:space-between;">
+      <div class="card-title" id="fields-heading">Fields</div>
+      <span class="text-mono text-muted" style="font-size:11px;" id="fields-count"></span>
+    </div>
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th style="width:24px;"></th>
+          <th>Field name</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Stage gate</th>
+          <th>API key</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="fields-tbody">
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-50);">Loading fields…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="row gap-2 mt-5 between">
+    <div class="text-muted" style="font-size:12px;" id="rebuild-note">
+      Materialised view rebuild takes ~30 sec. No read downtime.
+    </div>
+    <div class="row gap-2">
+      <button class="btn" onclick="discardChanges()">Discard changes</button>
+      <button class="btn primary" onclick="publishSchema()">Publish schema</button>
+    </div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var objectName = new URLSearchParams(window.location.search).get("object") || "";
+    if (!objectName) { window.location.href = "settings-data-model.html"; throw new Error("No object"); }
+
+    // ── Object field definitions ─────────────────────────────────
+    var OBJECTS = {
+      "Person": {
+        sub: "Default object · 1,847 records · Schema v3",
+        rebuildNote: "Materialised view rebuild takes ~45 sec for 1,847 persons.",
+        fields: [
+          { name:"First name",  type:"Text",            required:"✓ Always",    gate:"—",         key:"first_name" },
+          { name:"Last name",   type:"Text",            required:"✓ Always",    gate:"—",         key:"last_name" },
+          { name:"Email",       type:"Email",           required:"—",           gate:"—",         key:"email" },
+          { name:"Phone",       type:"Phone",           required:"—",           gate:"—",         key:"phone" },
+          { name:"Title",       type:"Text",            required:"—",           gate:"—",         key:"title" },
+          { name:"Company",     type:"Relation (Company)", required:"—",        gate:"—",         key:"company_id" },
+          { name:"Location",    type:"Text",            required:"—",           gate:"—",         key:"location" },
+          { name:"LinkedIn",    type:"URL",             required:"—",           gate:"—",         key:"linkedin_url" },
+          { name:"Source",      type:"Single-select",   required:"—",           gate:"—",         key:"source" },
+          { name:"Owner",       type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"owner_id" },
+          { name:"Tags",        type:"Multi-select",    required:"—",           gate:"—",         key:"tags" },
+          { name:"Created at",  type:"Timestamp",       required:"Auto",        gate:"—",         key:"created_at", readonly:true },
+        ]
+      },
+      "Company": {
+        sub: "Default object · 412 records · Schema v3",
+        rebuildNote: "Materialised view rebuild takes ~15 sec for 412 companies.",
+        fields: [
+          { name:"Name",        type:"Text",            required:"✓ Always",    gate:"—",         key:"name" },
+          { name:"Domain",      type:"URL",             required:"—",           gate:"—",         key:"domain" },
+          { name:"Industry",    type:"Single-select",   required:"—",           gate:"—",         key:"industry" },
+          { name:"Size",        type:"Number",          required:"—",           gate:"—",         key:"size" },
+          { name:"HQ",          type:"Text",            required:"—",           gate:"—",         key:"hq" },
+          { name:"Owner",       type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"owner_id" },
+          { name:"Tags",        type:"Multi-select",    required:"—",           gate:"—",         key:"tags" },
+          { name:"Description", type:"Long text",       required:"—",           gate:"—",         key:"description" },
+          { name:"Created at",  type:"Timestamp",       required:"Auto",        gate:"—",         key:"created_at", readonly:true },
+        ]
+      },
+      "Deal": {
+        sub: "Default object · 60 records · Schema v3",
+        rebuildNote: "Materialised view rebuild takes ~30 sec for 60 deals.",
+        fields: [
+          { name:"Name",              type:"Text",                     required:"✓ Always",        gate:"—",          key:"name" },
+          { name:"Amount",            type:"Currency",                 required:"✓ Always",        gate:"—",          key:"amount" },
+          { name:"Stage",             type:"Single-select (Pipeline)", required:"✓ Always",        gate:"—",          key:"stage" },
+          { name:"Competitor",        type:"Single-select",            required:"✓ Before Proposal",gate:"Proposal+", key:"competitor" },
+          { name:"Source",            type:"Single-select",            required:"—",               gate:"—",          key:"source" },
+          { name:"ACV tier",          type:"Single-select",            required:"—",               gate:"—",          key:"acv_tier" },
+          { name:"Probability",       type:"Number (0-100)",           required:"—",               gate:"—",          key:"probability" },
+          { name:"Close date",        type:"Date",                     required:"✓ Before Negotiation",gate:"Neg+",   key:"close_date" },
+          { name:"Buying committee",  type:"Multi-select (People)",    required:"—",               gate:"—",          key:"buying_committee" },
+          { name:"Forecast category", type:"Single-select",            required:"—",               gate:"—",          key:"forecast_category" },
+          { name:"Owner",             type:"Relation (User)",          required:"✓ Always",        gate:"—",          key:"owner_id" },
+          { name:"Pipeline",          type:"Relation (Pipeline)",      required:"✓ Always",        gate:"—",          key:"pipeline_id" },
+          { name:"Created at",        type:"Timestamp",                required:"Auto",            gate:"—",          key:"created_at", readonly:true },
+          { name:"Acct Type",         type:"Single-select",            required:"—",               gate:"—",          key:"acct_type", deprecated:true },
+        ]
+      },
+      "Task": {
+        sub: "Default object · 142 records · Schema v3",
+        rebuildNote: "Materialised view rebuild takes ~10 sec for 142 tasks.",
+        fields: [
+          { name:"Title",       type:"Text",            required:"✓ Always",    gate:"—",         key:"title" },
+          { name:"Due at",      type:"Datetime",        required:"—",           gate:"—",         key:"due_at" },
+          { name:"Priority",    type:"Single-select",   required:"—",           gate:"—",         key:"priority" },
+          { name:"Completed",   type:"Boolean",         required:"—",           gate:"—",         key:"completed" },
+          { name:"Owner",       type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"owner_id" },
+          { name:"Contact",     type:"Relation (Person)","required":"—",        gate:"—",         key:"contact_id" },
+          { name:"Deal",        type:"Relation (Deal)", required:"—",           gate:"—",         key:"deal_id" },
+          { name:"Created at",  type:"Timestamp",       required:"Auto",        gate:"—",         key:"created_at", readonly:true },
+        ]
+      },
+      "Note": {
+        sub: "Default object · 287 records · Schema v3",
+        rebuildNote: "Materialised view rebuild takes ~10 sec for 287 notes.",
+        fields: [
+          { name:"Body",        type:"Rich text",       required:"✓ Always",    gate:"—",         key:"body" },
+          { name:"Author",      type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"author_id" },
+          { name:"Contact",     type:"Relation (Person)","required":"—",        gate:"—",         key:"contact_id" },
+          { name:"Deal",        type:"Relation (Deal)", required:"—",           gate:"—",         key:"deal_id" },
+          { name:"Created at",  type:"Timestamp",       required:"Auto",        gate:"—",         key:"created_at", readonly:true },
+        ]
+      }
+    };
+
+    var data = OBJECTS[objectName] || {
+      sub: "Custom object",
+      rebuildNote: "Materialised view rebuild in progress.",
+      fields: []
+    };
+
+    // ── Populate page ────────────────────────────────────────────
+    document.getElementById("page-title").textContent       = objectName + " · Data Model · SmartSense CRM";
+    document.getElementById("breadcrumb-object").textContent = objectName;
+    document.getElementById("object-heading").textContent   = objectName + " — Fields";
+    document.getElementById("object-sub").textContent       = data.sub;
+    document.getElementById("rebuild-note").textContent     = data.rebuildNote;
+    document.getElementById("fields-count").textContent     = data.fields.length + " FIELDS";
+    document.getElementById("fields-heading").textContent   = objectName + " fields";
+    document.getElementById("publish-btn").textContent      = "Publish " + objectName + " schema";
+
+    var tbody = document.getElementById("fields-tbody");
+    tbody.innerHTML = data.fields.map(function(f) {
+      var rowStyle = f.deprecated ? " style='opacity:0.55;background:var(--ink-03);'" : "";
+      var nameHtml = "<strong>" + f.name + "</strong>" +
+        (f.deprecated ? " <span class='badge warn' style='font-size:9px;vertical-align:middle;'>DEPRECATED</span>" : "");
+      var keyHtml  = f.deprecated
+        ? "<span class='text-mono' style='font-size:11px;text-decoration:line-through;color:var(--ink-30);'>" + f.key + "</span>"
+        : "<span class='text-mono' style='font-size:11px;'>" + f.key + "</span>";
+      var actionHtml = f.readonly || f.deprecated
+        ? "<span class='text-muted' style='font-size:11px;'>System</span>"
+        : "<button class='btn sm'>Edit</button>";
+      var gateHtml = f.gate !== "—"
+        ? "<span class='badge'>" + f.gate + "</span>"
+        : "—";
+      return "<tr" + rowStyle + ">" +
+        "<td>" + (f.readonly || f.deprecated ? "—" : "≡") + "</td>" +
+        "<td>" + nameHtml + "</td>" +
+        "<td>" + f.type + "</td>" +
+        "<td>" + f.required + "</td>" +
+        "<td>" + gateHtml + "</td>" +
+        "<td>" + keyHtml + "</td>" +
+        "<td>" + actionHtml + "</td>" +
+        "</tr>";
+    }).join("") +
+    "<tr style='background:var(--ink-03);'><td>—</td><td colspan='6'><button class='btn sm primary'>+ Add field</button></td></tr>";
+
+    function publishSchema() {
+      if (window.SS_toast) window.SS_toast(objectName + " schema published", { sub: "Schema v4 is now live. Rebuild queued." });
+      else alert(objectName + " schema published.");
+    }
+    function discardChanges() {
+      window.location.reload();
+    }
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>
