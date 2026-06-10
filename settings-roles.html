@@ -56,18 +56,21 @@
       <button class="btn sm mt-3">View permissions</button>
     </div>
     <div class="card" style="border-color: var(--ink);">
-      <div class="row between">
+      <div class="card-head">
         <div class="card-title">Workspace Admin</div>
-        <span class="text-mono text-muted" style="font-size:11px;">2 USERS · EDITING</span>
+        <span class="text-mono text-muted" style="font-size:11px;">2 USERS</span>
       </div>
       <div class="text-muted" style="font-size: 12px;">Full access. Manages billing, SSO, residency, audit log, role definitions.</div>
       <button class="btn sm mt-3">View permissions</button>
     </div>
   </div>
 
+  <!-- Editing section — hidden by default, opened when a role's "View permissions" is clicked -->
+  <div id="role-editing-section" style="display:none;">
+
   <div class="section-rule">
     <span class="num">01</span>
-    <span class="title">Editing — Junior Rep (new role)</span>
+    <span class="title" id="editing-role-title">Editing — Junior Rep (new role)</span>
     <span class="line"></span>
     <span class="text-mono text-muted" style="font-size:11px;">UNSAVED CHANGES</span>
   </div>
@@ -163,13 +166,31 @@
       <button class="btn primary">Save role</button>
     </div>
   </div>
-  
+
+  </div><!-- /role-editing-section -->
+
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
   <script src="assets/chrome.js"></script>
+  <script>
+    // Wire "View permissions" buttons to open the editing section
+    document.querySelectorAll(".btn.sm").forEach(function(btn) {
+      if ((btn.textContent || "").trim().toLowerCase() === "view permissions") {
+        btn.addEventListener("click", function() {
+          var card    = btn.closest(".card");
+          var title   = card ? (card.querySelector(".card-title") || {}).textContent || "" : "";
+          var section = document.getElementById("role-editing-section");
+          var heading = document.getElementById("editing-role-title");
+          if (section) section.style.display = "";
+          if (heading) heading.textContent = "Editing — " + title.trim();
+          if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    });
+  </script>
   <script>
     // D4 — Interactive permission matrix
     (function () {
