@@ -32,59 +32,62 @@
   </div>
 
   <div class="split-3 mb-6">
-    <div class="card">
+    <div class="card role-card" onclick="openObject('Person')">
       <div class="row between">
         <div class="card-title">Person</div>
-        <span class="text-mono text-muted" style="font-size:11px;">12 FIELDS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">12 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default object · 1,847 records</div>
       <div class="row mt-3 gap-2">
         <span class="chip">name</span><span class="chip">email</span><span class="chip">phone</span><span class="chip">title</span><span class="chip">+ 8</span>
       </div>
     </div>
-    <div class="card">
+    <div class="card role-card" onclick="openObject('Company')">
       <div class="row between">
         <div class="card-title">Company</div>
-        <span class="text-mono text-muted" style="font-size:11px;">9 FIELDS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">9 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default object · 412 records</div>
       <div class="row mt-3 gap-2">
         <span class="chip">name</span><span class="chip">domain</span><span class="chip">industry</span><span class="chip">size</span><span class="chip">+ 5</span>
       </div>
     </div>
-    <div class="card" style="border-color: var(--ink);">
+    <div class="card role-card" onclick="openObject('Deal')">
       <div class="row between">
         <div class="card-title">Deal</div>
-        <span class="text-mono text-muted" style="font-size:11px;">14 FIELDS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">14 FIELDS ↗</span>
       </div>
-      <div class="text-muted mt-2" style="font-size:12px;">Default · 60 records · Editing now</div>
+      <div class="text-muted mt-2" style="font-size:12px;">Default · 60 records</div>
       <div class="row mt-3 gap-2">
         <span class="chip">name</span><span class="chip">amount</span><span class="chip">stage</span><span class="chip">competitor</span><span class="chip">+ 10</span>
       </div>
     </div>
-    <div class="card">
+    <div class="card role-card" onclick="openObject('Task')">
       <div class="row between">
         <div class="card-title">Task</div>
-        <span class="text-mono text-muted" style="font-size:11px;">7 FIELDS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">7 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default · 142 records</div>
     </div>
-    <div class="card">
+    <div class="card role-card" onclick="openObject('Note')">
       <div class="row between">
         <div class="card-title">Note</div>
-        <span class="text-mono text-muted" style="font-size:11px;">5 FIELDS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">5 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default · 287 records</div>
     </div>
-    <div class="card" style="border-style: dashed;">
+    <div class="card" style="border-style:dashed;">
       <div class="card-title">+ Custom object</div>
       <div class="text-muted mt-2" style="font-size:12px;">Up to 25 custom objects per workspace. Example: "Opportunity", "Project".</div>
     </div>
   </div>
 
+  <!-- Object editing section — hidden until a card is clicked -->
+  <div id="object-editing-section" style="display:none;">
+
   <div class="section-rule">
     <span class="num">01</span>
-    <span class="title">Editing — Deal · v3</span>
+    <span class="title" id="object-edit-title">Editing — Deal · v3</span>
     <span class="line"></span>
     <span class="text-mono text-muted" style="font-size: 11px;">UNSAVED CHANGES</span>
   </div>
@@ -217,11 +220,22 @@
     </div>
   </div>
 
+  </div><!-- /object-editing-section -->
+
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    function openObject(name) {
+      var section = document.getElementById("object-editing-section");
+      var title   = document.getElementById("object-edit-title");
+      if (section) section.style.display = "";
+      if (title)   title.textContent = "Editing — " + name + " · v3";
+      if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
