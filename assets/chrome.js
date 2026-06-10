@@ -2722,7 +2722,12 @@
       if (navMap[text]) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        window.location.href = navMap[text];
+        var dest = navMap[text];
+        // Carry page context so the destination can show the right breadcrumb
+        if (text === "manage pipelines" && pageId === "deals") {
+          dest = "settings-pipelines.html?from=deals";
+        }
+        window.location.href = dest;
       }
     }, true);
   }

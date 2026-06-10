@@ -11,7 +11,7 @@
     <div data-sidebar></div>
     <main class="main">
       <div class="topbar">
-        <div class="breadcrumb"><a href="settings.html">Workspace Admin</a><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><a href="settings-pipelines.html" class="current">Pipelines</a></div>
+        <div class="breadcrumb" id="pipelines-breadcrumb"><a href="settings.html">Workspace Admin</a><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><a href="settings-pipelines.html" class="current">Pipelines</a></div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
           <button class="icon-btn" title="Help">?</button>
@@ -139,6 +139,20 @@
   </div>
   <script src="assets/api.js"></script>
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    (function() {
+      var from = new URLSearchParams(window.location.search).get("from");
+      var bc   = document.getElementById("pipelines-breadcrumb");
+      if (!bc) return;
+      if (from === "deals") {
+        bc.innerHTML =
+          '<a href="contacts.html">Records</a><span class="sep">/</span>' +
+          '<a href="deals.html">Deals</a><span class="sep">/</span>' +
+          '<span class="current">Pipelines</span>';
+      }
+      // default (from=settings or direct): breadcrumb already correct
+    })();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
