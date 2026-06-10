@@ -1838,21 +1838,10 @@
   }
 
   function setRole(role) {
-    // F9 — Last-admin guard: warn when the sole WA would be demoted
-    if (getRole() === "WA" && role !== "WA") {
-      toast("Last-admin guard triggered", {
-        sub: "No other Workspace Admin exists — production blocks this. Demo allows view-only switch.",
-        duration: 5000,
-      });
-    }
+    if (role === getRole()) return;          // already on this role — nothing to do
     localStorage.setItem("ss_role", role);
-    try {
-      applyRole(role);
-    } catch (err) {
-      console.error("applyRole error:", err);
-      // Ensure at minimum the data-role attribute is set even if other steps fail
-      document.body.setAttribute("data-role", role);
-    }
+    // Reload the page so every restriction applies cleanly from scratch
+    window.location.reload();
   }
 
   // ── Role capability matrix ───────────────────────────────────────
@@ -2104,8 +2093,7 @@
       if (opt) {
         const newRole = opt.dataset.roleSet;
         menu.classList.remove("open");
-        setRole(newRole);   // applyRole() inside setRole() re-renders the menu
-        toast("Now viewing as " + ROLES[newRole].name, { sub: "Access level changed — some features may be hidden." });
+        setRole(newRole);  // saves to localStorage and reloads the page
       }
     });
     document.addEventListener("click", () => menu.classList.remove("open"));
