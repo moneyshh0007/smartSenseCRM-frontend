@@ -129,6 +129,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Cards */
 .card { border: var(--rule); border-radius: var(--radius); background: var(--paper); padding: var(--space-5); }
+.role-card { cursor: pointer; transition: background 120ms, border-color 120ms, box-shadow 120ms; }
+.role-card:hover { background: var(--ink-03); border-color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .card.elev { box-shadow: var(--shadow-flat); }
 .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-4); }
 .card-title { font-family: var(--display); font-weight: 500; font-size: 18px; letter-spacing: -0.01em; }

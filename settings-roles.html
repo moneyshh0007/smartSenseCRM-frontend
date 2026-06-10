@@ -31,37 +31,33 @@
   </div>
 
   <div class="split-2 mb-6">
-    <div class="card">
+    <div class="card role-card" onclick="window.location.href='settings-role-detail?role=Sales+Rep'">
       <div class="card-head">
         <div class="card-title">Sales Rep</div>
-        <span class="text-mono text-muted" style="font-size:11px;">12 USERS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">12 USERS ↗</span>
       </div>
-      <div class="text-muted" style="font-size: 12px;">Daily-driver IC. Can manage own records and their related activities.</div>
-      <button class="btn sm mt-3">View permissions</button>
+      <div class="text-muted" style="font-size:12px;">Daily-driver IC. Can manage own records and their related activities.</div>
     </div>
-    <div class="card">
+    <div class="card role-card" onclick="window.location.href='settings-role-detail?role=Sales+Manager'">
       <div class="card-head">
         <div class="card-title">Sales Manager</div>
-        <span class="text-mono text-muted" style="font-size:11px;">3 USERS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">3 USERS ↗</span>
       </div>
-      <div class="text-muted" style="font-size: 12px;">Read all reps' data within their team. Manage forecast, run reports.</div>
-      <button class="btn sm mt-3">View permissions</button>
+      <div class="text-muted" style="font-size:12px;">Read all reps' data within their team. Manage forecast, run reports.</div>
     </div>
-    <div class="card">
+    <div class="card role-card" onclick="window.location.href='settings-role-detail?role=RevOps+Lead'">
       <div class="card-head">
         <div class="card-title">RevOps Lead</div>
-        <span class="text-mono text-muted" style="font-size:11px;">2 USERS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">2 USERS ↗</span>
       </div>
-      <div class="text-muted" style="font-size: 12px;">Edit schema, pipelines, selling rules. Read all data. Cannot change billing.</div>
-      <button class="btn sm mt-3">View permissions</button>
+      <div class="text-muted" style="font-size:12px;">Edit schema, pipelines, selling rules. Read all data. Cannot change billing.</div>
     </div>
-    <div class="card" style="border-color: var(--ink);">
+    <div class="card role-card" style="border-color:var(--ink);" onclick="window.location.href='settings-role-detail?role=Workspace+Admin'">
       <div class="card-head">
         <div class="card-title">Workspace Admin</div>
-        <span class="text-mono text-muted" style="font-size:11px;">2 USERS</span>
+        <span class="text-mono text-muted" style="font-size:11px;">2 USERS ↗</span>
       </div>
-      <div class="text-muted" style="font-size: 12px;">Full access. Manages billing, SSO, residency, audit log, role definitions.</div>
-      <button class="btn sm mt-3">View permissions</button>
+      <div class="text-muted" style="font-size:12px;">Full access. Manages billing, SSO, residency, audit log, role definitions.</div>
     </div>
   </div>
 
@@ -176,18 +172,7 @@
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
   <script src="assets/chrome.js"></script>
   <script>
-    // "View permissions" → navigate to the dedicated role detail page
-    document.querySelectorAll(".btn.sm").forEach(function(btn) {
-      if ((btn.textContent || "").trim().toLowerCase() === "view permissions") {
-        btn.addEventListener("click", function() {
-          var card  = btn.closest(".card");
-          var title = card ? (card.querySelector(".card-title") || {}).textContent.trim() : "";
-          if (title) {
-            window.location.href = "settings-role-detail?role=" + encodeURIComponent(title);
-          }
-        });
-      }
-    });
+    // Role cards are now fully clickable via inline onclick — no extra wiring needed.
   </script>
   <script>
     // D4 — Interactive permission matrix
