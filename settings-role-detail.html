@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="page-title">Role Permissions · SmartSense CRM</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="settings" class="">
+  <div class="app">
+    <div data-sidebar></div>
+    <main class="main">
+      <div class="topbar">
+        <div class="breadcrumb" id="breadcrumb">
+          <a href="settings.html">Workspace Admin</a><span class="sep">/</span>
+          <a href="settings.html">Settings</a><span class="sep">/</span>
+          <a href="settings-roles.html">Roles &amp; Permissions</a><span class="sep">/</span>
+          <span class="current" id="breadcrumb-role">Loading…</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Notifications">○</button>
+          <button class="icon-btn" title="Help">?</button>
+        </div>
+      </div>
+      <div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">M9 · F9.1 · Role Settings</div>
+      <h1 class="page-title mt-2" id="role-heading">Loading…</h1>
+      <div class="page-sub" id="role-sub"></div>
+    </div>
+    <div class="row gap-2">
+      <button class="btn" onclick="window.location.href='settings-roles.html'">← All roles</button>
+      <button class="btn primary" id="save-btn">Save changes</button>
+    </div>
+  </div>
+
+  <!-- Object permissions -->
+  <div class="card mb-5">
+    <div class="card-title mb-3">Object permissions</div>
+    <table class="table" style="margin:-16px;">
+      <thead>
+        <tr>
+          <th>Object</th>
+          <th>Read</th>
+          <th>Create</th>
+          <th>Update</th>
+          <th>Delete</th>
+          <th>Record-level filter</th>
+        </tr>
+      </thead>
+      <tbody id="object-perms-tbody">
+        <!-- populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Field-level overrides -->
+  <div class="card mb-5">
+    <div class="card-title mb-3">Field-level overrides</div>
+    <table class="table" style="margin:-16px;">
+      <thead>
+        <tr><th>Object</th><th>Field</th><th>Restriction</th><th></th></tr>
+      </thead>
+      <tbody id="field-overrides-tbody">
+        <!-- populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer actions -->
+  <div class="row gap-2 mt-5 between">
+    <div class="text-muted" style="font-size:12px;">
+      Changes take effect on the user's next page load. Existing sessions are not invalidated.
+    </div>
+    <div class="row gap-2">
+      <button class="btn" id="discard-btn">Discard changes</button>
+      <button class="btn primary" id="save-btn-2">Save changes</button>
+    </div>
+  </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var roleName = new URLSearchParams(window.location.search).get("role") || "";
+    if (!roleName) { window.location.href = "settings-roles.html"; throw new Error("No role"); }
+
+    // ── Role data ────────────────────────────────────────────────
+    var ROLE_DATA = {
+      "Sales Rep": {
+        sub: "Daily-driver IC · 12 users",
+        objects: [
+          { name: "Person",  read: "ALL",      create: "YES", update: "OWN", delete: "NO",  filter: "—" },
+          { name: "Company", read: "ALL",      create: "YES", update: "OWN", delete: "NO",  filter: "—" },
+          { name: "Deal",    read: "FILTERED", create: "YES", update: "OWN", delete: "NO",  filter: "owner = me", highlight: true },
+          { name: "Task",    read: "ALL",      create: "YES", update: "OWN", delete: "OWN", filter: "—" },
+          { name: "Note",    read: "ALL",      create: "YES", update: "OWN", delete: "OWN", filter: "—" },
+        ],
+        fields: [
+          { object: "Deal",   field: "Amount",  restriction: "Visible only on deals owned by user" },
+          { object: "Person", field: "Phone",   restriction: "Hidden" },
+        ]
+      },
+      "Sales Manager": {
+        sub: "Team lead · 3 users",
+        objects: [
+          { name: "Person",  read: "ALL", create: "YES", update: "ALL", delete: "NO",  filter: "—" },
+          { name: "Company", read: "ALL", create: "YES", update: "ALL", delete: "NO",  filter: "—" },
+          { name: "Deal",    read: "ALL", create: "YES", update: "ALL", delete: "OWN", filter: "—" },
+          { name: "Task",    read: "ALL", create: "YES", update: "ALL", delete: "OWN", filter: "—" },
+          { name: "Note",    read: "ALL", create: "YES", update: "ALL", delete: "OWN", filter: "—" },
+        ],
+        fields: []
+      },
+      "RevOps Lead": {
+        sub: "Operations · 2 users",
+        objects: [
+          { name: "Person",  read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Company", read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Deal",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Task",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Note",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+        ],
+        fields: []
+      },
+      "Workspace Admin": {
+        sub: "Owner · 2 users",
+        objects: [
+          { name: "Person",  read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Company", read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Deal",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Task",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+          { name: "Note",    read: "ALL", create: "YES", update: "ALL", delete: "YES", filter: "—" },
+        ],
+        fields: []
+      },
+      "Junior Rep": {
+        sub: "Restricted · new role",
+        objects: [
+          { name: "Person",  read: "ALL",      create: "YES", update: "OWN", delete: "NO",  filter: "—" },
+          { name: "Company", read: "ALL",      create: "YES", update: "OWN", delete: "NO",  filter: "—" },
+          { name: "Deal",    read: "FILTERED", create: "YES", update: "OWN", delete: "NO",  filter: "amount < $100k", highlight: true },
+          { name: "Task",    read: "ALL",      create: "YES", update: "OWN", delete: "OWN", filter: "—" },
+          { name: "Note",    read: "ALL",      create: "YES", update: "OWN", delete: "OWN", filter: "—" },
+        ],
+        fields: [
+          { object: "Deal",   field: "Amount",  restriction: "Visible only on deals owned by user" },
+          { object: "Person", field: "Phone",   restriction: "Hidden" },
+        ]
+      }
+    };
+
+    var READ_STATES  = ["ALL", "OWN", "FILTERED", "NO"];
+    var WRITE_STATES = ["YES", "OWN", "NO"];
+    var CLASS_MAP    = { ALL:"positive", OWN:"positive", YES:"positive", NO:"negative", FILTERED:"muted" };
+    var STORAGE_KEY  = "ss_perms_" + roleName;
+    var saved = {};
+    var isDirty = false;
+
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch(e) {}
+
+    // ── Populate page ────────────────────────────────────────────
+    var data = ROLE_DATA[roleName] || {
+      sub: "Custom role",
+      objects: [
+        { name:"Person",  read:"ALL", create:"YES", update:"OWN", delete:"NO",  filter:"—" },
+        { name:"Company", read:"ALL", create:"YES", update:"OWN", delete:"NO",  filter:"—" },
+        { name:"Deal",    read:"ALL", create:"YES", update:"OWN", delete:"NO",  filter:"—" },
+        { name:"Task",    read:"ALL", create:"YES", update:"OWN", delete:"OWN", filter:"—" },
+        { name:"Note",    read:"ALL", create:"YES", update:"OWN", delete:"OWN", filter:"—" },
+      ],
+      fields: []
+    };
+
+    document.getElementById("page-title").textContent        = roleName + " · Permissions · SmartSense CRM";
+    document.getElementById("breadcrumb-role").textContent   = roleName;
+    document.getElementById("role-heading").textContent      = roleName + " — Permissions";
+    document.getElementById("role-sub").textContent          = data.sub;
+
+    function badgeHtml(val, key, states) {
+      var cls = CLASS_MAP[val] || "muted";
+      return "<span class='badge " + cls + "' data-key='" + key + "' data-states='" +
+        states.join(",") + "' style='cursor:pointer;' title='Click to change'>" + val + "</span>";
+    }
+
+    // Object permissions table
+    var tbody = document.getElementById("object-perms-tbody");
+    tbody.innerHTML = data.objects.map(function(o) {
+      var obj    = o.name.toLowerCase();
+      var rVal   = saved[obj + ".read"]   || o.read;
+      var cVal   = saved[obj + ".create"] || o.create;
+      var uVal   = saved[obj + ".update"] || o.update;
+      var dVal   = saved[obj + ".delete"] || o.delete;
+      return "<tr" + (o.highlight ? " style='background:var(--ink-03);'" : "") + ">" +
+        "<td><strong>" + o.name + "</strong></td>" +
+        "<td>" + badgeHtml(rVal, obj+".read",   READ_STATES)  + "</td>" +
+        "<td>" + badgeHtml(cVal, obj+".create", WRITE_STATES) + "</td>" +
+        "<td>" + badgeHtml(uVal, obj+".update", WRITE_STATES) + "</td>" +
+        "<td>" + badgeHtml(dVal, obj+".delete", WRITE_STATES) + "</td>" +
+        "<td><span class='text-mono' style='font-size:11px;'>" + o.filter + "</span></td>" +
+        "</tr>";
+    }).join("");
+
+    // Field-level overrides
+    var ftbody = document.getElementById("field-overrides-tbody");
+    var fieldRows = data.fields.map(function(f) {
+      return "<tr><td>" + f.object + "</td><td><strong>" + f.field + "</strong></td>" +
+        "<td>" + f.restriction + "</td><td><button class='btn sm'>Edit</button></td></tr>";
+    });
+    fieldRows.push("<tr style='background:var(--ink-03);'><td colspan='4'><button class='btn sm primary'>+ Add field-level rule</button></td></tr>");
+    ftbody.innerHTML = fieldRows.join("");
+
+    // ── Interactive badges ───────────────────────────────────────
+    function markDirty() {
+      isDirty = true;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    }
+
+    document.getElementById("object-perms-tbody").addEventListener("click", function(e) {
+      var badge = e.target.closest(".badge[data-key]");
+      if (!badge) return;
+      var states = badge.getAttribute("data-states").split(",");
+      var key    = badge.getAttribute("data-key");
+      var cur    = badge.textContent.trim();
+      var idx    = states.indexOf(cur);
+      var next   = states[(idx + 1) % states.length];
+      badge.textContent = next;
+      badge.className   = "badge " + (CLASS_MAP[next] || "muted");
+      saved[key] = next;
+      markDirty();
+      if (window.SS_toast) window.SS_toast("Permission updated", { sub: key.replace(".", " → ") + ": " + next, duration: 2000 });
+    });
+
+    // ── Save / Discard ───────────────────────────────────────────
+    function saveRole() {
+      isDirty = false;
+      if (window.SS_toast) window.SS_toast("Role saved", { sub: roleName + " permissions updated" });
+    }
+    function discardRole() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+      window.location.reload();
+    }
+
+    document.getElementById("save-btn").addEventListener("click", saveRole);
+    document.getElementById("save-btn-2").addEventListener("click", saveRole);
+    document.getElementById("discard-btn").addEventListener("click", discardRole);
+  </script>
+  <script src="assets/chrome.js"></script>
+</body>
+</html>
