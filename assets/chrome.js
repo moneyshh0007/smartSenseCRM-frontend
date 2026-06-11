@@ -2817,7 +2817,7 @@
   // BOOT
   // ============================================================
   ready(() => {
-    injectRoleSwitcher();
+    // injectRoleSwitcher();  // "View as" panel removed — roles shown differently
     applyRole(getRole());
     buildNotifications();
     buildHelpDrawer();
