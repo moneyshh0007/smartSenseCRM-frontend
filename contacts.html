@@ -58,6 +58,8 @@
   <div class="row mb-4 gap-3">
     <div class="row gap-2">
       <button class="btn sm">+ Add filter</button>
+      <button class="btn sm" id="delete-contacts-btn" style="display:none;"
+        onclick="deleteSelectedContacts()">Delete contact</button>
     </div>
     <div style="margin-left: auto;" class="row gap-2">
       <span class="text-mono text-muted" style="font-size: 11px;" id="contacts-count"></span>
@@ -68,7 +70,7 @@
     <table class="table" style="border: none; border-radius: 0;">
       <thead>
         <tr>
-          <th style="width: 24px; position: sticky; top: 0; z-index: 1;"><input type="checkbox" id="select-all-contacts" onchange="document.querySelectorAll('#contacts-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this))" /></th>
+          <th style="width: 24px; position: sticky; top: 0; z-index: 1;"><input type="checkbox" id="select-all-contacts" onchange="document.querySelectorAll('#contacts-tbody input[type=checkbox]').forEach(function(cb){ cb.checked = this.checked; }.bind(this)); updateDeleteBtn();" /></th>
           <th style="position: sticky; top: 0; z-index: 1;">Name</th>
           <th style="position: sticky; top: 0; z-index: 1;">Title</th>
           <th style="position: sticky; top: 0; z-index: 1;">Company</th>
@@ -124,7 +126,7 @@
           var source = c.source || "manual";
           var date = new Date(c.createdAt).toLocaleDateString();
           return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + "'\">" +
-            "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
+            "<td><input type='checkbox' data-id='" + c.id + "' onclick='event.stopPropagation()' onchange='updateDeleteBtn()' /></td>" +
             "<td><div class='row gap-2'><div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials + "</div><strong>" + c.firstName + " " + c.lastName + "</strong></div></td>" +
             "<td>" + title + "</td>" +
             "<td>" + company + "</td>" +
@@ -138,6 +140,44 @@
         console.error("Failed to load contacts:", err);
         document.getElementById("contacts-tbody").innerHTML = "<tr><td colspan='7' style='text-align:center; padding:40px; color:var(--ink-50);'>Failed to load contacts. Please refresh.</td></tr>";
       }
+    }
+
+    function updateDeleteBtn() {
+      var checked = document.querySelectorAll('#contacts-tbody input[type=checkbox]:checked');
+      var btn = document.getElementById('delete-contacts-btn');
+      if (!btn) return;
+      if (checked.length > 0) {
+        btn.style.display = '';
+        btn.textContent = 'Delete contact' + (checked.length > 1 ? 's (' + checked.length + ')' : '');
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    async function deleteSelectedContacts() {
+      var checked = Array.from(document.querySelectorAll('#contacts-tbody input[type=checkbox]:checked'));
+      var ids = checked.map(function(cb) { return cb.getAttribute('data-id'); }).filter(Boolean);
+      if (!ids.length) return;
+      var label = ids.length === 1 ? '1 contact' : ids.length + ' contacts';
+      if (!confirm('Delete ' + label + '? This cannot be undone.')) return;
+
+      var btn = document.getElementById('delete-contacts-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+
+      var results = await Promise.allSettled(ids.map(function(id) {
+        return SS_API.Contacts.delete(id);
+      }));
+
+      var failed = results.filter(function(r) { return r.status === 'rejected'; }).length;
+      if (btn) { btn.disabled = false; }
+
+      // Uncheck all and reload
+      var allCb = document.getElementById('select-all-contacts');
+      if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
+      await loadContacts();
+      updateDeleteBtn();
+
+      if (failed > 0) alert(failed + ' contact(s) could not be deleted.');
     }
 
     window.SS_loadContacts = loadContacts;
