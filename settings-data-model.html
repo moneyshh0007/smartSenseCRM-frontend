@@ -424,41 +424,72 @@
       noRenderFields();
     }
 
+    var STORAGE_KEY = "ss_custom_objects_v1";
+
+    function loadSavedObjects() {
+      var saved = [];
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) {}
+      saved.forEach(function(obj) { injectObjectCard(obj); });
+    }
+
+    function injectObjectCard(obj) {
+      var grid = document.querySelector(".split-3");
+      if (!grid) return;
+      var customCard = grid.querySelector('[onclick*="settings-custom-object"]') ||
+                       grid.querySelector('[style*="dashed"]');
+      var newCard = document.createElement("div");
+      newCard.className = "card role-card";
+      newCard.setAttribute("data-custom-id", obj.id);
+      newCard.onclick = function() { window.location.href = "settings-object-detail?object=" + encodeURIComponent(obj.name); };
+      newCard.innerHTML =
+        "<div class='row between'>" +
+          "<div class='card-title'>" + obj.icon + " " + obj.name + "</div>" +
+          "<span class='text-mono text-muted' style='font-size:11px;'>" + obj.fieldCount + " FIELDS ↗</span>" +
+        "</div>" +
+        "<div class='text-muted mt-2' style='font-size:12px;'>Custom object · 0 records" + (obj.desc ? " · " + obj.desc : "") + "</div>" +
+        "<div class='row mt-3 gap-2'>" +
+          (obj.fieldPreviews || []).slice(0,4).map(function(f){ return "<span class='chip'>" + f + "</span>"; }).join("") +
+          (obj.fieldCount > 4 ? "<span class='chip'>+ " + (obj.fieldCount - 4) + "</span>" : "") +
+        "</div>";
+      if (customCard) grid.insertBefore(newCard, customCard);
+      else grid.appendChild(newCard);
+    }
+
     function noSave() {
       var name = document.getElementById("no-name").value.trim();
       if (!name) { alert("Object name is required."); document.getElementById("no-name").focus(); return; }
-      var plural = document.getElementById("no-plural").value || name + "s";
       var icon   = document.getElementById("no-icon").value;
       var desc   = document.getElementById("no-desc").value;
       var apiKey = name.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
 
-      // Add a new card to the grid
-      var grid = document.querySelector(".split-3");
-      if (grid) {
-        // Insert before the custom object card
-        var customCard = grid.querySelector('[onclick*="settings-custom-object"]') ||
-                         grid.querySelector('[style*="dashed"]');
-        var newCard = document.createElement("div");
-        newCard.className = "card role-card";
-        newCard.onclick = function() { window.location.href = "settings-object-detail?object=" + encodeURIComponent(name); };
-        newCard.innerHTML =
-          "<div class='row between'>" +
-            "<div class='card-title'>" + icon + " " + name + "</div>" +
-            "<span class='text-mono text-muted' style='font-size:11px;'>" + noFields.length + " FIELDS ↗</span>" +
-          "</div>" +
-          "<div class='text-muted mt-2' style='font-size:12px;'>Custom object · 0 records" + (desc ? " · " + desc : "") + "</div>" +
-          "<div class='row mt-3 gap-2'>" +
-            noFields.slice(0,4).map(function(f){ return "<span class='chip'>" + f.n.toLowerCase() + "</span>"; }).join("") +
-            (noFields.length > 4 ? "<span class='chip'>+ " + (noFields.length-4) + "</span>" : "") +
-          "</div>";
+      var obj = {
+        id:            Date.now(),
+        name:          name,
+        plural:        document.getElementById("no-plural").value || name + "s",
+        icon:          icon,
+        desc:          desc,
+        apiKey:        apiKey,
+        fieldCount:    noFields.length,
+        fieldPreviews: noFields.map(function(f){ return f.n.toLowerCase(); }),
+        fields:        noFields,
+        created:       new Date().toISOString()
+      };
 
-        if (customCard) grid.insertBefore(newCard, customCard);
-        else grid.appendChild(newCard);
-      }
+      // Persist to localStorage
+      var saved = [];
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) {}
+      saved.push(obj);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+
+      // Inject card into grid
+      injectObjectCard(obj);
 
       closeNewObjectPanel();
-      if (window.SS_toast) window.SS_toast("Object created", { sub: icon + " " + name + " · " + noFields.length + " fields · API key: " + apiKey });
+      if (window.SS_toast) window.SS_toast("Object created", { sub: icon + " " + name + " · " + noFields.length + " fields" });
     }
+
+    // Load saved objects immediately on page load
+    loadSavedObjects();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
