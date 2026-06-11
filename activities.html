@@ -209,7 +209,9 @@
     }
 
     window.SS_loadActivities = loadActivities;
-    loadActivities();
+    loadActivities().then(function() {
+      if (window.SS_applyHighlight) window.SS_applyHighlight();
+    });
   </script>
   <script src="assets/chrome.js"></script>
 </body>

@@ -2160,35 +2160,35 @@
         meta: "2 min ago · DEAL",
         title: "Acme — Annual License moved to Proposal",
         body: "Mayur S. updated the stage",
-        href: "deals.html"
+        href: "deals?notif=acme-annual"
       },
       {
         unread: true,
         meta: "15 min ago · ROTTING",
         title: "Northwind — Multi-year flagged as stalled",
         body: "27 days in Proposal without activity",
-        href: "deals.html"
+        href: "deals?notif=northwind-multi"
       },
       {
         unread: true,
         meta: "1 hr ago · BILLING",
         title: "Seat usage at 95%",
         body: "38 of 40 seats used · auto-alert from F9.4",
-        href: "settings-billing.html"
+        href: "settings-billing?notif=seats"
       },
       {
         unread: false,
         meta: "3 hr ago · MENTION",
         title: "Sarah K. mentioned you in a note",
         body: '"@mayur please send security PDF before next call"',
-        href: "activities.html"
+        href: "activities?notif=mention"
       },
       {
         unread: false,
         meta: "Yesterday · SCHEMA",
         title: "Schema v2 → v3 published",
         body: "2 fields added to Deal object",
-        href: "settings-data-model.html"
+        href: "settings-data-model?notif=schema"
       },
     ];
 
@@ -2807,6 +2807,58 @@
   }
 
   // ============================================================
+  // NOTIFICATION HIGHLIGHT (triggered by ?notif= param)
+  // ============================================================
+  function applyHighlight() {
+    var notif = new URLSearchParams(window.location.search).get("notif");
+    if (!notif) return;
+
+    // Keyword → target selector / scroll strategy
+    var keyword = notif.toLowerCase();
+
+    function pulseEl(el) {
+      if (!el) return;
+      el.classList.add("notif-highlight");
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(function() { el.classList.remove("notif-highlight"); }, 4000);
+    }
+
+    // Deals kanban: find card by name keyword
+    if (keyword.startsWith("acme") || keyword.startsWith("northwind") || keyword.startsWith("initech")) {
+      var search = keyword.split("-")[0]; // e.g. "acme", "northwind"
+      var found = Array.from(document.querySelectorAll(".kanban-card")).find(function(c) {
+        return c.textContent.toLowerCase().includes(search);
+      });
+      pulseEl(found);
+    }
+
+    // Billing: highlight seat usage section
+    if (keyword === "seats") {
+      var el = document.querySelector(".seat-usage, [data-highlight='seats'], .card");
+      pulseEl(el);
+    }
+
+    // Activities: highlight mention items
+    if (keyword === "mention") {
+      var el = Array.from(document.querySelectorAll(".timeline-item")).find(function(ti) {
+        return ti.textContent.toLowerCase().includes("mention") || ti.textContent.toLowerCase().includes("sarah");
+      });
+      pulseEl(el);
+    }
+
+    // Data model schema: highlight the Deal object card
+    if (keyword === "schema") {
+      var el = Array.from(document.querySelectorAll(".role-card, .card")).find(function(c) {
+        return c.textContent.toLowerCase().includes("deal");
+      });
+      pulseEl(el);
+    }
+  }
+
+  // Expose so page scripts can call after their data loads
+  window.SS_applyHighlight = applyHighlight;
+
+  // ============================================================
   // BOOT
   // ============================================================
   ready(() => {
@@ -2826,6 +2878,12 @@
     wireDetailNavigation();
     wireLastAdminGuard();
     buildGlobalSearch();
+    // Apply notification highlight for static pages (billing, data-model, settings)
+    // Dynamic pages (deals, activities) call SS_applyHighlight() after their data loads
+    var _pageId = document.body.getAttribute("data-page") || "";
+    if (_pageId === "settings") {
+      setTimeout(applyHighlight, 400);
+    }
   });
 
   // ============================================================

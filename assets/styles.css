@@ -131,6 +131,19 @@ button { font-family: inherit; cursor: pointer; }
 .card { border: var(--rule); border-radius: var(--radius); background: var(--paper); padding: var(--space-5); }
 .role-card { cursor: pointer; transition: background 120ms, border-color 120ms, box-shadow 120ms; }
 .role-card:hover { background: var(--ink-03); border-color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+/* Notification highlight pulse */
+@keyframes notifPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(0,0,0,.25); background: var(--ink-05); }
+  50%  { box-shadow: 0 0 0 6px rgba(0,0,0,.08); background: var(--ink-08, #ebebeb); }
+  100% { box-shadow: 0 0 0 0   rgba(0,0,0,0);   background: transparent; }
+}
+.notif-highlight {
+  animation: notifPulse 1s ease-in-out 3;
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
 .card.elev { box-shadow: var(--shadow-flat); }
 .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-4); }
 .card-title { font-family: var(--display); font-weight: 500; font-size: 18px; letter-spacing: -0.01em; }
