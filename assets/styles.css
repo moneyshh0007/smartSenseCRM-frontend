@@ -414,25 +414,17 @@ select.btn:hover {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border: var(--rule);
   background: var(--paper);
-  font-size: 11px;
-  font-family: var(--mono);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-family: var(--body);
   border-radius: var(--radius);
   cursor: pointer;
+  transition: border-color 100ms, background 100ms;
 }
-.role-switcher:hover { border-color: var(--ink); }
-.role-switcher .role-pill {
-  background: var(--ink);
-  color: var(--paper);
-  padding: 1px 6px;
-  border-radius: 2px;
-  font-weight: 500;
-}
-.role-switcher::after { content: "▾"; font-size: 9px; color: var(--ink-50); }
+.role-switcher:hover { border-color: var(--ink); background: var(--ink-03); }
+.role-switcher::after { content: "▾"; font-size: 10px; color: var(--ink-50); margin-left: 2px; }
 
 .role-switcher-menu {
   position: absolute;

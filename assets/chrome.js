@@ -1880,9 +1880,11 @@
     document.body.setAttribute("data-role", role);
     const r = ROLES[role];
 
-    // ── Re-render role menu: active role pinned to top with ● Current ──
+    // ── Sync role button label and dropdown ──────────────────────
     const roleMenu = document.querySelector(".role-switcher-menu");
     if (roleMenu) roleMenu.innerHTML = buildRoleMenuHTML(role);
+    const roleLabel = document.getElementById("role-switcher-label");
+    if (roleLabel) roleLabel.textContent = (ROLES[role] || {}).name || role;
 
     // ── User chip ────────────────────────────────────────────────
     const chip = document.querySelector(".user-role");
@@ -2034,29 +2036,16 @@
     });
   }
 
-  // Build role menu HTML with the active role pinned to the top
+  // Build role dropdown HTML
   function buildRoleMenuHTML(activeRole) {
-    const entries = Object.entries(ROLES);
-    const sorted = [
-      ...entries.filter(([code]) => code === activeRole),
-      ...entries.filter(([code]) => code !== activeRole),
-    ];
-    return sorted.map(([code, r]) => {
+    return Object.entries(ROLES).map(([code, r]) => {
       const isActive = code === activeRole;
-      const dots = Array.from({length: 5}, (_, i) =>
-        `<span class="access-dot ${i < r.level ? 'on' : ''}"></span>`
-      ).join('');
       return `
         <button class="role-option ${isActive ? 'active' : ''}" data-role-set="${code}">
-          <div class="role-header">
-            <span class="role-badge" style="background:${r.badgeBg};color:${r.badgeFg};">${code}</span>
-            <div class="role-meta">
-              <div class="role-name">${r.name}</div>
-              <span class="role-category-tag">${r.category}</span>
-            </div>
-            <div class="role-access-bar" title="Access level ${r.level} of 5">${dots}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <span class="role-name" style="font-weight:${isActive ? '600' : '500'};font-size:13px;">${r.name}</span>
+            ${isActive ? '<span style="font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink-50);">● CURRENT</span>' : ''}
           </div>
-          <div class="role-code">${isActive ? '● Current' : '○ Switch to'}</div>
           <div class="role-desc">${r.desc}</div>
         </button>
       `;
@@ -2067,11 +2056,14 @@
     const topbarActions = document.querySelector(".topbar-actions");
     if (!topbarActions) return;
     const role = getRole();
+    const r = ROLES[role] || {};
+
+    // Button: shows full role name as label
     const switcher = document.createElement("button");
     switcher.className = "role-switcher";
-    switcher.setAttribute("aria-label", "View as");
-    const currentRoleData = ROLES[role];
-    switcher.innerHTML = `<span>View as</span><span class="role-pill" style="background:${currentRoleData.badgeBg};color:${currentRoleData.badgeFg};">${role}</span>`;
+    switcher.setAttribute("aria-label", "Switch role");
+    switcher.innerHTML =
+      `<span id="role-switcher-label" style="font-weight:500;">${r.name || role}</span>`;
     topbarActions.insertBefore(switcher, topbarActions.firstChild);
 
     const menu = document.createElement("div");
@@ -2087,15 +2079,16 @@
       if (hd) hd.classList.remove("open");
       menu.classList.toggle("open");
     });
+
     menu.addEventListener("click", e => {
       e.stopPropagation();
       const opt = e.target.closest("[data-role-set]");
       if (opt) {
-        const newRole = opt.dataset.roleSet;
         menu.classList.remove("open");
-        setRole(newRole);  // saves to localStorage and reloads the page
+        setRole(opt.dataset.roleSet);  // saves + reloads
       }
     });
+
     document.addEventListener("click", () => menu.classList.remove("open"));
   }
 
@@ -2817,7 +2810,7 @@
   // BOOT
   // ============================================================
   ready(() => {
-    // injectRoleSwitcher();  // "View as" panel removed — roles shown differently
+    injectRoleSwitcher();
     applyRole(getRole());
     buildNotifications();
     buildHelpDrawer();
