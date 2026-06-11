@@ -32,6 +32,7 @@
     </div>
     <div class="row gap-2">
       <button class="btn" onclick="window.location.href='settings-data-model.html'">← Data Model</button>
+      <button class="btn" id="delete-object-btn" onclick="deleteObject()">Delete object</button>
       <button class="btn primary" id="publish-btn">Publish schema</button>
     </div>
   </div>
@@ -205,6 +206,39 @@
         "</tr>";
     }).join("") +
     "<tr style='background:var(--ink-03);'><td>—</td><td colspan='6'><button class='btn sm primary'>+ Add field</button></td></tr>";
+
+    // ── Delete object ────────────────────────────────────────────
+    var SYSTEM_OBJECTS = ["Person", "Company", "Deal", "Task", "Note"];
+
+    function deleteObject() {
+      if (SYSTEM_OBJECTS.indexOf(objectName) !== -1) {
+        // System objects cannot be deleted
+        if (window.SS_toast) {
+          window.SS_toast(objectName + " cannot be deleted", {
+            sub: "System objects are part of the core data model and cannot be removed."
+          });
+        } else {
+          alert(objectName + " is a system object and cannot be deleted.");
+        }
+        return;
+      }
+
+      // Custom object — confirm then delete
+      if (!confirm('Delete "' + objectName + '"?\n\nAll field definitions for this object will be permanently removed. This cannot be undone.')) return;
+
+      var btn = document.getElementById("delete-object-btn");
+      if (btn) { btn.disabled = true; btn.textContent = "Deleting…"; }
+
+      // Remove from localStorage (keyed by id matching the name)
+      var STORAGE_KEY = "ss_custom_objects_v1";
+      var saved = [];
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) {}
+      saved = saved.filter(function(o) { return o.name !== objectName; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+
+      if (window.SS_toast) window.SS_toast("Object deleted", { sub: objectName + " has been removed from the data model." });
+      setTimeout(function() { window.location.href = "settings-data-model.html"; }, 800);
+    }
 
     function publishSchema() {
       if (window.SS_toast) window.SS_toast(objectName + " schema published", { sub: "Schema v4 is now live. Rebuild queued." });
