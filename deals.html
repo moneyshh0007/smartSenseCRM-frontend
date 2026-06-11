@@ -66,7 +66,34 @@
         <a href="deals-table.html">Table</a>
         <a href="deals-forecast.html">Forecast</a>
       </div>
-      <button class="btn sm">+ Add filter</button>
+      <button class="btn sm" id="deals-filter-btn" onclick="dealsToggleFilter(event)">+ Add filter</button>
+      <div id="deals-filter-dd" style="display:none;position:absolute;top:auto;margin-top:4px;background:var(--paper);border:var(--rule-strong);border-radius:var(--radius);box-shadow:var(--shadow-pop);width:300px;z-index:100;padding:14px;">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:10px;">Filter deals by</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Field</label>
+            <select id="df-field" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;" onchange="dfUpdateVal()">
+              <option value="stage">Stage</option>
+              <option value="company">Company</option>
+              <option value="amount">Amount</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Condition</label>
+            <select id="df-op" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;"></select>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Value</label>
+          <select id="df-sel" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;"></select>
+          <input id="df-val" type="number" placeholder="e.g. 10000" style="display:none;width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;box-sizing:border-box;" onkeydown="if(event.key==='Enter')dfApply()" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+          <button class="btn sm" onclick="dfClearAll()">Clear all</button>
+          <button class="btn sm primary" onclick="dfApply()">Apply filter</button>
+        </div>
+      </div>
+      <div id="df-chips" class="row gap-2" style="flex-wrap:wrap;margin-left:4px;"></div>
     </div>
   </div>
 
@@ -292,6 +319,103 @@
         console.error("Failed to load deals:", err);
         document.getElementById("deals-sub").textContent = "Failed to load deals.";
       }
+    }
+
+    // ── Deals filter ─────────────────────────────────────────────
+    var _dfFilters = [];
+
+    function dealsToggleFilter(e) {
+      e.stopPropagation();
+      var dd = document.getElementById("deals-filter-dd");
+      var btn = document.getElementById("deals-filter-btn");
+      var rect = btn.getBoundingClientRect();
+      dd.style.position = "fixed";
+      dd.style.top  = (rect.bottom + 6) + "px";
+      dd.style.left = rect.left + "px";
+      dd.style.display = dd.style.display === "none" ? "block" : "none";
+      if (dd.style.display === "block") dfUpdateVal();
+    }
+    document.addEventListener("click", function(e) {
+      var dd = document.getElementById("deals-filter-dd"), btn = document.getElementById("deals-filter-btn");
+      if (dd && !dd.contains(e.target) && e.target !== btn) dd.style.display = "none";
+    });
+
+    function dfUpdateVal() {
+      var f = document.getElementById("df-field").value;
+      var opSel = document.getElementById("df-op");
+      var sel = document.getElementById("df-sel"), val = document.getElementById("df-val");
+      sel.style.display = "none"; val.style.display = "none";
+
+      if (f === "stage") {
+        opSel.innerHTML = "<option>is</option><option>is not</option>";
+        var stages = Array.from(document.querySelectorAll(".kanban-col[data-stage]")).map(function(c){return c.getAttribute("data-stage");});
+        sel.innerHTML = stages.map(function(s){return "<option>"+s+"</option>";}).join("");
+        sel.style.display = "block";
+      } else if (f === "company") {
+        opSel.innerHTML = "<option>is</option><option>is not</option>";
+        var companies = Array.from(new Set(
+          Array.from(document.querySelectorAll(".kanban-card-meta span:not(.kanban-card-amount)")).map(function(s){return s.textContent.trim();}).filter(Boolean)
+        )).sort();
+        sel.innerHTML = companies.map(function(n){return "<option>"+n+"</option>";}).join("");
+        sel.style.display = "block";
+      } else if (f === "amount") {
+        opSel.innerHTML = "<option>greater than</option><option>less than</option><option>equals</option>";
+        val.style.display = "block";
+      }
+    }
+
+    function dfApply() {
+      var f = document.getElementById("df-field").value, op = document.getElementById("df-op").value;
+      var sel = document.getElementById("df-sel"), val = document.getElementById("df-val");
+      var value = sel.style.display !== "none" ? sel.value : val.value.trim();
+      if (!value) return;
+      _dfFilters.push({field:f, op:op, value:value});
+      dfRenderChips(); dfApplyToCards();
+      document.getElementById("deals-filter-dd").style.display = "none";
+      val.value = "";
+    }
+
+    function dfRemove(i) { _dfFilters.splice(i,1); dfRenderChips(); dfApplyToCards(); }
+
+    function dfClearAll() { _dfFilters = []; dfRenderChips(); dfApplyToCards(); document.getElementById("deals-filter-dd").style.display="none"; }
+
+    function dfRenderChips() {
+      var LABELS = {stage:"Stage",company:"Company",amount:"Amount"};
+      document.getElementById("df-chips").innerHTML = _dfFilters.map(function(f,i){
+        return "<span class='chip' style='background:var(--ink);color:var(--paper);'>"+LABELS[f.field]+" "+f.op+" <em>"+f.value+"</em> <span class='chip-x' onclick='dfRemove("+i+")' style='cursor:pointer;color:rgba(255,255,255,.7);'>×</span></span>";
+      }).join("");
+      document.getElementById("deals-filter-btn").textContent = _dfFilters.length ? "+ Add filter ("+_dfFilters.length+")" : "+ Add filter";
+    }
+
+    function dfApplyToCards() {
+      document.querySelectorAll(".kanban-card").forEach(function(card) {
+        if (!_dfFilters.length) { card.style.display = ""; return; }
+        var col = card.closest(".kanban-col");
+        var stage = col ? col.getAttribute("data-stage") : "";
+        var amtEl = card.querySelector(".kanban-card-amount");
+        var amt = amtEl ? parseFloat(amtEl.textContent.replace(/[^0-9.]/g,"")) : 0;
+        var coEl = card.querySelector(".kanban-card-meta span:not(.kanban-card-amount)");
+        var company = coEl ? coEl.textContent.trim() : "";
+
+        var show = _dfFilters.every(function(f) {
+          if (f.field==="stage")   { return f.op==="is not" ? stage!==f.value : stage===f.value; }
+          if (f.field==="company") { return f.op==="is not" ? company!==f.value : company===f.value; }
+          if (f.field==="amount")  {
+            var fv = parseFloat(f.value)||0;
+            return f.op==="greater than"?amt>fv:f.op==="less than"?amt<fv:amt===fv;
+          }
+          return true;
+        });
+        card.style.display = show ? "" : "none";
+      });
+
+      // Update column counts
+      document.querySelectorAll(".kanban-col").forEach(function(col) {
+        var visible = Array.from(col.querySelectorAll(".kanban-card")).filter(function(c){return c.style.display!=="none";}).length;
+        var meta = col.querySelector(".kanban-col-meta"), cnt = col.querySelector(".kanban-col-count");
+        if (meta) meta.textContent = visible + " deals";
+        if (cnt)  cnt.textContent  = visible;
+      });
     }
 
     window.SS_loadDeals = loadDeals;

@@ -54,9 +54,39 @@
     </div>
   </div>
 
-  <div class="row mb-4 gap-3">
-    <div class="row gap-2">
-      <button class="btn sm">+ Add filter</button>
+  <div class="row mb-4 gap-3" style="flex-wrap:wrap;">
+    <div class="row gap-2" style="align-items:center;flex-wrap:wrap;">
+      <div style="position:relative;">
+        <button class="btn sm" id="co-filter-btn" onclick="coToggleFilter(event)">+ Add filter</button>
+        <div id="co-filter-dd" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--paper);border:var(--rule-strong);border-radius:var(--radius);box-shadow:var(--shadow-pop);width:300px;z-index:100;padding:14px;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:10px;">Filter companies by</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Field</label>
+              <select id="co-ff-field" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;" onchange="coUpdateOps()">
+                <option value="name">Company name</option>
+                <option value="industry">Industry</option>
+                <option value="size">Size (employees)</option>
+                <option value="deals">Open deals</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Condition</label>
+              <select id="co-ff-op" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;"></select>
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Value</label>
+            <input id="co-ff-val" type="text" placeholder="Enter value…" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;box-sizing:border-box;" onkeydown="if(event.key==='Enter')coApplyFilter()" />
+            <select id="co-ff-sel" style="display:none;width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;"></select>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button class="btn sm" onclick="document.getElementById('co-filter-dd').style.display='none'">Cancel</button>
+            <button class="btn sm primary" onclick="coApplyFilter()">Apply filter</button>
+          </div>
+        </div>
+      </div>
+      <div id="co-active-filters" class="row gap-2" style="flex-wrap:wrap;"></div>
     </div>
     <div style="margin-left: auto;" class="row gap-2">
       <span class="text-mono text-muted" style="font-size: 11px;" id="companies-count"></span>
@@ -99,50 +129,99 @@
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
+    var _allCo = [], _coFilters = [];
+    var CO_OPS = { name:["contains","equals","does not contain"], industry:["is","is not"], size:["equals","greater than","less than"], deals:["equals","greater than","less than"] };
+
+    function coToggleFilter(e) {
+      e.stopPropagation();
+      var dd = document.getElementById("co-filter-dd");
+      dd.style.display = dd.style.display === "none" ? "block" : "none";
+      if (dd.style.display === "block") { coUpdateOps(); document.getElementById("co-ff-val").focus(); }
+    }
+    document.addEventListener("click", function(e) {
+      var dd = document.getElementById("co-filter-dd"), btn = document.getElementById("co-filter-btn");
+      if (dd && !dd.contains(e.target) && e.target !== btn) dd.style.display = "none";
+    });
+
+    function coUpdateOps() {
+      var f = document.getElementById("co-ff-field").value;
+      var opSel = document.getElementById("co-ff-op");
+      opSel.innerHTML = (CO_OPS[f] || ["contains","equals"]).map(function(o){return "<option>"+o+"</option>";}).join("");
+      var val = document.getElementById("co-ff-val"), sel = document.getElementById("co-ff-sel");
+      val.style.display = "none"; sel.style.display = "none";
+      if (f === "industry") {
+        var inds = Array.from(new Set(_allCo.map(function(c){return c.industry||"";}).filter(Boolean))).sort();
+        sel.innerHTML = inds.map(function(i){return "<option>"+i+"</option>";}).join("");
+        sel.style.display = "block";
+      } else {
+        val.type = (f === "size" || f === "deals") ? "number" : "text";
+        val.placeholder = f === "size" ? "e.g. 500" : f === "deals" ? "e.g. 2" : "Enter value…";
+        val.style.display = "block";
+      }
+    }
+
+    function coApplyFilter() {
+      var f = document.getElementById("co-ff-field").value, op = document.getElementById("co-ff-op").value;
+      var val = document.getElementById("co-ff-field").value === "industry" ? document.getElementById("co-ff-sel").value : document.getElementById("co-ff-val").value.trim();
+      if (!val) return;
+      _coFilters.push({field:f, op:op, value:val});
+      coRenderChips(); coRender(coFiltered());
+      document.getElementById("co-filter-dd").style.display = "none";
+      document.getElementById("co-ff-val").value = "";
+    }
+
+    function coRemove(i) { _coFilters.splice(i,1); coRenderChips(); coRender(coFiltered()); }
+
+    function coRenderChips() {
+      var LABELS = {name:"Name", industry:"Industry", size:"Size", deals:"Open deals"};
+      document.getElementById("co-active-filters").innerHTML = _coFilters.map(function(f,i){
+        return "<span class='chip' style='background:var(--ink);color:var(--paper);'>" + LABELS[f.field] + " " + f.op + " <em>" + f.value + "</em> <span class='chip-x' onclick='coRemove("+i+")' style='cursor:pointer;color:rgba(255,255,255,.7);'>×</span></span>";
+      }).join("");
+      document.getElementById("co-filter-btn").textContent = _coFilters.length ? "+ Add filter ("+_coFilters.length+")" : "+ Add filter";
+    }
+
+    function coFiltered() {
+      if (!_coFilters.length) return _allCo;
+      return _allCo.filter(function(c) {
+        return _coFilters.every(function(f) {
+          var v = f.value.toLowerCase(), op = f.op;
+          if (f.field === "name") { var n=(c.name||"").toLowerCase(); return op==="contains"?n.includes(v):op==="equals"?n===v:!n.includes(v); }
+          if (f.field === "industry") { return op==="is not" ? (c.industry||"")!==f.value : (c.industry||"")===f.value; }
+          if (f.field === "size") { var s=Number(c.size||0),fv=Number(f.value); return op==="greater than"?s>fv:op==="less than"?s<fv:s===fv; }
+          if (f.field === "deals") { var d=c._count?c._count.deals:0,dv=Number(f.value); return op==="greater than"?d>dv:op==="less than"?d<dv:d===dv; }
+          return true;
+        });
+      });
+    }
+
+    function coRender(companies) {
+      var tbody=document.getElementById("companies-tbody"), count=document.getElementById("companies-count"), footer=document.getElementById("companies-footer");
+      count.textContent = companies.length + " RESULTS";
+      footer.textContent = "SHOWING " + companies.length + " COMPANIES";
+      if (!companies.length) { tbody.innerHTML="<tr><td colspan='7' style='text-align:center;padding:40px;color:var(--ink-50);'>No companies match the current filters.</td></tr>"; return; }
+      tbody.innerHTML = companies.map(function(c) {
+        var domain = c.domain ? "<div class='text-muted' style='font-size:11px;'>" + c.domain + "</div>" : "";
+        var industry = c.industry || "—", size = c.size || "—", deals = c._count ? c._count.deals : "0";
+        return "<tr style='cursor:pointer;' onclick=\"window.location.href='company-detail?id="+c.id+"'\">" +
+          "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
+          "<td><strong>" + c.name + "</strong>" + domain + "</td><td>" + industry + "</td><td>" + size + "</td><td>" + deals + "</td><td class='num'>—</td><td>—</td></tr>";
+      }).join("");
+    }
+
     async function loadCompanies() {
       try {
         const data = await SS_API.Companies.list();
-        const tbody = document.getElementById("companies-tbody");
         const sub = document.getElementById("companies-sub");
-        const count = document.getElementById("companies-count");
-        const footer = document.getElementById("companies-footer");
-
-        // Deduplicate by name (case-insensitive), keeping the record with the most contacts+deals
         var seen = new Map();
         data.companies.forEach(function(c) {
-          var key = c.name.toLowerCase();
-          var existing = seen.get(key);
+          var key = c.name.toLowerCase(), existing = seen.get(key);
           var score = (c._count ? c._count.contacts + c._count.deals : 0);
           var existingScore = existing ? (existing._count ? existing._count.contacts + existing._count.deals : 0) : -1;
           if (!existing || score > existingScore) seen.set(key, c);
         });
-        var companies = Array.from(seen.values());
-
-        sub.textContent = companies.length + " Companies · Live from database";
-        count.textContent = companies.length + " RESULTS";
-        footer.textContent = "SHOWING " + companies.length + " COMPANIES";
-
-        if (companies.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;padding:40px;color:var(--ink-50);'>No companies yet — import CSV or add your first company.</td></tr>";
-          return;
-        }
-
-
-        tbody.innerHTML = companies.map(function(c) {
-          var domain = c.domain ? "<div class='text-muted' style='font-size:11px;'>" + c.domain + "</div>" : "";
-          var industry = c.industry || "—";
-          var size = c.size || "—";
-          var deals = c._count ? c._count.deals : "0";
-          return "<tr style='cursor:pointer;' onclick=\"window.location.href='company-detail?id=" + c.id + "'\">" +
-            "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
-            "<td><strong>" + c.name + "</strong>" + domain + "</td>" +
-            "<td>" + industry + "</td>" +
-            "<td>" + size + "</td>" +
-            "<td>" + deals + "</td>" +
-            "<td class='num'>—</td>" +
-            "<td>—</td>" +
-            "</tr>";
-        }).join("");
+        _allCo = Array.from(seen.values());
+        sub.textContent = _allCo.length + " Companies · Live from database";
+        coRender(coFiltered());
 
       } catch (err) {
         console.error("Failed to load companies:", err);

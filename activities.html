@@ -39,8 +39,40 @@
       <a href="#" id="tab-call" onclick="filterByType('call', this)">Calls</a>
       <a href="#" id="tab-note" onclick="filterByType('note', this)">Notes</a>
     </div>
-    <div class="row gap-2">
-      <button class="btn sm">+ Add filter</button>
+    <div class="row gap-2" style="align-items:center;">
+      <div style="position:relative;">
+        <button class="btn sm" id="ac-filter-btn" onclick="acToggleFilter(event)">+ Add filter</button>
+        <div id="ac-filter-dd" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--paper);border:var(--rule-strong);border-radius:var(--radius);box-shadow:var(--shadow-pop);width:300px;z-index:100;padding:14px;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:10px;">Filter activities by</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Field</label>
+              <select id="ac-ff-field" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;" onchange="acUpdateVal()">
+                <option value="type">Activity type</option>
+                <option value="contact">Contact</option>
+                <option value="deal">Deal</option>
+                <option value="date">Date</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Condition</label>
+              <select id="ac-ff-op" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;">
+                <option>is</option><option>is not</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Value</label>
+            <select id="ac-ff-sel" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;"></select>
+            <input id="ac-ff-val" type="text" placeholder="Enter value…" style="display:none;width:100%;border:var(--rule);border-radius:var(--radius);padding:6px 8px;font-size:12px;box-sizing:border-box;" onkeydown="if(event.key==='Enter')acApplyFilter()" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button class="btn sm" onclick="document.getElementById('ac-filter-dd').style.display='none'">Cancel</button>
+            <button class="btn sm primary" onclick="acApplyFilter()">Apply filter</button>
+          </div>
+        </div>
+      </div>
+      <div id="ac-active-filters" class="row gap-2" style="flex-wrap:wrap;"></div>
     </div>
   </div>
 
@@ -57,13 +89,101 @@
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
-    var currentType = null;
+    var _allActs = [], _acFilters = [], currentType = null;
+
+    function acToggleFilter(e) {
+      e.stopPropagation();
+      var dd = document.getElementById("ac-filter-dd");
+      dd.style.display = dd.style.display === "none" ? "block" : "none";
+      if (dd.style.display === "block") acUpdateVal();
+    }
+    document.addEventListener("click", function(e) {
+      var dd = document.getElementById("ac-filter-dd"), btn = document.getElementById("ac-filter-btn");
+      if (dd && !dd.contains(e.target) && e.target !== btn) dd.style.display = "none";
+    });
+
+    function acUpdateVal() {
+      var f = document.getElementById("ac-ff-field").value;
+      var opSel = document.getElementById("ac-ff-op");
+      var sel = document.getElementById("ac-ff-sel"), val = document.getElementById("ac-ff-val");
+      sel.style.display = "none"; val.style.display = "none";
+
+      if (f === "type") {
+        opSel.innerHTML = "<option>is</option><option>is not</option>";
+        var types = Array.from(new Set(_allActs.map(function(a){return a.type||""}).filter(Boolean))).sort();
+        sel.innerHTML = types.length ? types.map(function(t){return "<option>"+t+"</option>";}).join("") : "<option>meeting</option><option>email</option><option>note</option>";
+        sel.style.display = "block";
+      } else if (f === "contact") {
+        opSel.innerHTML = "<option>is</option><option>is not</option>";
+        var contacts = Array.from(new Set(_allActs.filter(function(a){return a.contact;}).map(function(a){return a.contact.firstName+" "+a.contact.lastName;}))).sort();
+        sel.innerHTML = contacts.map(function(n){return "<option>"+n+"</option>";}).join("");
+        sel.style.display = "block";
+      } else if (f === "deal") {
+        opSel.innerHTML = "<option>is</option><option>is not</option>";
+        var deals = Array.from(new Set(_allActs.filter(function(a){return a.deal;}).map(function(a){return a.deal.name;}))).sort();
+        sel.innerHTML = deals.map(function(n){return "<option>"+n+"</option>";}).join("");
+        sel.style.display = "block";
+      } else if (f === "date") {
+        opSel.innerHTML = "<option>is before</option><option>is after</option>";
+        val.type = "date"; val.style.display = "block";
+      }
+    }
+
+    function acApplyFilter() {
+      var f = document.getElementById("ac-ff-field").value, op = document.getElementById("ac-ff-op").value;
+      var sel = document.getElementById("ac-ff-sel"), val = document.getElementById("ac-ff-val");
+      var value = (sel.style.display !== "none") ? sel.value : val.value.trim();
+      if (!value) return;
+      _acFilters.push({field:f, op:op, value:value});
+      acRenderChips(); acRender(acFiltered());
+      document.getElementById("ac-filter-dd").style.display = "none";
+      val.value = "";
+    }
+
+    function acRemove(i) { _acFilters.splice(i,1); acRenderChips(); acRender(acFiltered()); }
+
+    function acRenderChips() {
+      var LABELS = {type:"Type",contact:"Contact",deal:"Deal",date:"Date"};
+      document.getElementById("ac-active-filters").innerHTML = _acFilters.map(function(f,i){
+        return "<span class='chip' style='background:var(--ink);color:var(--paper);'>"+LABELS[f.field]+" "+f.op+" <em>"+f.value+"</em> <span class='chip-x' onclick='acRemove("+i+")' style='cursor:pointer;color:rgba(255,255,255,.7);'>×</span></span>";
+      }).join("");
+      document.getElementById("ac-filter-btn").textContent = _acFilters.length ? "+ Add filter ("+_acFilters.length+")" : "+ Add filter";
+    }
+
+    function acFiltered() {
+      var list = currentType ? _allActs.filter(function(a){return a.type===currentType;}) : _allActs;
+      if (!_acFilters.length) return list;
+      return list.filter(function(a) {
+        return _acFilters.every(function(f) {
+          var op=f.op, v=f.value;
+          if (f.field==="type") { return op==="is not"?a.type!==v:a.type===v; }
+          if (f.field==="contact") { var cn=a.contact?(a.contact.firstName+" "+a.contact.lastName):""; return op==="is not"?cn!==v:cn===v; }
+          if (f.field==="deal") { var dn=a.deal?a.deal.name:""; return op==="is not"?dn!==v:dn===v; }
+          if (f.field==="date") { var d=new Date(a.occurredAt||a.createdAt),fv=new Date(v); return op==="is before"?d<fv:d>fv; }
+          return true;
+        });
+      });
+    }
+
+    function acRender(acts) {
+      var timeline = document.getElementById("activities-timeline");
+      if (!acts.length) { timeline.innerHTML="<div style='text-align:center;padding:40px;color:var(--ink-50);'>No activities match the current filters.</div>"; return; }
+      timeline.innerHTML = acts.map(function(a) {
+        var date = new Date(a.occurredAt||a.createdAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+        var body = a.body ? "<div class='timeline-body'>"+a.body+"</div>" : "";
+        var contact = a.contact ? " · <a href='contact-detail?id="+a.contact.id+"'>"+a.contact.firstName+" "+a.contact.lastName+"</a>" : "";
+        var deal = a.deal ? " · <a href='deal-detail?id="+a.deal.id+"'>"+a.deal.name+"</a>" : "";
+        return "<div class='" + getTypeClass(a.type) + "'>" +
+          "<div class='timeline-meta'><span>"+date+"</span><span class='badge muted'>"+(a.type||"").toUpperCase()+"</span><span>"+(a.autoLogged?"Auto-logged":"Manual")+"</span></div>" +
+          "<div class='timeline-title'>"+a.title+contact+deal+"</div>" + body + "</div>";
+      }).join("");
+    }
 
     function filterByType(type, el) {
       currentType = type;
       document.querySelectorAll(".tab-bar a").forEach(function(a) { a.className = ""; });
       el.className = "active";
-      loadActivities();
+      acRender(acFiltered());
       return false;
     }
 
@@ -76,38 +196,11 @@
     async function loadActivities() {
       try {
         var params = { limit: 50 };
-        if (currentType) params.type = currentType;
         var data = await SS_API.Activities.list(params);
-        var timeline = document.getElementById("activities-timeline");
         var sub = document.getElementById("activities-sub");
-
-        sub.textContent = data.total + " activities · Live from database";
-
-        if (data.activities.length === 0) {
-          timeline.innerHTML = "<div style='text-align:center;padding:40px;color:var(--ink-50);'>No activities yet — log your first activity.</div>";
-          return;
-        }
-
-        timeline.innerHTML = data.activities.map(function(a) {
-          var date = new Date(a.occurredAt).toLocaleDateString("en-GB", {
-            day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
-          });
-          var typeLabel = a.type.toUpperCase();
-          var autoLabel = a.autoLogged ? "Auto-logged" : "Manual";
-          var body = a.body ? "<div class='timeline-body'>" + a.body + "</div>" : "";
-          var contact = a.contact ? " · <a href='contact-detail?id=" + a.contact.id + "'>" + a.contact.firstName + " " + a.contact.lastName + "</a>" : "";
-          var deal = a.deal ? " · <a href='deal-detail?id=" + a.deal.id + "'>" + a.deal.name + "</a>" : "";
-
-          return "<div class='" + getTypeClass(a.type) + "'>" +
-            "<div class='timeline-meta'>" +
-            "<span>" + date + "</span>" +
-            "<span class='badge muted'>" + typeLabel + "</span>" +
-            "<span>" + autoLabel + "</span>" +
-            "</div>" +
-            "<div class='timeline-title'>" + a.title + contact + deal + "</div>" +
-            body +
-            "</div>";
-        }).join("");
+        _allActs = data.activities || [];
+        sub.textContent = _allActs.length + " activities · Live from database";
+        acRender(acFiltered());
 
       } catch (err) {
         console.error("Failed to load activities:", err);
