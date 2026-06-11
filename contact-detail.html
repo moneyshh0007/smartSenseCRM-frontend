@@ -34,6 +34,9 @@
       <button class="btn sm">Re-enrich</button>
       <button class="btn">Log activity</button>
       <button class="btn primary">+ New task</button>
+      <button class="btn" id="delete-contact-btn"
+        style="border-color:var(--ink);color:var(--ink);"
+        onclick="deleteContact()">Delete contact</button>
     </div>
   </div>
 
@@ -317,6 +320,22 @@
       } catch (err) {
         document.getElementById("tasks-list").innerHTML =
           "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load tasks.</div>";
+      }
+    }
+
+    // ── Delete contact ────────────────────────────────────────────────────
+    async function deleteContact() {
+      var name = document.getElementById("contact-name").textContent || "this contact";
+      if (!confirm('Delete "' + name + '"?\n\nThis will permanently remove the contact. This cannot be undone.')) return;
+      var btn = document.getElementById("delete-contact-btn");
+      if (btn) { btn.disabled = true; btn.textContent = "Deleting…"; }
+      try {
+        await SS_API.Contacts.delete(contactId);
+        window.location.href = "contacts.html";
+      } catch (err) {
+        console.error("Delete contact failed:", err);
+        alert("Could not delete contact: " + (err.message || "Unknown error"));
+        if (btn) { btn.disabled = false; btn.textContent = "Delete contact"; }
       }
     }
 
