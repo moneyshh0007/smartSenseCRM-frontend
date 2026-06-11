@@ -198,26 +198,80 @@
       var ops   = OPS_FOR_FIELD[field] || ["contains","equals"];
       opSel.innerHTML = ops.map(function(o) { return "<option>" + o + "</option>"; }).join("");
 
-      // Show/hide value inputs
-      var txtInput  = document.getElementById("ff-value");
-      var boolSel   = document.getElementById("ff-value-select");
-      var srcSel    = document.getElementById("ff-source-select");
-      txtInput.style.display  = "none";
-      boolSel.style.display   = "none";
-      srcSel.style.display    = "none";
+      // Hide all value inputs first
+      var txtInput = document.getElementById("ff-value");
+      var boolSel  = document.getElementById("ff-value-select");
+      var srcSel   = document.getElementById("ff-source-select");
+      txtInput.style.display = "none";
+      boolSel.style.display  = "none";
+      srcSel.style.display   = "none";
 
+      // ── Populate options dynamically from loaded contacts ──────
       if (field === "source") {
+        // Unique sources from real data
+        var sources = Array.from(new Set(
+          _allContacts.map(function(c) { return (c.source || "manual").toLowerCase(); })
+        )).sort();
+        srcSel.innerHTML = sources.length
+          ? sources.map(function(s) { return "<option value='" + s + "'>" + s.replace(/_/g, " ") + "</option>"; }).join("")
+          : "<option value='manual'>manual</option>";
         srcSel.style.display = "block";
-      } else if (field === "email" || field === "linked") {
-        boolSel.style.display = "block";
-      } else if (field === "created") {
+
+      } else if (field === "company") {
+        // Unique company names from real data
+        var companies = Array.from(new Set(
+          _allContacts.filter(function(c) { return c.company; })
+                      .map(function(c) { return c.company.name; })
+        )).sort();
+        if (companies.length > 0) {
+          srcSel.innerHTML = companies.map(function(n) {
+            return "<option value='" + n.replace(/'/g, "&#39;") + "'>" + n + "</option>";
+          }).join("");
+          srcSel.style.display = "block";
+        } else {
+          txtInput.type = "text";
+          txtInput.placeholder = "Enter company name…";
+          txtInput.style.display = "block";
+        }
+
+      } else if (field === "title") {
+        // Text input with datalist of unique titles
+        var titles = Array.from(new Set(
+          _allContacts.filter(function(c) { return c.title; })
+                      .map(function(c) { return c.title; })
+        )).sort();
+        var listId = "ff-title-list";
+        var existing = document.getElementById(listId);
+        if (existing) existing.remove();
+        var dl = document.createElement("datalist");
+        dl.id = listId;
+        titles.forEach(function(t) {
+          var opt = document.createElement("option");
+          opt.value = t;
+          dl.appendChild(opt);
+        });
+        txtInput.parentNode.appendChild(dl);
+        txtInput.setAttribute("list", listId);
+        txtInput.type = "text";
+        txtInput.placeholder = "Type or pick a title…";
         txtInput.style.display = "block";
+
+      } else if (field === "email" || field === "linked") {
+        // Boolean — yes/no is always static
+        boolSel.innerHTML = "<option value='yes'>Yes</option><option value='no'>No</option>";
+        boolSel.style.display = "block";
+
+      } else if (field === "created") {
+        txtInput.removeAttribute("list");
         txtInput.type = "date";
         txtInput.placeholder = "";
-      } else {
         txtInput.style.display = "block";
+
+      } else {
+        txtInput.removeAttribute("list");
         txtInput.type = "text";
         txtInput.placeholder = "Enter value…";
+        txtInput.style.display = "block";
       }
     }
 
@@ -228,9 +282,9 @@
       var boolSel  = document.getElementById("ff-value-select");
       var srcSel   = document.getElementById("ff-source-select");
       var value;
-      if (field === "source")                    value = srcSel.value;
+      if (field === "source" || field === "company") value = srcSel.value;
       else if (field === "email" || field === "linked") value = boolSel.value;
-      else                                        value = txtInput.value.trim();
+      else                                             value = txtInput.value.trim();
 
       if (!value) { txtInput.focus(); return; }
 
