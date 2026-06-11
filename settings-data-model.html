@@ -35,9 +35,7 @@
     <div class="card role-card" onclick="window.location.href='settings-object-detail?object=Person'">
       <div class="row between">
         <div class="card-title">Person</div>
-        <div class="row gap-2">
-          <span class="text-mono text-muted" style="font-size:11px;">12 FIELDS ↗</span>
-        </div>
+        <span class="text-mono text-muted" style="font-size:11px;">12 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default object · 1,847 records</div>
       <div class="row mt-3 gap-2">
@@ -47,9 +45,7 @@
     <div class="card role-card" onclick="window.location.href='settings-object-detail?object=Company'">
       <div class="row between">
         <div class="card-title">Company</div>
-        <div class="row gap-2">
-          <span class="text-mono text-muted" style="font-size:11px;">9 FIELDS ↗</span>
-        </div>
+        <span class="text-mono text-muted" style="font-size:11px;">9 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default object · 412 records</div>
       <div class="row mt-3 gap-2">
@@ -59,9 +55,7 @@
     <div class="card role-card" onclick="window.location.href='settings-object-detail?object=Deal'">
       <div class="row between">
         <div class="card-title">Deal</div>
-        <div class="row gap-2">
-          <span class="text-mono text-muted" style="font-size:11px;">14 FIELDS ↗</span>
-        </div>
+        <span class="text-mono text-muted" style="font-size:11px;">14 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default · 60 records</div>
       <div class="row mt-3 gap-2">
@@ -71,18 +65,14 @@
     <div class="card role-card" onclick="window.location.href='settings-object-detail?object=Task'">
       <div class="row between">
         <div class="card-title">Task</div>
-        <div class="row gap-2">
-          <span class="text-mono text-muted" style="font-size:11px;">7 FIELDS ↗</span>
-        </div>
+        <span class="text-mono text-muted" style="font-size:11px;">7 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default · 142 records</div>
     </div>
     <div class="card role-card" onclick="window.location.href='settings-object-detail?object=Note'">
       <div class="row between">
         <div class="card-title">Note</div>
-        <div class="row gap-2">
-          <span class="text-mono text-muted" style="font-size:11px;">5 FIELDS ↗</span>
-        </div>
+        <span class="text-mono text-muted" style="font-size:11px;">5 FIELDS ↗</span>
       </div>
       <div class="text-muted mt-2" style="font-size:12px;">Default · 287 records</div>
     </div>
@@ -496,35 +486,6 @@
 
       closeNewObjectPanel();
       if (window.SS_toast) window.SS_toast("Object created", { sub: icon + " " + name + " · " + noFields.length + " fields" });
-    }
-
-    // ── Delete handlers ───────────────────────────────────────────
-    function deleteSystemObject(name) {
-      if (window.SS_toast) {
-        window.SS_toast(name + " cannot be deleted", {
-          sub: "System objects are part of the core data model and cannot be removed."
-        });
-      } else {
-        alert(name + " is a system object and cannot be deleted.");
-      }
-    }
-
-    function deleteCustomObject(id, btn) {
-      var card = btn.closest(".card");
-      var objName = card ? card.querySelector(".card-title") : null;
-      var name = objName ? objName.textContent.trim() : "this object";
-      if (!confirm("Delete " + name + "?\n\nAll records and field definitions for this object will be permanently removed. This cannot be undone.")) return;
-
-      // Remove from localStorage
-      var saved = [];
-      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) {}
-      saved = saved.filter(function(o) { return String(o.id) !== String(id); });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-
-      // Remove card from DOM
-      if (card) card.remove();
-
-      if (window.SS_toast) window.SS_toast("Object deleted", { sub: name + " has been removed from the data model." });
     }
 
     // Load saved objects immediately on page load
