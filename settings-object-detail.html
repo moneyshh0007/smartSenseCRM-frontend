@@ -31,7 +31,7 @@
       <div class="page-sub" id="object-sub"></div>
     </div>
     <div class="row gap-2">
-      <button class="btn" onclick="window.location.href='settings-data-model.html'">← Data Model</button>
+      <button class="btn" onclick="window.location.href='settings-data-model'">← Data Model</button>
       <button class="btn" id="delete-object-btn" onclick="deleteObject()">Delete object</button>
       <button class="btn primary" id="publish-btn">Publish schema</button>
     </div>
@@ -237,7 +237,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
 
       if (window.SS_toast) window.SS_toast("Object deleted", { sub: objectName + " has been removed from the data model." });
-      setTimeout(function() { window.location.href = "settings-data-model.html"; }, 800);
+      setTimeout(function() { window.location.href = "settings-data-model"; }, 800);
     }
 
     function publishSchema() {
