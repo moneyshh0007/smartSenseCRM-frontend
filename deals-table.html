@@ -63,7 +63,7 @@
     <div class="row gap-2">
       <a href="deals-table-junior.html" style="font-size:11px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;">View as Junior Rep ↗</a>
       <button class="btn sm">+ Filter</button>
-      <button class="btn sm">Group by stage</button>
+      <button class="btn sm" id="dt-group-btn" onclick="dtToggleGroup(this)">Group by stage</button>
     </div>
   </div>
 
@@ -223,6 +223,44 @@
   </div>
   <script src="assets/api.js"></script>
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    var _dtGrouped = false;
+    function dtToggleGroup(btn) {
+      _dtGrouped = !_dtGrouped;
+      btn.textContent = _dtGrouped ? "Ungroup" : "Group by stage";
+      btn.style.background = _dtGrouped ? "var(--ink)" : "";
+      btn.style.color      = _dtGrouped ? "var(--paper)" : "";
+
+      var tbody = document.querySelector(".table tbody");
+      if (!tbody) return;
+      var rows = Array.from(tbody.querySelectorAll("tr:not([data-group-header])"));
+
+      if (!_dtGrouped) {
+        // Remove group headers and restore
+        tbody.querySelectorAll("tr[data-group-header]").forEach(function(h){ h.remove(); });
+        rows.forEach(function(r){ r.style.display=""; });
+        return;
+      }
+
+      // Group rows by Stage column (col index 1 based on table structure)
+      var grouped = {}, order = [];
+      rows.forEach(function(row) {
+        var stageBadge = row.querySelector(".badge");
+        var stage = stageBadge ? stageBadge.textContent.trim() : "—";
+        if (!grouped[stage]) { grouped[stage]=[]; order.push(stage); }
+        grouped[stage].push(row);
+      });
+
+      tbody.innerHTML = "";
+      order.forEach(function(stage) {
+        var hdr = document.createElement("tr");
+        hdr.setAttribute("data-group-header","1");
+        hdr.innerHTML = "<td colspan='6' style='background:var(--ink-05);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);padding:8px 12px;'>" + stage + " · " + grouped[stage].length + " deal" + (grouped[stage].length!==1?"s":"") + "</td>";
+        tbody.appendChild(hdr);
+        grouped[stage].forEach(function(r){ tbody.appendChild(r); });
+      });
+    }
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
