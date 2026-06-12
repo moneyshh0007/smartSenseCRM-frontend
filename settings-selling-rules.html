@@ -86,10 +86,8 @@
     <div data-sidebar></div>
     <main class="main">
       <div class="topbar">
-        <div class="breadcrumb">
-          <a href="settings.html">Workspace Admin</a><span class="sep">/</span>
-          <a href="settings.html">Settings</a><span class="sep">/</span>
-          <a href="settings-selling-rules.html" class="current">Selling Rules</a>
+        <div class="breadcrumb" id="breadcrumb">
+          <!-- set by JS below -->
         </div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
@@ -355,6 +353,24 @@
     </div>
   </div>
 
+  <script>
+    (function() {
+      var from = new URLSearchParams(window.location.search).get("from");
+      var bc = document.getElementById("breadcrumb");
+      if (!bc) return;
+      if (from === "activities") {
+        bc.innerHTML =
+          '<a href="activities.html">Records</a><span class="sep">/</span>' +
+          '<a href="activities.html">Activities</a><span class="sep">/</span>' +
+          '<span class="current">Selling Rules</span>';
+      } else {
+        bc.innerHTML =
+          '<a href="settings.html">Workspace Admin</a><span class="sep">/</span>' +
+          '<a href="settings.html">Settings</a><span class="sep">/</span>' +
+          '<span class="current">Selling Rules</span>';
+      }
+    })();
+  </script>
   <script src="assets/api.js"></script>
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
