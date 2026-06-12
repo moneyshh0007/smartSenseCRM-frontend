@@ -143,9 +143,11 @@
         rebuildNote: "Materialised view rebuild takes ~10 sec for 142 tasks.",
         fields: [
           { name:"Title",       type:"Text",            required:"✓ Always",    gate:"—",         key:"title" },
+          { name:"Description", type:"Long text",       required:"—",           gate:"—",         key:"description" },
           { name:"Due at",      type:"Datetime",        required:"—",           gate:"—",         key:"due_at" },
           { name:"Priority",    type:"Single-select",   required:"—",           gate:"—",         key:"priority" },
           { name:"Completed",   type:"Boolean",         required:"—",           gate:"—",         key:"completed" },
+          { name:"Tags",        type:"Multi-select",    required:"—",           gate:"—",         key:"tags" },
           { name:"Owner",       type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"owner_id" },
           { name:"Contact",     type:"Relation (Person)","required":"—",        gate:"—",         key:"contact_id" },
           { name:"Deal",        type:"Relation (Deal)", required:"—",           gate:"—",         key:"deal_id" },
@@ -159,6 +161,7 @@
           { name:"Body",        type:"Rich text",       required:"✓ Always",    gate:"—",         key:"body" },
           { name:"Author",      type:"Relation (User)", required:"✓ Always",    gate:"—",         key:"author_id" },
           { name:"Contact",     type:"Relation (Person)","required":"—",        gate:"—",         key:"contact_id" },
+          { name:"Company",     type:"Relation (Company)","required":"—",       gate:"—",         key:"company_id" },
           { name:"Deal",        type:"Relation (Deal)", required:"—",           gate:"—",         key:"deal_id" },
           { name:"Created at",  type:"Timestamp",       required:"Auto",        gate:"—",         key:"created_at", readonly:true },
         ]
