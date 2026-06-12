@@ -2865,7 +2865,7 @@
     injectRoleSwitcher();
     applyRole(getRole());
     buildNotifications();
-    buildHelpDrawer();
+    // buildHelpDrawer();  // Keyboard shortcuts panel removed
     buildUserPopover();
     wirePostActions();
     wireBulkToolbar();

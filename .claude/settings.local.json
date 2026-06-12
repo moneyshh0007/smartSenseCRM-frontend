@@ -25,7 +25,8 @@
       "Bash(grep -v \"node_module\\\\|//.*filter\\\\|smart-filter\")",
       "Bash(grep -iv \"//.*update\\\\|data-slide\\\\|url\\\\|field\")",
       "Bash(git push *)",
-      "Bash(grep -v \"//\\\\|sidebarTrigger\\\\|#global-search\")"
+      "Bash(grep -v \"//\\\\|sidebarTrigger\\\\|#global-search\")",
+      "Bash(python3 *)"
     ]
   }
 }
