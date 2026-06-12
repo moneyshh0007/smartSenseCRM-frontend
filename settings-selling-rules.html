@@ -355,18 +355,20 @@
 
   <script>
     (function() {
-      var from = new URLSearchParams(window.location.search).get("from");
+      var fromParam = new URLSearchParams(window.location.search).get("from");
+      var fromRef   = document.referrer && document.referrer.indexOf("activities") !== -1;
+      var fromActivities = fromParam === "activities" || fromRef;
       var bc = document.getElementById("breadcrumb");
       if (!bc) return;
-      if (from === "activities") {
+      if (fromActivities) {
         bc.innerHTML =
-          '<a href="activities.html">Records</a><span class="sep">/</span>' +
-          '<a href="activities.html">Activities</a><span class="sep">/</span>' +
+          '<a href="activities">Records</a><span class="sep">/</span>' +
+          '<a href="activities">Activities</a><span class="sep">/</span>' +
           '<span class="current">Selling Rules</span>';
       } else {
         bc.innerHTML =
-          '<a href="settings.html">Workspace Admin</a><span class="sep">/</span>' +
-          '<a href="settings.html">Settings</a><span class="sep">/</span>' +
+          '<a href="settings">Workspace Admin</a><span class="sep">/</span>' +
+          '<a href="settings">Settings</a><span class="sep">/</span>' +
           '<span class="current">Selling Rules</span>';
       }
     })();
