@@ -2762,7 +2762,8 @@
   // DETAIL BACK NAV (F11) + LIST SCROLL RESTORE (F12)
   // ============================================================
   function wireDetailNavigation() {
-    var isDetail = window.location.pathname.indexOf("detail") !== -1;
+    var isDetail = window.location.pathname.indexOf("detail") !== -1 &&
+                   (document.body.getAttribute("data-page") || "") !== "settings";
     var pageId = document.body.getAttribute("data-page") || "";
     var pathname = window.location.pathname;
 
