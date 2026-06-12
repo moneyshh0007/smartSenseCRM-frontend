@@ -2183,13 +2183,6 @@
         body: '"@mayur please send security PDF before next call"',
         href: "activities?notif=mention"
       },
-      {
-        unread: false,
-        meta: "Yesterday · SCHEMA",
-        title: "Schema v2 → v3 published",
-        body: "2 fields added to Deal object",
-        href: "settings-data-model?notif=schema"
-      },
     ];
 
     drawer.innerHTML = `
