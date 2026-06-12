@@ -33,7 +33,6 @@
     <div class="row gap-2">
       <button class="btn" onclick="window.location.href='settings-data-model'">← Data Model</button>
       <button class="btn" id="delete-object-btn" onclick="deleteObject()">Delete object</button>
-      <button class="btn primary" id="publish-btn">Publish schema</button>
     </div>
   </div>
 
@@ -182,7 +181,6 @@
     document.getElementById("rebuild-note").textContent     = data.rebuildNote;
     document.getElementById("fields-count").textContent     = data.fields.length + " FIELDS";
     document.getElementById("fields-heading").textContent   = objectName + " fields";
-    document.getElementById("publish-btn").textContent      = "Publish " + objectName + " schema";
 
     var tbody = document.getElementById("fields-tbody");
     tbody.innerHTML = data.fields.map(function(f, i) {
