@@ -185,7 +185,7 @@
     document.getElementById("publish-btn").textContent      = "Publish " + objectName + " schema";
 
     var tbody = document.getElementById("fields-tbody");
-    tbody.innerHTML = data.fields.map(function(f) {
+    tbody.innerHTML = data.fields.map(function(f, i) {
       var rowStyle = f.deprecated ? " style='opacity:0.55;background:var(--ink-03);'" : "";
       var nameHtml = "<strong>" + f.name + "</strong>" +
         (f.deprecated ? " <span class='badge warn' style='font-size:9px;vertical-align:middle;'>DEPRECATED</span>" : "");
@@ -194,7 +194,7 @@
         : "<span class='text-mono' style='font-size:11px;'>" + f.key + "</span>";
       var actionHtml = f.readonly || f.deprecated
         ? "<span class='text-muted' style='font-size:11px;'>System</span>"
-        : "<button class='btn sm'>Edit</button>";
+        : "<button class='btn sm' onclick='openEditFieldPanel(" + i + ")'>Edit</button>";
       var gateHtml = f.gate !== "—"
         ? "<span class='badge'>" + f.gate + "</span>"
         : "—";
@@ -208,7 +208,7 @@
         "<td>" + actionHtml + "</td>" +
         "</tr>";
     }).join("") +
-    "<tr style='background:var(--ink-03);'><td>—</td><td colspan='6'><button class='btn sm primary'>+ Add field</button></td></tr>";
+    "<tr style='background:var(--ink-03);'><td>—</td><td colspan='6'><button class='btn sm primary' onclick='openAddFieldPanel()'>+ Add field</button></td></tr>";
 
     // ── Delete object ────────────────────────────────────────────
     var SYSTEM_OBJECTS = ["Person", "Company", "Deal", "Task", "Note"];
@@ -251,6 +251,224 @@
       window.location.reload();
     }
   </script>
+  <!-- ── Field edit / add slide panel ───────────────────────── -->
+  <div id="fp-backdrop" onclick="closeFieldPanel()" style="
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199;"></div>
+
+  <div id="fp-panel" style="
+    position:fixed;top:0;right:-480px;width:440px;height:100vh;
+    background:var(--paper);border-left:1px solid var(--ink);
+    box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:200;
+    display:flex;flex-direction:column;
+    transition:right 220ms cubic-bezier(.4,0,.2,1);">
+
+    <div style="padding:18px 20px;border-bottom:var(--rule);background:var(--paper-warm);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div id="fp-eyebrow" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-50);"></div>
+        <h3 id="fp-title" style="font-size:16px;font-weight:600;margin-top:4px;"></h3>
+      </div>
+      <button onclick="closeFieldPanel()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-50);line-height:1;">×</button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:20px;">
+
+      <div style="margin-bottom:14px;">
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Field name *</label>
+        <input id="fp-name" type="text" placeholder="e.g. Close date" oninput="fpUpdateApiKey()"
+          style="width:100%;border:var(--rule);border-radius:var(--radius);padding:7px 10px;font-size:13px;box-sizing:border-box;" />
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">API key</label>
+        <div id="fp-apikey" style="font-family:var(--mono);font-size:12px;color:var(--ink-50);padding:7px 10px;background:var(--paper-warm);border:var(--rule);border-radius:var(--radius);">field_name</div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Type</label>
+        <select id="fp-type" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:7px 10px;font-size:13px;box-sizing:border-box;">
+          <option>Text</option>
+          <option>Long text</option>
+          <option>Rich text</option>
+          <option>Email</option>
+          <option>Phone</option>
+          <option>URL</option>
+          <option>Number</option>
+          <option>Number (0-100)</option>
+          <option>Currency</option>
+          <option>Date</option>
+          <option>Datetime</option>
+          <option>Boolean</option>
+          <option>Single-select</option>
+          <option>Multi-select</option>
+          <option>Relation (Person)</option>
+          <option>Relation (Company)</option>
+          <option>Relation (Deal)</option>
+          <option>Relation (User)</option>
+          <option>Relation (Pipeline)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Required</label>
+        <select id="fp-required" onchange="fpToggleGate()" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:7px 10px;font-size:13px;box-sizing:border-box;">
+          <option value="—">— (optional)</option>
+          <option value="✓ Always">✓ Always</option>
+          <option value="before">✓ Before stage…</option>
+        </select>
+      </div>
+
+      <div id="fp-gate-row" style="margin-bottom:14px;display:none;">
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-50);display:block;margin-bottom:4px;">Before stage (gate)</label>
+        <input id="fp-gate" type="text" placeholder="e.g. Proposal"
+          style="width:100%;border:var(--rule);border-radius:var(--radius);padding:7px 10px;font-size:13px;box-sizing:border-box;" />
+        <div style="font-size:11px;color:var(--ink-50);margin-top:4px;">Field becomes required before this pipeline stage is reached.</div>
+      </div>
+
+    </div>
+
+    <div style="padding:14px 20px;border-top:var(--rule);background:var(--paper-warm);display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn" onclick="closeFieldPanel()">Cancel</button>
+      <button class="btn primary" onclick="saveField()">Save field</button>
+    </div>
+  </div>
+
+  <script>
+    var fpEditIndex = -1;
+
+    function rerenderFields() {
+      var tbody = document.getElementById("fields-tbody");
+      tbody.innerHTML = data.fields.map(function(f, i) {
+        var rowStyle = f.deprecated ? " style='opacity:0.55;background:var(--ink-03);'" : "";
+        var nameHtml = "<strong>" + f.name + "</strong>" +
+          (f.deprecated ? " <span class='badge warn' style='font-size:9px;vertical-align:middle;'>DEPRECATED</span>" : "");
+        var keyHtml  = f.deprecated
+          ? "<span class='text-mono' style='font-size:11px;text-decoration:line-through;color:var(--ink-30);'>" + f.key + "</span>"
+          : "<span class='text-mono' style='font-size:11px;'>" + f.key + "</span>";
+        var actionHtml = f.readonly || f.deprecated
+          ? "<span class='text-muted' style='font-size:11px;'>System</span>"
+          : "<button class='btn sm' onclick='openEditFieldPanel(" + i + ")'>Edit</button>";
+        var gateHtml = f.gate !== "—"
+          ? "<span class='badge'>" + f.gate + "</span>"
+          : "—";
+        return "<tr" + rowStyle + ">" +
+          "<td>" + (f.readonly || f.deprecated ? "—" : "≡") + "</td>" +
+          "<td>" + nameHtml + "</td>" +
+          "<td>" + f.type + "</td>" +
+          "<td>" + f.required + "</td>" +
+          "<td>" + gateHtml + "</td>" +
+          "<td>" + keyHtml + "</td>" +
+          "<td>" + actionHtml + "</td>" +
+          "</tr>";
+      }).join("") +
+      "<tr style='background:var(--ink-03);'><td>—</td><td colspan='6'><button class='btn sm primary' onclick='openAddFieldPanel()'>+ Add field</button></td></tr>";
+      document.getElementById("fields-count").textContent = data.fields.length + " FIELDS";
+    }
+
+    function openEditFieldPanel(index) {
+      fpEditIndex = index;
+      var f = data.fields[index];
+      document.getElementById("fp-eyebrow").textContent = objectName + " · Edit Field";
+      document.getElementById("fp-title").textContent   = "Edit “" + f.name + "”";
+      document.getElementById("fp-name").value          = f.name;
+      document.getElementById("fp-apikey").textContent  = f.key;
+
+      var sel = document.getElementById("fp-type");
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === f.type) { sel.selectedIndex = i; break; }
+      }
+
+      var reqSel = document.getElementById("fp-required");
+      if (f.required === "✓ Always") {
+        reqSel.value = "✓ Always";
+      } else if (f.required !== "—" && f.required.indexOf("✓ Before") === 0) {
+        reqSel.value = "before";
+        document.getElementById("fp-gate").value = f.required.replace(/^✓ Before /, "");
+      } else {
+        reqSel.value = "—";
+      }
+      fpToggleGate();
+
+      document.getElementById("fp-backdrop").style.display = "block";
+      document.getElementById("fp-panel").style.right = "0";
+      setTimeout(function() { document.getElementById("fp-name").focus(); }, 280);
+    }
+
+    function openAddFieldPanel() {
+      fpEditIndex = -1;
+      document.getElementById("fp-eyebrow").textContent  = objectName + " · Add Field";
+      document.getElementById("fp-title").textContent    = "Add field";
+      document.getElementById("fp-name").value           = "";
+      document.getElementById("fp-apikey").textContent   = "field_name";
+      document.getElementById("fp-type").selectedIndex   = 0;
+      document.getElementById("fp-required").value       = "—";
+      document.getElementById("fp-gate").value           = "";
+      fpToggleGate();
+
+      document.getElementById("fp-backdrop").style.display = "block";
+      document.getElementById("fp-panel").style.right = "0";
+      setTimeout(function() { document.getElementById("fp-name").focus(); }, 280);
+    }
+
+    function closeFieldPanel() {
+      document.getElementById("fp-backdrop").style.display = "none";
+      document.getElementById("fp-panel").style.right = "-480px";
+    }
+
+    function fpUpdateApiKey() {
+      if (fpEditIndex !== -1) return;
+      var name = document.getElementById("fp-name").value.trim();
+      var key  = name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+      document.getElementById("fp-apikey").textContent = key || "field_name";
+    }
+
+    function fpToggleGate() {
+      var show = document.getElementById("fp-required").value === "before";
+      document.getElementById("fp-gate-row").style.display = show ? "block" : "none";
+    }
+
+    function saveField() {
+      var name = document.getElementById("fp-name").value.trim();
+      if (!name) {
+        if (window.SS_toast) window.SS_toast("Field name required", { sub: "Please enter a name for this field." });
+        else alert("Field name is required.");
+        document.getElementById("fp-name").focus();
+        return;
+      }
+
+      var type   = document.getElementById("fp-type").value;
+      var reqVal = document.getElementById("fp-required").value;
+      var required, gate;
+
+      if (reqVal === "before") {
+        var stage = document.getElementById("fp-gate").value.trim();
+        required  = stage ? "✓ Before " + stage : "—";
+        gate      = stage ? stage + "+" : "—";
+      } else {
+        required = reqVal;
+        gate     = "—";
+      }
+
+      var apiKey = document.getElementById("fp-apikey").textContent.trim() ||
+                   name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+
+      if (fpEditIndex === -1) {
+        var insertAt = data.fields.length - 1;
+        data.fields.splice(insertAt, 0, { name: name, type: type, required: required, gate: gate, key: apiKey });
+        if (window.SS_toast) window.SS_toast("Field added", { sub: "“" + name + "” added to " + objectName + "." });
+      } else {
+        var f      = data.fields[fpEditIndex];
+        f.name     = name;
+        f.type     = type;
+        f.required = required;
+        f.gate     = gate;
+        if (window.SS_toast) window.SS_toast("Field updated", { sub: "“" + name + "” has been updated." });
+      }
+
+      rerenderFields();
+      closeFieldPanel();
+    }
+  </script>
+
   <script src="assets/chrome.js"></script>
 </body>
 </html>
