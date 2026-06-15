@@ -31,7 +31,7 @@
       <div class="page-sub">3 pipelines · Each with its own stages, probabilities, and role-scoped visibility</div>
     </div>
     <div class="row gap-2">
-      <button class="btn primary">+ New pipeline</button>
+      <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-pipeline')">+ New pipeline</button>
     </div>
   </div>
 
@@ -142,6 +142,8 @@
         ]
       }
     };
+
+    window.PIPELINE_DATA = PIPELINE_DATA;
 
     var _pipeObserver = null;
 

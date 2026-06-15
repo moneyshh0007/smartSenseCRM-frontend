@@ -854,19 +854,35 @@
               '<td class="num">' + s.prob + '</td><td>0</td><td class="num">—</td><td>—</td></tr>';
           }).join('');
 
-          // Build and inject new pipeline card
+          var stageNameList = stages.map(function(s) { return s.name; }).join(' · ') || '—';
+          var newId = 'pipeline-' + Date.now();
+
+          // Register in PIPELINE_DATA so Settings panel works
+          if (window.PIPELINE_DATA) {
+            window.PIPELINE_DATA[newId] = {
+              name: name,
+              visibility: vis,
+              isDefault: false,
+              stages: stages.map(function(s) { return { name: s.name, prob: parseInt(s.prob) || 0, deals: 0, value: '—', required: '—' }; })
+            };
+          }
+
+          // Build compact card matching existing pipeline-card style
           var cardHtml =
-            '<div class="card mb-5">' +
+            '<div class="card mb-5 pipeline-card" data-pipeline-id="' + newId + '">' +
               '<div class="card-head"><div>' +
                 '<div class="card-title">' + name + '</div>' +
                 '<div class="card-sub">' + stageCount + ' stages · 0 open deals · Visible to: ' + vis + '</div>' +
               '</div>' +
-              '<div class="row gap-2"><button class="btn sm">Settings</button></div></div>' +
+              '<div class="row gap-2">' +
+                '<span class="badge solid default-badge" style="display:none;">DEFAULT</span>' +
+                '<button class="btn sm" onclick="openPipelineSettings(\'' + newId + '\')">Settings</button>' +
+              '</div></div>' +
               (desc ? '<div class="text-muted mt-2" style="font-size:12px;">' + desc + '</div>' : '') +
-              '<table class="table mt-3"><thead><tr>' +
-                '<th style="width:24px;"></th><th>Stage</th><th>Probability</th>' +
-                '<th>Open deals</th><th class="num">Value</th><th>Required fields</th>' +
-              '</tr></thead><tbody>' + stageRows + '</tbody></table>' +
+              '<div class="text-muted mt-3 row gap-3" style="font-size:12px;">' +
+                '<span><strong>Stages:</strong> ' + stageNameList + '</span>' +
+                '<span><strong>Created:</strong> Just now</span>' +
+              '</div>' +
             '</div>';
 
           var allCards = document.querySelectorAll('.card.mb-5');
