@@ -1552,6 +1552,46 @@
       },
     }),
 
+    "pipeline-settings": function(ctx) {
+      if (!ctx) ctx = { name: "Pipeline", stages: [], visibility: "All roles", isDefault: false };
+      var stagesHTML = (ctx.stages || []).map(function(s, i) {
+        var reqBadge = (s.required && s.required !== "—")
+          ? '<span style="font-size:10px;background:var(--ink-05);border:var(--rule);border-radius:4px;padding:1px 6px;color:var(--ink-50);">' + s.required + '</span>'
+          : '';
+        return '<div style="display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:var(--rule);font-size:13px;">' +
+          '<span style="color:var(--ink-30);width:14px;text-align:right;flex-shrink:0;font-size:11px;">' + (i + 1) + '</span>' +
+          '<span style="flex:1;font-weight:500;">' + s.name + '</span>' +
+          '<span style="color:var(--ink-50);font-size:12px;min-width:36px;text-align:right;">' + s.prob + '%</span>' +
+          '<span style="color:var(--ink-50);font-size:12px;min-width:28px;text-align:right;">' + s.deals + (typeof s.deals === 'number' && s.deals !== 0 ? ' deals' : '') + '</span>' +
+          reqBadge +
+          '</div>';
+      }).join("");
+
+      var visOptions = ["All roles", "Sales Rep, Sales Manager, RevOps Lead", "CS Manager, Sales Manager", "Admins only"]
+        .map(function(v) {
+          return '<option' + (v === ctx.visibility ? ' selected' : '') + '>' + v + '</option>';
+        }).join("");
+
+      return {
+        eyebrow: "Settings · Pipelines",
+        title: ctx.name,
+        body:
+          '<div class="field"><label>Pipeline name</label>' +
+          '<input type="text" id="pipe-name" value="' + ctx.name.replace(/"/g, '&quot;') + '" /></div>' +
+          '<div class="field"><label>Visibility</label>' +
+          '<select id="pipe-vis">' + visOptions + '</select></div>' +
+          '<div style="margin-top:20px;">' +
+          '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:4px;">Stages</div>' +
+          stagesHTML +
+          '<button type="button" class="btn sm" style="margin-top:10px;">+ Add stage</button></div>',
+        primaryLabel: "Save changes",
+        onSave: function() {
+          var name = ((document.getElementById("pipe-name") || {}).value || "").trim() || ctx.name;
+          toast("Pipeline saved", { sub: name + " · Changes saved" });
+        },
+      };
+    },
+
     "add-file-link": () => ({
       eyebrow: "Deal · Files & Links",
       title: "Add a file or link",

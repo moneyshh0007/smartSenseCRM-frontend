@@ -38,81 +38,22 @@
       </div>
       <div class="row gap-2">
         <span class="badge solid">DEFAULT</span>
-        <button class="btn sm">Settings</button>
+        <button class="btn sm" onclick="openPipelineSettings('direct-sales')">Settings</button>
       </div>
     </div>
-
-    <table class="table mt-3">
-      <thead>
-        <tr>
-          <th style="width:24px;"></th>
-          <th>Stage</th>
-          <th>Probability</th>
-          <th>Open deals</th>
-          <th class="num">Value</th>
-          <th>Required fields</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td><strong>Discovery</strong></td>
-          <td class="num">10%</td>
-          <td>8</td>
-          <td class="num">$96,000</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td><strong>Qualified</strong></td>
-          <td class="num">30%</td>
-          <td>12</td>
-          <td class="num">$128,000</td>
-          <td>Source</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td><strong>Proposal</strong></td>
-          <td class="num">60%</td>
-          <td>9</td>
-          <td class="num">$187,000</td>
-          <td>Competitor</td>
-        </tr>
-        <tr>
-          <td>4</td>
-          <td><strong>Negotiation</strong></td>
-          <td class="num">85%</td>
-          <td>5</td>
-          <td class="num">$76,000</td>
-          <td>Close date</td>
-        </tr>
-        <tr>
-          <td>5</td>
-          <td><strong>Closed Won</strong></td>
-          <td class="num">100%</td>
-          <td>—</td>
-          <td class="num">—</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td>5</td>
-          <td><strong>Closed Lost</strong></td>
-          <td class="num">0%</td>
-          <td>—</td>
-          <td class="num">—</td>
-          <td>Loss reason</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
+      <span><strong>Stages:</strong> Discovery · Qualified · Proposal · Negotiation · Closed Won · Closed Lost</span>
+      <span><strong>Created:</strong> 1 Jun 2026 by Mayur</span>
+    </div>
   </div>
 
   <div class="card mb-5">
     <div class="card-head">
       <div>
         <div class="card-title">Channel Partner Deals</div>
-        <div class="card-sub">5 stages · 7 open deals · Restricted to: Channel Team role only</div>
+        <div class="card-sub">5 stages · 7 open deals · Visible to: All roles</div>
       </div>
-      <button class="btn sm">Settings</button>
+      <button class="btn sm" onclick="openPipelineSettings('channel-partner')">Settings</button>
     </div>
     <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
       <span><strong>Stages:</strong> Identified · Qualified · Co-sell · Signed · Won</span>
@@ -126,7 +67,7 @@
         <div class="card-title">Expansion (renewals)</div>
         <div class="card-sub">4 stages · 0 open deals · Visible to: CS Manager, Sales Manager</div>
       </div>
-      <button class="btn sm">Settings</button>
+      <button class="btn sm" onclick="openPipelineSettings('expansion')">Settings</button>
     </div>
     <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
       <span><strong>Stages:</strong> Health Check · At Risk · Renewal Discussion · Renewed</span>
@@ -150,8 +91,52 @@
           '<a href="deals.html">Deals</a><span class="sep">/</span>' +
           '<span class="current">Manage Pipelines</span>';
       }
-      // default (from=settings or direct): breadcrumb already correct
     })();
+
+    var PIPELINE_DATA = {
+      "direct-sales": {
+        name: "Direct Sales",
+        visibility: "Sales Rep, Sales Manager, RevOps Lead",
+        isDefault: true,
+        stages: [
+          { name: "Discovery",   prob: 10,  deals: 8,    value: "$96,000",  required: "—" },
+          { name: "Qualified",   prob: 30,  deals: 12,   value: "$128,000", required: "Source" },
+          { name: "Proposal",    prob: 60,  deals: 9,    value: "$187,000", required: "Competitor" },
+          { name: "Negotiation", prob: 85,  deals: 5,    value: "$76,000",  required: "Close date" },
+          { name: "Closed Won",  prob: 100, deals: "—",  value: "—",        required: "—" },
+          { name: "Closed Lost", prob: 0,   deals: "—",  value: "—",        required: "Loss reason" }
+        ]
+      },
+      "channel-partner": {
+        name: "Channel Partner Deals",
+        visibility: "All roles",
+        isDefault: false,
+        stages: [
+          { name: "Identified", prob: 10,  deals: 2,   value: "—", required: "—" },
+          { name: "Qualified",  prob: 30,  deals: 3,   value: "—", required: "—" },
+          { name: "Co-sell",    prob: 60,  deals: 1,   value: "—", required: "—" },
+          { name: "Signed",     prob: 85,  deals: 1,   value: "—", required: "—" },
+          { name: "Won",        prob: 100, deals: "—", value: "—", required: "—" }
+        ]
+      },
+      "expansion": {
+        name: "Expansion (renewals)",
+        visibility: "CS Manager, Sales Manager",
+        isDefault: false,
+        stages: [
+          { name: "Health Check",       prob: 20,  deals: 0,   value: "—", required: "—" },
+          { name: "At Risk",            prob: 40,  deals: 0,   value: "—", required: "—" },
+          { name: "Renewal Discussion", prob: 70,  deals: 0,   value: "—", required: "—" },
+          { name: "Renewed",            prob: 100, deals: "—", value: "—", required: "—" }
+        ]
+      }
+    };
+
+    function openPipelineSettings(id) {
+      var data = PIPELINE_DATA[id];
+      if (!data || !window.SS_openSlide) return;
+      window.SS_openSlide("pipeline-settings", data);
+    }
   </script>
   <script src="assets/chrome.js"></script>
 </body>
