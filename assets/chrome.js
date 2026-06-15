@@ -2332,6 +2332,7 @@
       const pageId = document.body.getAttribute("data-page");
       if (pageId !== "tasks" || !inTasksTable) return;
       if (cb.closest("th")) return;
+      if (cb.hasAttribute("data-id")) return; // selection checkbox — not a completion toggle
       if (cb.checked) {
         row.classList.add("task-completed");
         var completedRow = row;

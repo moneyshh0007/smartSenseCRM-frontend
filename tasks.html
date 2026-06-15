@@ -121,6 +121,7 @@
 
     function clearSelection() {
       document.querySelectorAll("#tasks-tbody input[type=checkbox]").forEach(function(cb) { cb.checked = false; });
+      document.querySelectorAll("#tasks-tbody tr").forEach(function(row) { row.classList.remove("task-completed"); });
       var allCb = document.getElementById("select-all-tasks");
       if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
       document.getElementById("bulk-toolbar").classList.remove("show");
