@@ -124,9 +124,9 @@
       <div class="card">
         <div class="card-head" style="margin-bottom:8px;">
           <div class="label">Files &amp; links</div>
-          <button class="btn sm">+ Add</button>
+          <button class="btn sm" onclick="if(window.SS_openSlide)window.SS_openSlide('add-file-link')">+ Add</button>
         </div>
-        <ul class="summary-list">
+        <ul class="summary-list" id="sidebar-files-list">
           <li>
             <div class="left-icon">↗</div>
             <div class="grow"><strong>Proposal v3</strong><div class="text-muted" style="font-size:11px;">Google Docs</div></div>

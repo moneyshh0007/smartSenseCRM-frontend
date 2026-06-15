@@ -1551,6 +1551,45 @@
         toast("Invite sent", { sub: email + " · " + role });
       },
     }),
+
+    "add-file-link": () => ({
+      eyebrow: "Deal · Files & Links",
+      title: "Add a file or link",
+      body: `
+        <div class="field"><label>Name<span class="field-required-marker">*</span></label>
+          <input type="text" id="slide-fl-name" placeholder="e.g. Proposal v3" />
+        </div>
+        <div class="field"><label>URL</label>
+          <input type="url" id="slide-fl-url" placeholder="https://…" />
+        </div>
+        <div class="field"><label>Type</label>
+          <select id="slide-fl-type">
+            <option>Google Docs</option>
+            <option>Google Sheets</option>
+            <option>Google Slides</option>
+            <option>PDF</option>
+            <option>Notion</option>
+            <option>Other</option>
+          </select>
+        </div>
+      `,
+      primaryLabel: "Add file",
+      onSave: () => {
+        var name = ((document.getElementById("slide-fl-name") || {}).value || "").trim();
+        var url  = ((document.getElementById("slide-fl-url")  || {}).value || "").trim();
+        var type = (document.getElementById("slide-fl-type")  || {}).value || "Other";
+        if (!name) { toast("Name required", { sub: "Enter a name for the file or link" }); return; }
+        toast("File added", { sub: name + " · " + type });
+        var list = document.getElementById("sidebar-files-list");
+        if (list) {
+          var li = document.createElement("li");
+          li.innerHTML = url
+            ? '<div class="left-icon">↗</div><div class="grow"><a href="' + url + '" target="_blank" rel="noopener"><strong>' + name + '</strong></a><div class="text-muted" style="font-size:11px;">' + type + '</div></div>'
+            : '<div class="left-icon">↗</div><div class="grow"><strong>' + name + '</strong><div class="text-muted" style="font-size:11px;">' + type + '</div></div>';
+          list.appendChild(li);
+        }
+      },
+    }),
   };
 
   // ============================================================
