@@ -2352,7 +2352,6 @@
       <button data-action="profile">Profile & preferences</button>
       <button data-action="theme">Switch theme</button>
       <div class="menu-sep"></div>
-      <button data-action="help">Help & shortcuts</button>
       <button data-action="invite">Invite teammates</button>
       <div class="menu-sep"></div>
       <button data-action="signout">Sign out</button>
