@@ -57,10 +57,10 @@
   <div class="record-grid">
     <div>
       <div class="record-tab-bar">
-        <button class="record-tab active" data-tab="activity">Activity</button>
-        <button class="record-tab" data-tab="contacts" id="tab-contacts-btn">Contacts</button>
-        <button class="record-tab" data-tab="files">Files</button>
-        <button class="record-tab" data-tab="notes">Notes</button>
+        <button class="record-tab active" data-tab="activity" onclick="switchDealTab('activity',this)">Activity</button>
+        <button class="record-tab" data-tab="contacts" id="tab-contacts-btn" onclick="switchDealTab('contacts',this)">Contacts</button>
+        <button class="record-tab" data-tab="files" onclick="switchDealTab('files',this)">Files</button>
+        <button class="record-tab" data-tab="notes" onclick="switchDealTab('notes',this)">Notes</button>
       </div>
 
       <!-- Activity timeline -->
@@ -175,6 +175,15 @@
       if (resp[key]) return resp[key];
       if (resp.data && typeof resp.data === "object") return resp.data;
       return resp;
+    }
+
+    // ── Tab switching ────────────────────────────────────────────────────
+    function switchDealTab(tabId, btn) {
+      document.querySelectorAll(".record-tab-bar .record-tab").forEach(function(t) { t.classList.remove("active"); });
+      document.querySelectorAll(".tab-pane").forEach(function(p) { p.classList.remove("active"); p.style.display = "none"; });
+      if (btn) btn.classList.add("active");
+      var pane = document.querySelector('.tab-pane[data-pane="' + tabId + '"]');
+      if (pane) { pane.classList.add("active"); pane.style.display = ""; }
     }
 
     // Probability by stage (fallback if not in API)
