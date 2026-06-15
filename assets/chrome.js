@@ -1572,6 +1572,16 @@
           return '<option' + (v === ctx.visibility ? ' selected' : '') + '>' + v + '</option>';
         }).join("");
 
+      var makeDefaultSection = ctx.isDefault
+        ? '<div style="margin-top:16px;padding-top:14px;border-top:var(--rule);display:flex;align-items:center;justify-content:space-between;">' +
+            '<span style="font-size:13px;">Default pipeline</span>' +
+            '<span class="badge solid">Default</span>' +
+          '</div>'
+        : '<div style="margin-top:16px;padding-top:14px;border-top:var(--rule);display:flex;align-items:center;justify-content:space-between;">' +
+            '<span style="font-size:13px;">Default pipeline</span>' +
+            '<button type="button" class="btn sm" onclick="if(window.makeDefaultPipeline)window.makeDefaultPipeline(\'' + (ctx.id || '') + '\')">Make default</button>' +
+          '</div>';
+
       return {
         eyebrow: "Settings · Pipelines",
         title: ctx.name,
@@ -1583,7 +1593,8 @@
           '<div style="margin-top:20px;">' +
           '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:4px;">Stages</div>' +
           stagesHTML +
-          '<button type="button" class="btn sm" style="margin-top:10px;">+ Add stage</button></div>',
+          '<button type="button" class="btn sm" style="margin-top:10px;">+ Add stage</button></div>' +
+          makeDefaultSection,
         primaryLabel: "Save changes",
         onSave: function() {
           var name = ((document.getElementById("pipe-name") || {}).value || "").trim() || ctx.name;
@@ -2819,6 +2830,7 @@
 
       // Pipeline "Settings" button → open pipeline-settings slide-over
       if (text === "settings") {
+        if (btn.hasAttribute("onclick")) return; // page-level handler takes precedence
         var card = btn.closest(".card.mb-5");
         if (card) {
           e.preventDefault();

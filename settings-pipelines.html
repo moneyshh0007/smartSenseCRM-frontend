@@ -42,7 +42,7 @@
         <div class="card-sub">5 stages · 47 open deals · Visible to: Sales Rep, Sales Manager, RevOps Lead</div>
       </div>
       <div class="row gap-2">
-        <span class="badge solid">DEFAULT</span>
+        <span class="badge solid default-badge">DEFAULT</span>
         <button class="btn sm" onclick="openPipelineSettings('direct-sales')">Settings</button>
       </div>
     </div>
@@ -58,7 +58,10 @@
         <div class="card-title">Channel Partner Deals</div>
         <div class="card-sub">5 stages · 7 open deals · Visible to: All roles</div>
       </div>
-      <button class="btn sm" onclick="openPipelineSettings('channel-partner')">Settings</button>
+      <div class="row gap-2">
+        <span class="badge solid default-badge" style="display:none;">DEFAULT</span>
+        <button class="btn sm" onclick="openPipelineSettings('channel-partner')">Settings</button>
+      </div>
     </div>
     <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
       <span><strong>Stages:</strong> Identified · Qualified · Co-sell · Signed · Won</span>
@@ -72,7 +75,10 @@
         <div class="card-title">Expansion (renewals)</div>
         <div class="card-sub">4 stages · 0 open deals · Visible to: CS Manager, Sales Manager</div>
       </div>
-      <button class="btn sm" onclick="openPipelineSettings('expansion')">Settings</button>
+      <div class="row gap-2">
+        <span class="badge solid default-badge" style="display:none;">DEFAULT</span>
+        <button class="btn sm" onclick="openPipelineSettings('expansion')">Settings</button>
+      </div>
     </div>
     <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
       <span><strong>Stages:</strong> Health Check · At Risk · Renewal Discussion · Renewed</span>
@@ -148,7 +154,8 @@
       var card = document.querySelector('.pipeline-card[data-pipeline-id="' + id + '"]');
       if (card) card.classList.add('is-active');
 
-      window.SS_openSlide("pipeline-settings", data);
+      // Include id in context so the form can reference it
+      window.SS_openSlide("pipeline-settings", Object.assign({ id: id }, data));
 
       // Watch slide-over close → remove active highlight
       if (!_pipeObserver) {
@@ -163,6 +170,20 @@
         }
       }
     }
+
+    window.makeDefaultPipeline = function(id) {
+      if (!PIPELINE_DATA[id]) return;
+      // Update data flags
+      Object.keys(PIPELINE_DATA).forEach(function(k) { PIPELINE_DATA[k].isDefault = false; });
+      PIPELINE_DATA[id].isDefault = true;
+      // Toggle DEFAULT badges on cards
+      document.querySelectorAll('.pipeline-card').forEach(function(c) {
+        var badge = c.querySelector('.default-badge');
+        if (badge) badge.style.display = c.getAttribute('data-pipeline-id') === id ? '' : 'none';
+      });
+      if (window.SS_toast) window.SS_toast(PIPELINE_DATA[id].name + ' set as default', { sub: 'All new deals will use this pipeline' });
+      if (window.SS_closeSlide) window.SS_closeSlide();
+    };
   </script>
   <script src="assets/chrome.js"></script>
 </body>
