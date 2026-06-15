@@ -2938,6 +2938,17 @@
       var el = document.querySelector("#activity-list, #timeline-list");
       pulseEl(el);
     }
+
+    // Task click-through: on contact-detail switch to Tasks tab + highlight; on deal-detail highlight activity
+    if (keyword === "task") {
+      var tasksTabBtn = document.querySelector('.record-tab[data-tab="tasks"]');
+      if (tasksTabBtn) {
+        tasksTabBtn.click();
+        setTimeout(function() { pulseEl(document.getElementById("tasks-list")); }, 80);
+      } else {
+        pulseEl(document.querySelector("#activity-list"));
+      }
+    }
   }
 
   // Expose so page scripts can call after their data loads
@@ -2966,7 +2977,7 @@
     // Apply notification highlight for static pages (billing, data-model, settings)
     // Dynamic pages (deals, activities) call SS_applyHighlight() after their data loads
     var _pageId = document.body.getAttribute("data-page") || "";
-    if (_pageId === "settings" || _pageId === "deals" || _pageId === "contacts") {
+    if (_pageId === "settings" || _pageId === "deals" || _pageId === "contacts" || _pageId === "tasks") {
       setTimeout(applyHighlight, 400);
     }
   });

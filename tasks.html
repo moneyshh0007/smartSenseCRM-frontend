@@ -198,7 +198,12 @@
           var priority   = t.priority || "med";
           var badgeClass = priority === "high" ? "badge" : "badge muted";
           var isOverdue  = t.dueAt && !t.completed && new Date(t.dueAt) < new Date();
-          return "<tr>" +
+          var navUrl = t.dealId ? "deal-detail?id=" + t.dealId + "&notif=task"
+                    : t.contactId ? "contact-detail?id=" + t.contactId + "&notif=task" : "";
+          var rowAttrs = navUrl
+            ? " style='cursor:pointer;' onclick=\"if(event.target.type!=='checkbox')window.location.href='" + navUrl + "'\""
+            : "";
+          return "<tr" + rowAttrs + ">" +
             "<td><input type='checkbox' data-id='" + t.id + "' onchange=\"updateBulkBar()\" /></td>" +
             "<td>" +
               "<strong style='" + (t.completed ? "text-decoration:line-through;opacity:0.5;" : "") + "'>" + t.title + "</strong>" +
