@@ -28,7 +28,6 @@
     <div class="row gap-2">
       <button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-activity')">Log activity</button>
       <button class="btn" id="stage-btn">Stage: — ▾</button>
-      <button class="btn primary" id="mark-won-btn">Mark Won</button>
     </div>
   </div>
 
@@ -231,16 +230,67 @@
             "<a href='company-detail?id=" + d.company.id + "'>" + d.company.name + "</a>";
         }
 
-        // Wire Mark Won
-        document.getElementById("mark-won-btn").onclick = async function() {
-          try {
-            await SS_API.Deals.markWon(dealId);
-            document.getElementById("stage-btn").textContent = "Stage: Closed Won ▾";
-            document.getElementById("dd-stage").textContent  = "Closed Won";
-            this.textContent = "Won ✓";
-            this.disabled = true;
-          } catch(e) { alert("Could not mark deal as won."); }
-        };
+        // ── Stage dropdown ────────────────────────────────────────────
+        var currentStage = d.stage || "";
+        var STAGES = ["Discovery", "Qualified", "Proposal", "Negotiation", "Closed Won", "Closed Lost"];
+        var stageBtnEl = document.getElementById("stage-btn");
+
+        var stageDd = document.createElement("div");
+        stageDd.id = "stage-dd";
+        stageDd.style.cssText = "display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--paper);border:var(--rule-strong);border-radius:var(--radius);box-shadow:var(--shadow-pop);z-index:50;min-width:160px;padding:6px;";
+
+        STAGES.forEach(function(s) {
+          var item = document.createElement("button");
+          item.textContent = s;
+          item.setAttribute("data-stage-option", s);
+          item.style.cssText = "display:block;width:100%;text-align:left;padding:8px 12px;font-size:13px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;";
+          item.addEventListener("mouseenter", function() { this.style.background = "var(--ink-05)"; });
+          item.addEventListener("mouseleave", function() { this.style.background = "transparent"; });
+          item.addEventListener("click", async function(e) {
+            e.stopPropagation();
+            stageDd.style.display = "none";
+            if (s === currentStage) return;
+            try {
+              await SS_API.Deals.update(dealId, { stage: s });
+              currentStage = s;
+              stageBtnEl.textContent = "Stage: " + s + " ▾";
+              document.getElementById("dd-stage").textContent = s;
+              var newProb = STAGE_PROB[s] !== undefined ? STAGE_PROB[s] : (d.probability || 0);
+              document.getElementById("dd-prob").textContent  = newProb + "%";
+              document.getElementById("kpi-prob").textContent = newProb + "%";
+              var subParts = [];
+              if (d.company) subParts.push('<a href="company-detail?id=' + d.company.id + '">' + d.company.name + '</a>');
+              subParts.push(s + " stage");
+              if (d.owner) subParts.push("Owner: " + ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim());
+              if (d.closeDate || d.expectedCloseDate) subParts.push("Close: " + fmtDate(d.closeDate || d.expectedCloseDate));
+              document.getElementById("deal-sub").innerHTML = subParts.join(" · ");
+              stageDd.querySelectorAll("button[data-stage-option]").forEach(function(b) {
+                b.style.fontWeight = b.getAttribute("data-stage-option") === s ? "600" : "";
+              });
+            } catch(err) { console.error("Stage update failed:", err); alert("Could not update stage."); }
+          });
+          stageDd.appendChild(item);
+        });
+
+        var stageWrapper = document.createElement("div");
+        stageWrapper.style.cssText = "position:relative;display:inline-block;";
+        stageBtnEl.parentNode.insertBefore(stageWrapper, stageBtnEl);
+        stageWrapper.appendChild(stageBtnEl);
+        stageWrapper.appendChild(stageDd);
+
+        stageBtnEl.addEventListener("click", function(e) {
+          e.stopPropagation();
+          stageDd.querySelectorAll("button[data-stage-option]").forEach(function(b) {
+            b.style.fontWeight = b.getAttribute("data-stage-option") === currentStage ? "600" : "";
+          });
+          stageDd.style.display = stageDd.style.display === "none" ? "block" : "none";
+        });
+
+        document.addEventListener("click", function() {
+          var dd = document.getElementById("stage-dd");
+          if (dd) dd.style.display = "none";
+        });
+
 
       } catch (err) {
         console.error("loadDeal:", err);
