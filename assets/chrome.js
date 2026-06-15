@@ -2932,12 +2932,6 @@
       });
       pulseEl(el);
     }
-
-    // Activity click-through: highlight the timeline/activity section on detail pages
-    if (keyword === "activity") {
-      var el = document.querySelector("#activity-list, #timeline-list");
-      pulseEl(el);
-    }
   }
 
   // Expose so page scripts can call after their data loads

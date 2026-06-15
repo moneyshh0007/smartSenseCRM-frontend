@@ -173,10 +173,7 @@
         var body = a.body ? "<div class='timeline-body'>"+a.body+"</div>" : "";
         var contact = a.contact ? " · <a href='contact-detail?id="+a.contact.id+"'>"+a.contact.firstName+" "+a.contact.lastName+"</a>" : "";
         var deal = a.deal ? " · <a href='deal-detail?id="+a.deal.id+"'>"+a.deal.name+"</a>" : "";
-        var navUrl = a.deal ? "deal-detail?id="+a.deal.id+"&notif=activity"
-                    : a.contact ? "contact-detail?id="+a.contact.id+"&notif=activity" : "";
-        var clickAttr = navUrl ? " style='cursor:pointer;' onclick=\"if(!event.target.closest('a'))window.location.href='" + navUrl + "'\"" : "";
-        return "<div class='" + getTypeClass(a.type) + "'" + clickAttr + ">" +
+        return "<div class='" + getTypeClass(a.type) + "'>" +
           "<div class='timeline-meta'><span>"+date+"</span><span class='badge muted'>"+(a.type||"").toUpperCase()+"</span><span>"+(a.autoLogged?"Auto-logged":"Manual")+"</span></div>" +
           "<div class='timeline-title'>"+a.title+contact+deal+"</div>" + body + "</div>";
       }).join("");
