@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pipelines · SmartSense CRM</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    .pipeline-card { transition: border-color 0.15s; }
+    .pipeline-card:hover { border-color: var(--ink-30) !important; cursor: pointer; }
+    .pipeline-card.is-active { border-color: var(--ink) !important; }
+  </style>
 </head>
 <body data-page="settings" class="">
   <div class="app">
@@ -30,7 +35,7 @@
     </div>
   </div>
 
-  <div class="card mb-5" style="border-color: var(--ink);">
+  <div class="card mb-5 pipeline-card" data-pipeline-id="direct-sales">
     <div class="card-head">
       <div>
         <div class="card-title">Direct Sales</div>
@@ -47,7 +52,7 @@
     </div>
   </div>
 
-  <div class="card mb-5">
+  <div class="card mb-5 pipeline-card" data-pipeline-id="channel-partner">
     <div class="card-head">
       <div>
         <div class="card-title">Channel Partner Deals</div>
@@ -61,7 +66,7 @@
     </div>
   </div>
 
-  <div class="card mb-5">
+  <div class="card mb-5 pipeline-card" data-pipeline-id="expansion">
     <div class="card-head">
       <div>
         <div class="card-title">Expansion (renewals)</div>
@@ -132,10 +137,31 @@
       }
     };
 
+    var _pipeObserver = null;
+
     function openPipelineSettings(id) {
       var data = PIPELINE_DATA[id];
       if (!data || !window.SS_openSlide) return;
+
+      // Highlight the clicked card, clear others
+      document.querySelectorAll('.pipeline-card').forEach(function(c) { c.classList.remove('is-active'); });
+      var card = document.querySelector('.pipeline-card[data-pipeline-id="' + id + '"]');
+      if (card) card.classList.add('is-active');
+
       window.SS_openSlide("pipeline-settings", data);
+
+      // Watch slide-over close → remove active highlight
+      if (!_pipeObserver) {
+        var panel = document.querySelector('.slide-over');
+        if (panel) {
+          _pipeObserver = new MutationObserver(function() {
+            if (!panel.classList.contains('open')) {
+              document.querySelectorAll('.pipeline-card').forEach(function(c) { c.classList.remove('is-active'); });
+            }
+          });
+          _pipeObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
+        }
+      }
     }
   </script>
   <script src="assets/chrome.js"></script>
