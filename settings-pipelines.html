@@ -182,10 +182,43 @@
       });
     }
 
-    // Restore persisted default on load
+    // Restore persisted pipeline settings and default on load
     (function() {
-      var saved = localStorage.getItem('ss_default_pipeline');
-      if (saved) applyDefaultPipeline(saved);
+      // Restore saved name / visibility / stages for each pipeline
+      Object.keys(PIPELINE_DATA).forEach(function(id) {
+        try {
+          var raw = localStorage.getItem('ss_pipeline_' + id);
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          Object.assign(PIPELINE_DATA[id], parsed);
+
+          var card = document.querySelector('.pipeline-card[data-pipeline-id="' + id + '"]');
+          if (!card) return;
+
+          if (parsed.name) {
+            var titleEl = card.querySelector('.card-title');
+            if (titleEl) titleEl.textContent = parsed.name;
+          }
+
+          var subEl = card.querySelector('.card-sub');
+          if (subEl) {
+            var openDealsMatch = subEl.textContent.match(/\d+ open deals/);
+            var openDeals = openDealsMatch ? openDealsMatch[0] : '0 open deals';
+            var stageCount = parsed.stages ? parsed.stages.length : PIPELINE_DATA[id].stages.length;
+            var vis = parsed.visibility || PIPELINE_DATA[id].visibility;
+            subEl.textContent = stageCount + ' stages · ' + openDeals + ' · Visible to: ' + vis;
+          }
+
+          if (parsed.stages) {
+            var stagesRow = card.querySelector('.text-muted span:first-child');
+            if (stagesRow) stagesRow.innerHTML = '<strong>Stages:</strong> ' + parsed.stages.map(function(s) { return s.name; }).join(' · ');
+          }
+        } catch(e) {}
+      });
+
+      // Restore default pipeline selection
+      var savedDefault = localStorage.getItem('ss_default_pipeline');
+      if (savedDefault) applyDefaultPipeline(savedDefault);
     })();
 
     window.makeDefaultPipeline = function(id) {

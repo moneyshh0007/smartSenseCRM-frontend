@@ -1570,6 +1570,11 @@
 
     "pipeline-settings": function(ctx) {
       if (!ctx) ctx = { name: "Pipeline", stages: [], visibility: "All roles", isDefault: false };
+
+      // Store for use by __pipeAddStage and onSave
+      window.__pipeCtxId = ctx.id || '';
+      window.__pipeCtxStages = (ctx.stages || []).slice();
+
       var stagesHTML = (ctx.stages || []).map(function(s, i) {
         var reqBadge = (s.required && s.required !== "—")
           ? '<span style="font-size:10px;background:var(--ink-05);border:var(--rule);border-radius:4px;padding:1px 6px;color:var(--ink-50);">' + s.required + '</span>'
@@ -1608,13 +1613,53 @@
           '<select id="pipe-vis">' + visOptions + '</select></div>' +
           '<div style="margin-top:20px;">' +
           '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);margin-bottom:4px;">Stages</div>' +
-          stagesHTML +
-          '<button type="button" class="btn sm" style="margin-top:10px;">+ Add stage</button></div>' +
+          '<div id="pipe-stages-list">' + stagesHTML + '</div>' +
+          '<button type="button" class="btn sm" style="margin-top:10px;" onclick="window.__pipeAddStage()">+ Add stage</button></div>' +
           makeDefaultSection,
         primaryLabel: "Save changes",
         onSave: function() {
           var name = ((document.getElementById("pipe-name") || {}).value || "").trim() || ctx.name;
+          var vis  = ((document.getElementById("pipe-vis")  || {}).value || "").trim() || ctx.visibility;
+
+          // Collect newly added stages from editable input rows
+          var addedStages = [];
+          document.querySelectorAll(".pipe-new-stage-row").forEach(function(row) {
+            var nameVal = ((row.querySelector(".pipe-stage-name-input") || {}).value || "").trim();
+            var probVal = parseInt(((row.querySelector(".pipe-stage-prob-input") || {}).value || "0"), 10) || 0;
+            if (nameVal) addedStages.push({ name: nameVal, prob: probVal, deals: 0, value: "—", required: "—" });
+          });
+          var allStages = (window.__pipeCtxStages || []).concat(addedStages);
+
+          // Update in-memory PIPELINE_DATA
+          var pid = window.__pipeCtxId;
+          if (pid && window.PIPELINE_DATA && window.PIPELINE_DATA[pid]) {
+            window.PIPELINE_DATA[pid].name = name;
+            window.PIPELINE_DATA[pid].visibility = vis;
+            window.PIPELINE_DATA[pid].stages = allStages;
+          }
+
+          // Persist to localStorage
+          if (pid) {
+            try { localStorage.setItem('ss_pipeline_' + pid, JSON.stringify({ name: name, visibility: vis, stages: allStages })); } catch(e) {}
+          }
+
+          // Update pipeline card on page
+          var card = document.querySelector('.pipeline-card[data-pipeline-id="' + pid + '"]');
+          if (card) {
+            var titleEl = card.querySelector('.card-title');
+            if (titleEl) titleEl.textContent = name;
+            var subEl = card.querySelector('.card-sub');
+            if (subEl) {
+              var openDealsMatch = subEl.textContent.match(/\d+ open deals/);
+              var openDeals = openDealsMatch ? openDealsMatch[0] : '0 open deals';
+              subEl.textContent = allStages.length + ' stages · ' + openDeals + ' · Visible to: ' + vis;
+            }
+            var stagesRow = card.querySelector('.text-muted span:first-child');
+            if (stagesRow) stagesRow.innerHTML = '<strong>Stages:</strong> ' + allStages.map(function(s) { return s.name; }).join(' · ');
+          }
+
           toast("Pipeline saved", { sub: name + " · Changes saved" });
+          if (window.SS_closeSlide) window.SS_closeSlide();
         },
       };
     },
@@ -1964,6 +2009,22 @@
   };
   window.SS_closeSlide = closeSlide;
   window.SS_toast = toast;
+
+  // Appends an editable stage row to the pipeline-settings panel
+  window.__pipeAddStage = function() {
+    var list = document.getElementById("pipe-stages-list");
+    if (!list) return;
+    var idx = (window.__pipeCtxStages || []).length + list.querySelectorAll(".pipe-new-stage-row").length + 1;
+    var row = document.createElement("div");
+    row.className = "pipe-new-stage-row";
+    row.style.cssText = "display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:var(--rule);";
+    row.innerHTML =
+      '<span style="color:var(--ink-30);width:14px;text-align:right;flex-shrink:0;font-size:11px;">' + idx + '</span>' +
+      '<input class="pipe-stage-name-input" type="text" placeholder="Stage name" style="flex:1;border:var(--rule);border-radius:var(--radius);padding:5px 8px;font-size:13px;" />' +
+      '<input class="pipe-stage-prob-input" type="number" min="0" max="100" placeholder="%" style="width:52px;border:var(--rule);border-radius:var(--radius);padding:5px 8px;font-size:13px;" />' +
+      '<button type="button" onclick="this.closest(\'.pipe-new-stage-row\').remove()" style="color:var(--ink-50);background:none;border:none;cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">×</button>';
+    list.appendChild(row);
+  };
 })();
 // ============================================================
 // GAP-FIX ADDITIONS — appended for Critical + Important resolutions
