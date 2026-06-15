@@ -44,13 +44,13 @@
 html[data-theme="dark"] {
   --ink:       #F0F0EE;
   --ink-90:    #DDDDD8;
-  --ink-70:    #B8B8B2;
-  --ink-50:    #888882;
-  --ink-30:    #5A5A54;
-  --ink-20:    #3A3A36;
-  --ink-10:    #2A2A28;
-  --ink-05:    #1E1E1C;
-  --ink-03:    #181816;
+  --ink-70:    #C4C4C0;
+  --ink-50:    #ADADAB;   /* secondary/muted text — lifted for dark bg readability */
+  --ink-30:    #888882;   /* tertiary text — was #5A5A54, now clearly readable */
+  --ink-20:    #686864;   /* dim/decorative text — was #3A3A36, now visible */
+  --ink-10:    #303030;   /* border color */
+  --ink-05:    #1E1E1C;   /* hover / subtle bg */
+  --ink-03:    #181816;   /* very subtle bg */
   --paper:     #0E0E0C;
   --paper-warm:#131311;
   --accent:    #E8E8E4;
