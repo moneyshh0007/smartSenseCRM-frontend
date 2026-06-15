@@ -1482,6 +1482,75 @@
       note: "All schema changes are audit-logged · F9.3",
       onSave: () => closeSlide(),
     }),
+
+    "user-profile": () => {
+      var u = (function() { try { return JSON.parse(localStorage.getItem("ss_user") || "{}"); } catch(e) { return {}; } })();
+      var name = ((u.firstName || "") + " " + (u.lastName || "")).trim() || "—";
+      var email = u.email || "—";
+      var ws = (function() { try { return JSON.parse(localStorage.getItem("ss_workspace") || "{}"); } catch(e) { return {}; } })();
+      var wsName = ws.name || "SmartSense Workspace";
+      var currentTheme = localStorage.getItem("ss_theme") || "light";
+      return {
+        eyebrow: "Account",
+        title: "Profile & preferences",
+        body: `
+          <div class="field"><label>Name</label><input type="text" value="${name}" readonly style="background:var(--ink-03);" /></div>
+          <div class="field"><label>Email</label><input type="text" value="${email}" readonly style="background:var(--ink-03);" /></div>
+          <div class="field"><label>Workspace</label><input type="text" value="${wsName}" readonly style="background:var(--ink-03);" /></div>
+          <div style="border-top:var(--rule);margin:20px 0 16px;"></div>
+          <div class="field">
+            <label>Theme</label>
+            <select id="pref-theme">
+              <option value="light"${currentTheme !== "dark" ? " selected" : ""}>Light</option>
+              <option value="dark"${currentTheme === "dark" ? " selected" : ""}>Dark</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Notification digest</label>
+            <select id="pref-digest"><option>Daily at 9 am</option><option>Weekly on Monday</option><option>Off</option></select>
+          </div>
+        `,
+        primaryLabel: "Save preferences",
+        note: "Name and email are managed by your workspace admin",
+        onSave: () => {
+          var theme = (document.getElementById("pref-theme") || {}).value || "light";
+          if (theme === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+          localStorage.setItem("ss_theme", theme);
+          toast("Preferences saved", { sub: "Theme switched to " + theme });
+        },
+      };
+    },
+
+    "invite-teammate": () => ({
+      eyebrow: "Workspace",
+      title: "Invite a teammate",
+      body: `
+        <div class="field"><label>Email address</label><input type="email" id="invite-email" placeholder="colleague@yourcompany.com" /></div>
+        <div class="field">
+          <label>Role</label>
+          <select id="invite-role">
+            <option>Sales Rep (SR)</option>
+            <option>Junior Rep (JR)</option>
+            <option>Sales Manager (SM)</option>
+            <option>Read Only (RO)</option>
+            <option>Admin</option>
+          </select>
+        </div>
+        <div class="field"><label>Personal message (optional)</label><textarea placeholder="Hey, join us on SmartSense CRM!"></textarea></div>
+      `,
+      primaryLabel: "Send invite",
+      note: "Invitee will receive a one-time setup link via email",
+      onSave: () => {
+        var email = ((document.getElementById("invite-email") || {}).value || "").trim();
+        var role  = (document.getElementById("invite-role") || {}).value || "Sales Rep";
+        if (!email) { toast("Email required", { sub: "Enter a valid email address" }); return; }
+        toast("Invite sent", { sub: email + " · " + role });
+      },
+    }),
   };
 
   // ============================================================
@@ -1799,6 +1868,13 @@
   // Public helpers (toast / openSlide / closeSlide) re-exposed
   // for these add-on handlers
   // ============================================================
+  // Apply saved theme preference immediately to avoid flash of unstyled content
+  (function() {
+    var t = localStorage.getItem("ss_theme");
+    if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+  })();
+
   const SS = window.SS || {};
   if (!SS.toast) {
     SS.toast = function (msg, opts) {
@@ -2304,11 +2380,20 @@
       } else if (a === "help") {
         document.getElementById("help-drawer")?.classList.add("open");
       } else if (a === "invite") {
-        SS.toast("Invite slide-over", { sub: "Stub for prototype · would open invite form" });
+        window.SS_openSlide("invite-teammate");
       } else if (a === "profile") {
-        SS.toast("Profile", { sub: "User preferences (Phase 2 build)" });
+        window.SS_openSlide("user-profile");
       } else if (a === "theme") {
-        SS.toast("Theme", { sub: "Light / dark · Phase 2" });
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        if (isDark) {
+          document.documentElement.removeAttribute("data-theme");
+          localStorage.setItem("ss_theme", "light");
+          SS.toast("Light mode", { sub: "Theme switched to light" });
+        } else {
+          document.documentElement.setAttribute("data-theme", "dark");
+          localStorage.setItem("ss_theme", "dark");
+          SS.toast("Dark mode", { sub: "Theme switched to dark" });
+        }
       }
     });
     document.addEventListener("click", e => {
@@ -2866,7 +2951,7 @@
     injectRoleSwitcher();
     applyRole(getRole());
     buildNotifications();
-    // buildHelpDrawer();  // Keyboard shortcuts panel removed
+    buildHelpDrawer();
     buildUserPopover();
     wirePostActions();
     wireBulkToolbar();

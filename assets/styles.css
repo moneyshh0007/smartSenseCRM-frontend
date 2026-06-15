@@ -41,6 +41,23 @@
   --radius-lg: 8px;
 }
 
+html[data-theme="dark"] {
+  --ink:       #F0F0EE;
+  --ink-90:    #DDDDD8;
+  --ink-70:    #B8B8B2;
+  --ink-50:    #888882;
+  --ink-30:    #5A5A54;
+  --ink-20:    #3A3A36;
+  --ink-10:    #2A2A28;
+  --ink-05:    #1E1E1C;
+  --ink-03:    #181816;
+  --paper:     #0E0E0C;
+  --paper-warm:#131311;
+  --accent:    #E8E8E4;
+  --shadow-pop: 0 1px 0 rgba(255,255,255,0.06), 0 12px 32px -8px rgba(0,0,0,0.5);
+  --shadow-flat: 0 1px 0 rgba(255,255,255,0.06);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
