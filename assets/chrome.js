@@ -1579,12 +1579,13 @@
         var reqBadge = (s.required && s.required !== "—")
           ? '<span style="font-size:10px;background:var(--ink-05);border:var(--rule);border-radius:4px;padding:1px 6px;color:var(--ink-50);">' + s.required + '</span>'
           : '';
-        return '<div style="display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:var(--rule);font-size:13px;">' +
+        return '<div class="pipe-existing-stage-row" data-stage-idx="' + i + '" style="display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:var(--rule);font-size:13px;">' +
           '<span style="color:var(--ink-30);width:14px;text-align:right;flex-shrink:0;font-size:11px;">' + (i + 1) + '</span>' +
           '<span style="flex:1;font-weight:500;">' + s.name + '</span>' +
           '<span style="color:var(--ink-50);font-size:12px;min-width:36px;text-align:right;">' + s.prob + '%</span>' +
           '<span style="color:var(--ink-50);font-size:12px;min-width:28px;text-align:right;">' + s.deals + (typeof s.deals === 'number' && s.deals !== 0 ? ' deals' : '') + '</span>' +
           reqBadge +
+          '<button type="button" onclick="window.__pipeRemoveStage(this,' + i + ')" style="color:var(--ink-30);background:none;border:none;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;margin-left:4px;" title="Remove stage">×</button>' +
           '</div>';
       }).join("");
 
@@ -2009,6 +2010,13 @@
   };
   window.SS_closeSlide = closeSlide;
   window.SS_toast = toast;
+
+  // Removes an existing stage row from the pipeline-settings panel
+  window.__pipeRemoveStage = function(btn, idx) {
+    if (window.__pipeCtxStages) window.__pipeCtxStages.splice(idx, 1);
+    var row = btn.closest(".pipe-existing-stage-row");
+    if (row) row.remove();
+  };
 
   // Appends an editable stage row to the pipeline-settings panel
   window.__pipeAddStage = function() {
