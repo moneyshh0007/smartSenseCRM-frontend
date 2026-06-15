@@ -173,16 +173,25 @@
       }
     }
 
-    window.makeDefaultPipeline = function(id) {
-      if (!PIPELINE_DATA[id]) return;
-      // Update data flags
+    function applyDefaultPipeline(id) {
       Object.keys(PIPELINE_DATA).forEach(function(k) { PIPELINE_DATA[k].isDefault = false; });
-      PIPELINE_DATA[id].isDefault = true;
-      // Toggle DEFAULT badges on cards
+      if (PIPELINE_DATA[id]) PIPELINE_DATA[id].isDefault = true;
       document.querySelectorAll('.pipeline-card').forEach(function(c) {
         var badge = c.querySelector('.default-badge');
         if (badge) badge.style.display = c.getAttribute('data-pipeline-id') === id ? '' : 'none';
       });
+    }
+
+    // Restore persisted default on load
+    (function() {
+      var saved = localStorage.getItem('ss_default_pipeline');
+      if (saved) applyDefaultPipeline(saved);
+    })();
+
+    window.makeDefaultPipeline = function(id) {
+      if (!PIPELINE_DATA[id]) return;
+      applyDefaultPipeline(id);
+      localStorage.setItem('ss_default_pipeline', id);
       if (window.SS_toast) window.SS_toast(PIPELINE_DATA[id].name + ' set as default', { sub: 'All new deals will use this pipeline' });
       if (window.SS_closeSlide) window.SS_closeSlide();
     };
