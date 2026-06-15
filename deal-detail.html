@@ -82,14 +82,14 @@
 
       <!-- Files tab (static placeholder) -->
       <div class="tab-pane" data-pane="files">
-        <div class="files-grid">
+        <div class="files-grid" id="deal-files-grid">
           <div class="file-card">
             <div class="file-type">LINK · Google Docs</div>
             <div class="file-name">Proposal v3</div>
             <div class="file-meta">Sent 25 May · 2 opens</div>
           </div>
         </div>
-        <button class="btn sm mt-3">+ Add link or file</button>
+        <button class="btn sm mt-3" onclick="if(window.SS_openSlide)window.SS_openSlide('add-file-link')">+ Add link or file</button>
       </div>
 
       <!-- Notes tab -->

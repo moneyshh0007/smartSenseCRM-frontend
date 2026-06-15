@@ -1580,6 +1580,7 @@
         var type = (document.getElementById("slide-fl-type")  || {}).value || "Other";
         if (!name) { toast("Name required", { sub: "Enter a name for the file or link" }); return; }
         toast("File added", { sub: name + " · " + type });
+        // Append to sidebar Files & Links list
         var list = document.getElementById("sidebar-files-list");
         if (list) {
           var li = document.createElement("li");
@@ -1587,6 +1588,16 @@
             ? '<div class="left-icon">↗</div><div class="grow"><a href="' + url + '" target="_blank" rel="noopener"><strong>' + name + '</strong></a><div class="text-muted" style="font-size:11px;">' + type + '</div></div>'
             : '<div class="left-icon">↗</div><div class="grow"><strong>' + name + '</strong><div class="text-muted" style="font-size:11px;">' + type + '</div></div>';
           list.appendChild(li);
+        }
+        // Append to Files tab grid
+        var grid = document.getElementById("deal-files-grid");
+        if (grid) {
+          var card = document.createElement("div");
+          card.className = "file-card";
+          card.innerHTML = '<div class="file-type">LINK · ' + type.toUpperCase() + '</div>'
+            + (url ? '<a href="' + url + '" target="_blank" rel="noopener" class="file-name">' + name + '</a>' : '<div class="file-name">' + name + '</div>')
+            + '<div class="file-meta">Just added</div>';
+          grid.appendChild(card);
         }
       },
     }),
