@@ -2932,6 +2932,12 @@
       });
       pulseEl(el);
     }
+
+    // Activity click-through: highlight the timeline section on deal/contact detail
+    if (keyword === "activity") {
+      var el = document.querySelector("#activity-list, #timeline-list");
+      pulseEl(el);
+    }
   }
 
   // Expose so page scripts can call after their data loads
@@ -2960,7 +2966,7 @@
     // Apply notification highlight for static pages (billing, data-model, settings)
     // Dynamic pages (deals, activities) call SS_applyHighlight() after their data loads
     var _pageId = document.body.getAttribute("data-page") || "";
-    if (_pageId === "settings") {
+    if (_pageId === "settings" || _pageId === "deals" || _pageId === "contacts") {
       setTimeout(applyHighlight, 400);
     }
   });
