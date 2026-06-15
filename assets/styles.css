@@ -71,7 +71,7 @@ html, body {
 
 a { color: var(--ink); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
-button { font-family: inherit; cursor: pointer; }
+button { font-family: inherit; cursor: pointer; color: inherit; }
 
 /* Typography */
 .display-xl { font-family: var(--display); font-weight: 400; font-size: 64px; line-height: 1.05; letter-spacing: -0.03em; }
