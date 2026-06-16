@@ -739,51 +739,73 @@
 
     "task-detail": function(ctx) {
       if (!ctx) ctx = {};
-      var due = ctx.dueAt
-        ? new Date(ctx.dueAt).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
-        : "No due date";
       var priority = ctx.priority || "med";
-      var priorityClass = priority === "high" ? "badge" : "badge muted";
-      var priorityLabel = priority === "high" ? "HIGH" : priority === "low" ? "LOW" : "MED";
-      var isOverdue = ctx.dueAt && !ctx.completed && new Date(ctx.dueAt) < new Date();
+      var dueValue = ctx.dueAt ? (function() {
+        var d = new Date(ctx.dueAt);
+        var pad = function(n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      })() : '';
       var dealId    = ctx.dealId    || (ctx.deal    && ctx.deal.id)    || null;
       var contactId = ctx.contactId || (ctx.contact && ctx.contact.id) || null;
       var companyId = ctx.companyId || (ctx.company && ctx.company.id) || null;
       var linkedRow = (dealId || contactId || companyId)
-        ? '<div style="padding:12px 0;border-bottom:var(--rule);display:flex;justify-content:space-between;align-items:center;">' +
-            '<span style="color:var(--ink-50);font-size:13px;">Linked to</span>' +
-            (dealId    ? '<a href="deal-detail?id='    + dealId    + '" style="font-size:13px;">' + ((ctx.deal    && ctx.deal.name)    || 'Deal')    + '</a>' :
-             contactId ? '<a href="contact-detail?id=' + contactId + '" style="font-size:13px;">' + (ctx.contact ? ctx.contact.firstName + ' ' + ctx.contact.lastName : 'Contact') + '</a>' :
-                         '<a href="company-detail?id=' + companyId + '" style="font-size:13px;">' + ((ctx.company && ctx.company.name) || 'Company') + '</a>') +
+        ? '<div class="field"><label>Linked to</label>' +
+            (dealId    ? '<a href="deal-detail?id='    + dealId    + '">' + ((ctx.deal    && ctx.deal.name)    || 'Deal')    + '</a>' :
+             contactId ? '<a href="contact-detail?id=' + contactId + '">' + (ctx.contact ? ctx.contact.firstName + ' ' + ctx.contact.lastName : 'Contact') + '</a>' :
+                         '<a href="company-detail?id=' + companyId + '">' + ((ctx.company && ctx.company.name) || 'Company') + '</a>') +
           '</div>'
         : '';
+      var markCompleteBtn = !ctx.completed
+        ? '<div style="margin-top:20px;padding-top:16px;border-top:var(--rule);">' +
+            '<button type="button" class="btn sm" onclick="(function(){' +
+              'if(window.SS_API&&\'' + (ctx.id || '') + '\'){' +
+                'window.SS_API.Tasks.update(\'' + (ctx.id || '') + '\',{completed:true})' +
+                  '.then(function(){' +
+                    'if(window.SS_toast)window.SS_toast(\'Task completed\',{sub:\'' + (ctx.title || 'Task').replace(/'/g, "\\'") + '\'});' +
+                    'if(window.SS_closeSlide)window.SS_closeSlide();' +
+                    'if(window.SS_loadTasks)window.SS_loadTasks();' +
+                  '})' +
+                  '.catch(function(){if(window.SS_toast)window.SS_toast(\'Task completed\');});' +
+              '}else{if(window.SS_toast)window.SS_toast(\'Task completed\');}' +
+            '})()">✓ Mark as complete</button>' +
+          '</div>'
+        : '<div style="margin-top:20px;padding-top:16px;border-top:var(--rule);"><span class="badge muted">COMPLETED</span></div>';
       return {
         eyebrow: "Task",
         title: ctx.title || "Task",
         body:
-          '<div style="padding:12px 0;border-bottom:var(--rule);display:flex;justify-content:space-between;align-items:center;">' +
-            '<span style="color:var(--ink-50);font-size:13px;">Due</span>' +
-            '<span style="font-size:13px;' + (isOverdue ? 'font-weight:500;' : '') + '">' + due + (isOverdue ? ' <span class="badge warn">OVERDUE</span>' : '') + '</span>' +
-          '</div>' +
-          '<div style="padding:12px 0;border-bottom:var(--rule);display:flex;justify-content:space-between;align-items:center;">' +
-            '<span style="color:var(--ink-50);font-size:13px;">Priority</span>' +
-            '<span class="' + priorityClass + '">' + priorityLabel + '</span>' +
+          '<div class="field"><label>Title<span class="field-required-marker">*</span></label>' +
+            '<input type="text" id="td-title" value="' + (ctx.title || '').replace(/"/g, '&quot;') + '" placeholder="Task title" /></div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label>Due date</label>' +
+              '<input type="datetime-local" id="td-due" value="' + dueValue + '" /></div>' +
+            '<div class="field"><label>Priority</label>' +
+              '<select id="td-priority">' +
+                '<option value="high"' + (priority === 'high' ? ' selected' : '') + '>High</option>' +
+                '<option value="med"'  + (priority === 'med'  ? ' selected' : '') + '>Medium</option>' +
+                '<option value="low"'  + (priority === 'low'  ? ' selected' : '') + '>Low</option>' +
+              '</select></div>' +
           '</div>' +
           linkedRow +
-          (ctx.completed ? '<div style="padding:12px 0;border-bottom:var(--rule);display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--ink-50);font-size:13px;">Status</span><span class="badge muted">COMPLETED</span></div>' : ''),
-        primaryLabel: ctx.completed ? "Close" : "Mark complete",
-        onSave: ctx.completed ? null : function() {
+          markCompleteBtn,
+        primaryLabel: "Save changes",
+        onSave: function() {
+          var title    = ((document.getElementById("td-title")    || {}).value || "").trim();
+          var dueInput = ((document.getElementById("td-due")      || {}).value || "");
+          var priority = ((document.getElementById("td-priority") || {}).value || "med");
+          if (!title) { toast("Title required", { sub: "Enter a title for the task" }); return false; }
+          var payload = { title: title, priority: priority };
+          if (dueInput) payload.dueAt = new Date(dueInput).toISOString();
           if (window.SS_API && ctx.id) {
-            window.SS_API.Tasks.update(ctx.id, { completed: true })
+            window.SS_API.Tasks.update(ctx.id, payload)
               .then(function() {
-                toast("Task completed", { sub: ctx.title || "Task marked done" });
+                toast("Task updated", { sub: title });
                 if (typeof window.SS_loadTasks === "function") window.SS_loadTasks();
               })
-              .catch(function() {
-                toast("Task completed", { sub: ctx.title || "Task marked done" });
-              });
+              .catch(function() { toast("Task updated", { sub: title }); });
           } else {
-            toast("Task completed", { sub: ctx.title || "Task marked done" });
+            toast("Task updated", { sub: title });
+            if (typeof window.SS_loadTasks === "function") window.SS_loadTasks();
           }
         },
       };
