@@ -37,115 +37,119 @@
   <div class="progress-card mb-5">
     <div class="row between items-baseline">
       <div>
-        <div class="card-title">Importing 4,823 records</div>
-        <div class="text-muted mt-1" style="font-size:12px;">Job ID: imp_v9k3mq2 · Started 09:42 · Region: EU</div>
+        <div class="card-title" id="progress-title">Loading…</div>
+        <div class="text-muted mt-1" style="font-size:12px;" id="job-meta">—</div>
       </div>
-      <span class="badge solid">RUNNING</span>
+      <span class="badge solid" id="status-badge">RUNNING</span>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 34%;"></div></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%;"></div></div>
     <div class="progress-counter">
-      <span id="progress-text">1,640 of 4,823 imported · 34%</span>
-      <span>ETA ~85 seconds</span>
+      <span id="progress-text">Starting…</span>
     </div>
   </div>
 
   <div class="split-3 mb-5">
     <div class="card">
-      <div class="label">PEOPLE CREATED</div>
-      <div class="kpi-value" style="font-size:32px;" id="people-count">1,420</div>
-      <div class="text-muted" style="font-size:11px;">Includes auto-enriched fields</div>
+      <div class="label">RECORDS IMPORTED</div>
+      <div class="kpi-value" style="font-size:32px;" id="imported-count">—</div>
+      <div class="text-muted" style="font-size:11px;">Contacts created</div>
     </div>
     <div class="card">
-      <div class="label">COMPANIES CREATED</div>
-      <div class="kpi-value" style="font-size:32px;" id="companies-count">220</div>
-      <div class="text-muted" style="font-size:11px;">Deduplicated by domain</div>
+      <div class="label">DUPLICATES SKIPPED</div>
+      <div class="kpi-value" style="font-size:32px;" id="skipped-count">—</div>
+      <div class="text-muted" style="font-size:11px;">Already in your CRM</div>
     </div>
     <div class="card">
-      <div class="label">SKIPPED (DUPLICATES)</div>
-      <div class="kpi-value" style="font-size:32px;">142</div>
-      <div class="text-muted" style="font-size:11px;">As configured · downloadable</div>
+      <div class="label">ERRORS</div>
+      <div class="kpi-value" style="font-size:32px;" id="errors-count">—</div>
+      <div class="text-muted" style="font-size:11px;">Invalid rows skipped</div>
     </div>
-  </div>
-
-  <div class="section-rule">
-    <span class="num">02</span>
-    <span class="title">Live activity stream</span>
-    <span class="line"></span>
-  </div>
-
-  <div class="card mb-5">
-    <ul class="summary-list" id="live-stream">
-      <li>
-        <div class="left-icon">●</div>
-        <div class="grow">
-          <div>Batch 7 of 20 processed</div>
-          <div class="text-muted" style="font-size:11px;">240 records · 8 enriched · 4 duplicates skipped</div>
-        </div>
-        <span class="meta">just now</span>
-      </li>
-      <li>
-        <div class="left-icon">●</div>
-        <div class="grow">
-          <div>Batch 6 of 20 processed</div>
-          <div class="text-muted" style="font-size:11px;">240 records · 12 enriched · 7 duplicates skipped</div>
-        </div>
-        <span class="meta">2 sec ago</span>
-      </li>
-      <li>
-        <div class="left-icon">●</div>
-        <div class="grow">
-          <div>Schema validation passed for all batches</div>
-          <div class="text-muted" style="font-size:11px;">Custom field "Territory" mapped to 100% of rows</div>
-        </div>
-        <span class="meta">15 sec ago</span>
-      </li>
-      <li>
-        <div class="left-icon">●</div>
-        <div class="grow">
-          <div>Import job started</div>
-          <div class="text-muted" style="font-size:11px;">Worker spawned in eu-west-1 · Owner: Mayur S.</div>
-        </div>
-        <span class="meta">25 sec ago</span>
-      </li>
-    </ul>
   </div>
 
   <div class="row gap-3 between">
-    <a href="contacts.html">View Contacts (newly imported records will appear there)</a>
-    <button class="btn">Cancel import (rollback all)</button>
+    <span></span>
+    <a class="btn" href="contacts.html" id="view-contacts-btn">View Contacts →</a>
   </div>
 
-  <script>
-    // Simulate progress
-    let pct = 34;
-    const fill = document.getElementById("progress-fill");
-    const txt = document.getElementById("progress-text");
-    const pCount = document.getElementById("people-count");
-    const cCount = document.getElementById("companies-count");
-    const interval = setInterval(() => {
-      pct = Math.min(100, pct + 4);
-      fill.style.width = pct + "%";
-      const imported = Math.round(4823 * pct / 100);
-      txt.textContent = imported.toLocaleString() + " of 4,823 imported · " + pct + "%";
-      pCount.textContent = Math.round(imported * 0.866).toLocaleString();
-      cCount.textContent = Math.round(imported * 0.135).toLocaleString();
-      if (pct >= 100) {
-        clearInterval(interval);
-        // Show completion banner
-        const banner = document.createElement("div");
-        banner.className = "won-banner";
-        banner.innerHTML = '<div class="won-icon">✓</div><div class="won-text"><div class="won-title">Import complete — 4,823 records created</div><div class="won-sub">1,420 people · 220 companies · 142 duplicates skipped · 35 errors saved</div></div><div class="won-actions"><button class="btn ghost">Download summary</button><button class="btn" onclick="window.location.href=\'contacts.html\'">View Contacts</button></div>';
-        document.querySelector(".page-header").after(banner);
-        document.querySelector(".badge.solid").outerHTML = '<span class="badge solid">COMPLETE</span>';
-      }
-    }, 800);
-  </script>
-  
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var params = new URLSearchParams(window.location.search);
+    var jobId  = params.get("jobId");
+    if (!jobId) window.location.href = "import-upload.html";
+
+    var pollTimer   = null;
+    var isDone      = false;
+
+    function setProgress(imported, total) {
+      var pct  = total > 0 ? Math.min(100, Math.round(imported / total * 100)) : 0;
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("progress-text").textContent =
+        imported.toLocaleString() + " of " + total.toLocaleString() + " imported · " + pct + "%";
+    }
+
+    function updateUI(job) {
+      document.getElementById("progress-title").textContent =
+        "Importing " + (job.validRows || job.totalRows || 0).toLocaleString() + " records";
+      document.getElementById("job-meta").textContent =
+        "Job · " + job.filename + " · " + (job.totalRows || 0).toLocaleString() + " total rows";
+
+      var imported  = job.imported  || 0;
+      var total     = job.validRows || job.totalRows || 0;
+      setProgress(imported, total);
+
+      document.getElementById("imported-count").textContent = imported.toLocaleString();
+      document.getElementById("skipped-count").textContent  = (job.duplicates  || 0).toLocaleString();
+      document.getElementById("errors-count").textContent   = (job.errorCount  || 0).toLocaleString();
+
+      if (job.status === "completed" && !isDone) {
+        isDone = true;
+        clearInterval(pollTimer);
+        setProgress(imported, imported || 1);
+        document.getElementById("status-badge").textContent  = "COMPLETE";
+
+        if (!document.getElementById("completed-banner")) {
+          var banner = document.createElement("div");
+          banner.id        = "completed-banner";
+          banner.className = "won-banner";
+          banner.innerHTML =
+            '<div class="won-icon">✓</div>' +
+            '<div class="won-text">' +
+              '<div class="won-title">Import complete — ' + imported.toLocaleString() + ' records created</div>' +
+              '<div class="won-sub">' +
+                (job.duplicates || 0).toLocaleString() + ' duplicates skipped · ' +
+                (job.errorCount || 0).toLocaleString() + ' errors' +
+              '</div>' +
+            '</div>' +
+            '<div class="won-actions">' +
+              '<button class="btn" onclick="window.location.href=\'contacts.html\'">View Contacts</button>' +
+            '</div>';
+          document.querySelector(".page-header").after(banner);
+        }
+      } else if (job.status === "failed") {
+        isDone = true;
+        clearInterval(pollTimer);
+        document.getElementById("status-badge").textContent = "FAILED";
+        document.getElementById("progress-title").textContent = "Import failed";
+      }
+    }
+
+    async function poll() {
+      try {
+        var job = await SS_API.Imports.getJob(jobId);
+        updateUI(job);
+      } catch (err) {
+        // network hiccup — keep polling
+      }
+    }
+
+    poll();
+    pollTimer = setInterval(poll, 1500);
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>

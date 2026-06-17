@@ -18,12 +18,12 @@
         </div>
       </div>
       <div class="content ">
-        
+
   <div class="page-header">
     <div>
       <div class="eyebrow">M1 · F1.7 · STEP 3 OF 4</div>
       <h1 class="page-title mt-2">Review before importing</h1>
-      <div class="page-sub">prospects_q2_2026.csv · 5,000 rows analysed · 11 of 12 columns mapped</div>
+      <div class="page-sub" id="review-sub">Loading…</div>
     </div>
   </div>
 
@@ -35,26 +35,10 @@
   </div>
 
   <div class="kpi-grid mb-5">
-    <div class="kpi">
-      <div class="kpi-label">Will import</div>
-      <div class="kpi-value">4,823</div>
-      <div class="kpi-delta">Valid rows</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Likely duplicates</div>
-      <div class="kpi-value">142</div>
-      <div class="kpi-delta">Will be skipped</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Errors</div>
-      <div class="kpi-value">35</div>
-      <div class="kpi-delta">Need fixes</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Estimated time</div>
-      <div class="kpi-value" style="font-size:28px;">~2 min</div>
-      <div class="kpi-delta">Background job</div>
-    </div>
+    <div class="kpi"><div class="kpi-label">Will import</div><div class="kpi-value" id="kpi-valid">—</div><div class="kpi-delta">Valid rows</div></div>
+    <div class="kpi"><div class="kpi-label">Duplicates</div><div class="kpi-value" id="kpi-dupes">—</div><div class="kpi-delta">Will be skipped</div></div>
+    <div class="kpi"><div class="kpi-label">Errors</div><div class="kpi-value" id="kpi-errors">—</div><div class="kpi-delta">Invalid rows</div></div>
+    <div class="kpi"><div class="kpi-label">Total rows</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-delta">In your file</div></div>
   </div>
 
   <div class="section-rule">
@@ -62,87 +46,138 @@
     <span class="title">Sample of valid rows (first 5)</span>
     <span class="line"></span>
   </div>
-
-  <table class="table mb-5">
-    <thead>
-      <tr><th>Name</th><th>Email</th><th>Title</th><th>Company</th><th>Territory</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><strong>Sarah Chen</strong></td><td>sarah.chen@acme.com</td><td>VP Engineering</td><td>Acme Corp</td><td>NA-West</td></tr>
-      <tr><td><strong>David Park</strong></td><td>david.park@acme.com</td><td>CTO</td><td>Acme Corp</td><td>NA-West</td></tr>
-      <tr><td><strong>Riya Gupta</strong></td><td>riya.g@northwind.com</td><td>Head of Sales</td><td>Northwind Corp</td><td>NA-East</td></tr>
-      <tr><td><strong>Aiko Liu</strong></td><td>aiko.liu@globex.io</td><td>Director, Product</td><td>Globex Inc.</td><td>NA-West</td></tr>
-      <tr><td><strong>Hana Kim</strong></td><td>hana.kim@initech.com</td><td>Head of People</td><td>Initech</td><td>EU</td></tr>
-    </tbody>
-  </table>
-
-  <div class="section-rule">
-    <span class="num">02</span>
-    <span class="title">Likely duplicates (will be skipped)</span>
-    <span class="line"></span>
+  <div id="sample-table" class="mb-5">
+    <div style="padding:16px;color:var(--ink-40);font-size:13px;">Loading…</div>
   </div>
 
-  <div class="card mb-5">
-    <table class="table" style="margin: -16px;">
-      <thead>
-        <tr><th>CSV row</th><th>Existing CRM record</th><th>Match on</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr><td class="text-mono">#3, Sarah Chen, sarah.chen@acme.com</td><td>Sarah Chen · Acme Corp · 23 activities</td><td>Email + Name</td><td><button class="btn sm">Merge instead</button></td></tr>
-        <tr><td class="text-mono">#14, D. Park, dpark@acme.com</td><td>David Park · Acme Corp · 12 activities</td><td>Fuzzy Name + Domain</td><td><button class="btn sm">Merge instead</button></td></tr>
-        <tr><td class="text-mono">#22, Sarah K. Chen, schen@acme.com</td><td>Sarah Chen · Acme Corp · 23 activities</td><td>Fuzzy Name + Domain</td><td><button class="btn sm">Merge instead</button></td></tr>
-        <tr><td colspan="4" class="text-muted" style="text-align:center; font-size:12px;">+ 139 more duplicates · <a href="#">Show all</a></td></tr>
-      </tbody>
-    </table>
+  <div id="errors-section" style="display:none;">
+    <div class="section-rule">
+      <span class="num">02</span>
+      <span class="title">Errors (rows that will be skipped)</span>
+      <span class="line"></span>
+    </div>
+    <div class="card mb-5">
+      <table class="table" style="margin:-16px;">
+        <thead><tr><th>Row #</th><th>Issue</th></tr></thead>
+        <tbody id="errors-tbody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="section-rule">
     <span class="num">03</span>
-    <span class="title">Errors (need fixes)</span>
-    <span class="line"></span>
-  </div>
-
-  <div class="card mb-5">
-    <table class="table" style="margin: -16px;">
-      <thead>
-        <tr><th>CSV row</th><th>Issue</th><th>Suggestion</th></tr>
-      </thead>
-      <tbody>
-        <tr><td class="text-mono">#47</td><td>Invalid email "sarah@acme" (missing TLD)</td><td>Fix in source CSV or skip row</td></tr>
-        <tr><td class="text-mono">#118</td><td>Empty Name field</td><td>Required field missing</td></tr>
-        <tr><td class="text-mono">#203</td><td>Phone "+1 (415) 555-OOPS" — non-numeric</td><td>Auto-strip or skip</td></tr>
-        <tr><td colspan="3" class="text-muted" style="text-align:center; font-size:12px;">+ 32 more errors · <a href="#">Download full error report (CSV)</a></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="section-rule">
-    <span class="num">04</span>
     <span class="title">Import options</span>
     <span class="line"></span>
   </div>
 
   <div class="card mb-5">
-    <div class="checkbox-line"><input type="checkbox" checked /> <span>Skip duplicates (don't import the 142 likely duplicates)</span></div>
-    <div class="checkbox-line"><input type="checkbox" /> <span>Skip rows with errors (35 rows · alternative: download report and fix)</span></div>
-    <div class="checkbox-line"><input type="checkbox" checked /> <span>Auto-enrich new contacts from public web (F1.4)</span></div>
-    <div class="checkbox-line"><input type="checkbox" /> <span>Email me when import completes</span></div>
-    <div class="checkbox-line"><input type="checkbox" checked /> <span>Assign all imported records to: <strong>Mayur S.</strong></span></div>
+    <div class="checkbox-line"><input type="checkbox" id="opt-skip-dupes" checked /> <span id="opt-dupes-label">Skip duplicates</span></div>
+    <div class="checkbox-line"><input type="checkbox" id="opt-skip-errors" checked /> <span id="opt-errors-label">Skip rows with errors</span></div>
   </div>
 
   <div class="row gap-3 between">
-    <a href="import.html" class="text-muted">← Back to mapping</a>
-    <div class="row gap-2">
-      <button class="btn">Download error report</button>
-      <button class="btn primary" onclick="window.location.href='import-progress.html'">Import 4,823 records →</button>
-    </div>
+    <a id="back-link" href="import.html" class="text-muted">← Back to mapping</a>
+    <button class="btn primary" id="import-btn" onclick="startImport()">Import records →</button>
   </div>
   
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var params = new URLSearchParams(window.location.search);
+    var jobId  = params.get("jobId");
+    if (!jobId) window.location.href = "import-upload.html";
+
+    var JOB = null;
+
+    async function init() {
+      try {
+        JOB = await SS_API.Imports.getJob(jobId);
+
+        document.getElementById("review-sub").textContent =
+          JOB.filename + " · " + JOB.totalRows.toLocaleString() + " rows analysed";
+        document.getElementById("back-link").href = "import.html?jobId=" + jobId;
+
+        document.getElementById("kpi-valid").textContent  = JOB.validRows.toLocaleString();
+        document.getElementById("kpi-dupes").textContent  = JOB.duplicates.toLocaleString();
+        document.getElementById("kpi-errors").textContent = JOB.errorCount.toLocaleString();
+        document.getElementById("kpi-total").textContent  = JOB.totalRows.toLocaleString();
+
+        document.getElementById("opt-dupes-label").textContent =
+          "Skip duplicates (" + JOB.duplicates.toLocaleString() + " rows)";
+        document.getElementById("opt-errors-label").textContent =
+          "Skip rows with errors (" + JOB.errorCount.toLocaleString() + " rows)";
+
+        document.getElementById("import-btn").textContent =
+          "Import " + JOB.validRows.toLocaleString() + " records →";
+
+        // Sample valid rows
+        var mappings = JOB.mappings || [];
+        var fieldCols = mappings.filter(function(m) { return m.targetField; }).map(function(m) { return m.targetField; });
+        var sampleRows = JOB.sampleRows || [];
+        var headers    = JOB.headers    || [];
+
+        if (sampleRows.length > 0) {
+          var colMap = {};
+          mappings.forEach(function(m) {
+            if (m.targetField) {
+              var idx = headers.indexOf(m.csvColumn);
+              if (idx !== -1) colMap[idx] = m.targetField;
+            }
+          });
+
+          var shownFields = Object.values(colMap).filter(function(f, i, a) { return a.indexOf(f) === i; }).slice(0, 5);
+          var thead = '<tr>' + shownFields.map(function(f) { return '<th>' + f + '</th>'; }).join('') + '</tr>';
+          var tbody = sampleRows.map(function(row) {
+            return '<tr>' + shownFields.map(function(f, fi) {
+              var idx = Object.entries(colMap).find(function(e) { return e[1] === f; });
+              var val = idx ? (row[Number(idx[0])] || "—") : "—";
+              return '<td>' + (fi === 0 ? '<strong>' + val + '</strong>' : val) + '</td>';
+            }).join('') + '</tr>';
+          }).join('');
+
+          document.getElementById("sample-table").innerHTML =
+            '<table class="table"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>';
+        } else {
+          document.getElementById("sample-table").innerHTML =
+            '<div style="padding:16px;color:var(--ink-40);font-size:13px;">No valid rows to preview.</div>';
+        }
+
+        // Errors
+        var errors = JOB.errors || [];
+        if (errors.length > 0) {
+          document.getElementById("errors-section").style.display = "block";
+          document.getElementById("errors-tbody").innerHTML = errors.slice(0, 10).map(function(e) {
+            return '<tr><td class="text-mono">#' + e.rowIndex + '</td><td>' + e.reason + '</td></tr>';
+          }).join('') + (errors.length > 10 ? '<tr><td colspan="2" class="text-muted" style="font-size:12px;text-align:center;">+ ' + (JOB.errorCount - 10) + ' more</td></tr>' : '');
+        }
+      } catch (err) {
+        document.getElementById("review-sub").textContent = "Could not load job. " + (err.message || "");
+      }
+    }
+
+    async function startImport() {
+      var btn = document.getElementById("import-btn");
+      btn.disabled = true;
+      btn.textContent = "Starting import…";
+
+      try {
+        var skipDuplicates = document.getElementById("opt-skip-dupes").checked;
+        var skipErrors     = document.getElementById("opt-skip-errors").checked;
+        await SS_API.Imports.execute(jobId, { skipDuplicates: skipDuplicates, skipErrors: skipErrors });
+        window.location.href = "import-progress.html?jobId=" + jobId;
+      } catch (err) {
+        alert("Import failed: " + (err.message || "Unknown error"));
+        btn.disabled = false;
+        btn.textContent = "Import " + (JOB ? JOB.validRows.toLocaleString() : "") + " records →";
+      }
+    }
+
+    init();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>

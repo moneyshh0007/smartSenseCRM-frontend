@@ -225,5 +225,44 @@ const Activities = {
   },
 };
 
+// ─── Imports ─────────────────────────────────────────────────────────
+const Imports = {
+  async upload(file) {
+    const token = getToken();
+    const form  = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_URL}/imports/upload`, {
+      method:  "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body:    form,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+    return data;
+  },
+
+  async saveMappings(jobId, mappings) {
+    return apiFetch(`/imports/${jobId}/mappings`, {
+      method: "POST",
+      body:   JSON.stringify({ mappings }),
+    });
+  },
+
+  async validate(jobId) {
+    return apiFetch(`/imports/${jobId}/validate`);
+  },
+
+  async execute(jobId, options) {
+    return apiFetch(`/imports/${jobId}/execute`, {
+      method: "POST",
+      body:   JSON.stringify(options || {}),
+    });
+  },
+
+  async getJob(jobId) {
+    return apiFetch(`/imports/${jobId}`);
+  },
+};
+
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, getUser };

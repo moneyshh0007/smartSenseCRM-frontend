@@ -34,12 +34,15 @@
     <div class="stepper-step"><span class="stepper-num">4</span><span>Import</span></div>
   </div>
 
-  <div class="upload-zone" onclick="window.location.href='import.html'">
-    <div class="upload-icon">↓</div>
-    <div class="upload-title">Drop your file here</div>
-    <div class="upload-sub">or click to browse · Supports .csv, .tsv · Max 100MB</div>
-    <button class="btn primary">Choose file</button>
+  <div class="upload-zone" id="upload-zone">
+    <div class="upload-icon" id="upload-icon">↓</div>
+    <div class="upload-title" id="upload-title">Drop your file here</div>
+    <div class="upload-sub" id="upload-sub">or click to browse · Supports .csv, .tsv · Max 5,000 rows</div>
+    <button class="btn primary" id="choose-btn" onclick="document.getElementById('file-input').click()">Choose file</button>
+    <input type="file" id="file-input" accept=".csv,.tsv" style="display:none;" />
   </div>
+
+  <div id="upload-error" style="display:none;margin-top:12px;padding:12px 16px;background:#fff5f5;border:1px solid #fc8181;border-radius:6px;font-size:13px;color:#c53030;"></div>
 
   <div class="section-rule">
     <span class="num">02</span>
@@ -95,14 +98,78 @@
 
   <div class="row gap-3 mt-5 between">
     <a href="my-day.html" class="text-muted">Cancel and return to My Day</a>
-    <button class="btn primary" onclick="window.location.href='import.html'">Continue to mapping →</button>
+    <button class="btn primary" id="continue-btn" disabled onclick="continueToMapping()">Continue to mapping →</button>
   </div>
   
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var pendingJobId = null;
+
+    var zone      = document.getElementById("upload-zone");
+    var fileInput = document.getElementById("file-input");
+    var errEl     = document.getElementById("upload-error");
+    var continueBtn = document.getElementById("continue-btn");
+
+    // Drag-and-drop
+    zone.addEventListener("dragover", function(e) { e.preventDefault(); zone.classList.add("drag-over"); });
+    zone.addEventListener("dragleave", function()  { zone.classList.remove("drag-over"); });
+    zone.addEventListener("drop", function(e) {
+      e.preventDefault();
+      zone.classList.remove("drag-over");
+      var file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener("change", function() {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function showError(msg) {
+      errEl.textContent = msg;
+      errEl.style.display = "block";
+    }
+
+    function clearError() { errEl.style.display = "none"; }
+
+    async function handleFile(file) {
+      clearError();
+      var ext = file.name.split(".").pop().toLowerCase();
+      if (ext !== "csv" && ext !== "tsv") {
+        showError("Only .csv and .tsv files are supported.");
+        return;
+      }
+
+      document.getElementById("upload-icon").textContent  = "⟳";
+      document.getElementById("upload-title").textContent = "Uploading " + file.name + "…";
+      document.getElementById("upload-sub").textContent   = "";
+      document.getElementById("choose-btn").disabled = true;
+
+      try {
+        var result = await SS_API.Imports.upload(file);
+        pendingJobId = result.jobId;
+
+        document.getElementById("upload-icon").textContent  = "✓";
+        document.getElementById("upload-title").textContent = file.name;
+        document.getElementById("upload-sub").textContent   = result.totalRows.toLocaleString() + " rows · " + result.headers.length + " columns detected";
+        continueBtn.disabled = false;
+      } catch (err) {
+        document.getElementById("upload-icon").textContent  = "↓";
+        document.getElementById("upload-title").textContent = "Drop your file here";
+        document.getElementById("upload-sub").textContent   = "or click to browse · Supports .csv, .tsv · Max 5,000 rows";
+        document.getElementById("choose-btn").disabled = false;
+        showError(err.message || "Upload failed. Please try again.");
+      }
+    }
+
+    function continueToMapping() {
+      if (pendingJobId) window.location.href = "import.html?jobId=" + pendingJobId;
+    }
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>

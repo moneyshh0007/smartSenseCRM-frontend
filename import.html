@@ -34,139 +34,55 @@
     <div class="stepper-step"><span class="stepper-num">4</span><span>Import</span></div>
   </div>
 
-  <div class="card mb-5">
-    <div class="card-head">
-      <div>
-        <div class="card-title">prospects_q2_2026.csv</div>
-        <div class="card-sub">4,823 rows · 12 columns · Uploaded 2 min ago</div>
-      </div>
-      <div class="row gap-2">
-        <span class="badge positive">PARSED OK</span>
-        <button class="btn sm">Re-upload</button>
-      </div>
-    </div>
+  <div class="card mb-5" id="file-info-card">
+    <div style="padding:20px;text-align:center;color:var(--ink-40);font-size:13px;">Loading…</div>
   </div>
 
   <div class="section-rule">
     <span class="num">01</span>
     <span class="title">Map columns to fields</span>
     <span class="line"></span>
-    <span class="text-mono text-muted" style="font-size:11px;">AI SUGGESTED 11 OF 12</span>
+    <span class="text-mono text-muted" id="suggested-count" style="font-size:11px;"></span>
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>CSV column</th>
-        <th>Sample value</th>
-        <th>→</th>
-        <th>Target field</th>
-        <th>AI confidence</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="text-mono">full_name</td>
-        <td>"Sarah Chen"</td>
-        <td>→</td>
-        <td>Person · <strong>Name</strong></td>
-        <td><span class="badge positive">98%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">company_name</td>
-        <td>"Acme Corp"</td>
-        <td>→</td>
-        <td>Company · <strong>Name</strong></td>
-        <td><span class="badge positive">96%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">job_title</td>
-        <td>"VP Engineering"</td>
-        <td>→</td>
-        <td>Person · <strong>Title</strong></td>
-        <td><span class="badge positive">94%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">work_email</td>
-        <td>"sarah.chen@acme.com"</td>
-        <td>→</td>
-        <td>Person · <strong>Email</strong></td>
-        <td><span class="badge positive">99%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">phone</td>
-        <td>"+1 415 555 0117"</td>
-        <td>→</td>
-        <td>Person · <strong>Phone</strong></td>
-        <td><span class="badge positive">99%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">linkedin_url</td>
-        <td>"linkedin.com/in/sarahchen"</td>
-        <td>→</td>
-        <td>Person · <strong>LinkedIn</strong></td>
-        <td><span class="badge positive">97%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono">region</td>
-        <td>"NA-West"</td>
-        <td>→</td>
-        <td>Person · <strong>Territory</strong> <em>(custom)</em></td>
-        <td><span class="badge muted">62%</span></td>
-        <td><button class="btn sm">Change</button></td>
-      </tr>
-      <tr style="background: var(--ink-03);">
-        <td class="text-mono">internal_score</td>
-        <td>"7.4"</td>
-        <td>→</td>
-        <td><strong style="color: var(--ink);">— Not mapped —</strong></td>
-        <td><span class="badge muted">—</span></td>
-        <td><button class="btn sm primary">Map</button></td>
-      </tr>
-    </tbody>
-  </table>
+  <div id="mapping-table-wrap">
+    <div style="padding:20px;text-align:center;color:var(--ink-40);font-size:13px;">Loading column mappings…</div>
+  </div>
 
   <div class="row gap-3 mt-5 between">
     <a href="my-day.html" class="text-muted">Cancel</a>
     <div class="row gap-2">
       <button class="btn" onclick="window.location.href='import-upload.html'">← Back to upload</button>
-      <button class="btn primary" onclick="window.location.href='import-review.html'">Continue to review →</button>
+      <button class="btn primary" id="continue-btn" onclick="saveMappingsAndContinue()">Continue to review →</button>
     </div>
   </div>
 
   <div class="section-rule">
     <span class="num">02</span>
-    <span class="title">Pre-import preview</span>
+    <span class="title">Pre-import validation</span>
     <span class="line"></span>
   </div>
 
-  <div class="kpi-grid">
+  <div class="kpi-grid" id="validation-kpis" style="display:none;">
     <div class="kpi">
       <div class="kpi-label">Valid rows</div>
-      <div class="kpi-value">4,823</div>
+      <div class="kpi-value" id="kpi-valid">—</div>
       <div class="kpi-delta">Ready to import</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Likely duplicates</div>
-      <div class="kpi-value">142</div>
+      <div class="kpi-label">Duplicates</div>
+      <div class="kpi-value" id="kpi-dupes">—</div>
       <div class="kpi-delta">Will be skipped</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Errors</div>
-      <div class="kpi-value">35</div>
-      <div class="kpi-delta">Downloadable as CSV</div>
+      <div class="kpi-value" id="kpi-errors">—</div>
+      <div class="kpi-delta">Invalid rows</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Estimated time</div>
-      <div class="kpi-value">~2 min</div>
-      <div class="kpi-delta">In background</div>
+      <div class="kpi-label">Total rows</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-delta">In your file</div>
     </div>
   </div>
   
@@ -174,7 +90,128 @@
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var params = new URLSearchParams(window.location.search);
+    var jobId  = params.get("jobId");
+    if (!jobId) window.location.href = "import-upload.html";
+
+    var JOB = null;
+
+    var FIELD_LABELS = {
+      firstName:   "Person · First name",
+      lastName:    "Person · Last name",
+      fullName:    "Person · Full name (split)",
+      email:       "Person · Email",
+      phone:       "Person · Phone",
+      title:       "Person · Title",
+      location:    "Person · Location",
+      linkedinUrl: "Person · LinkedIn URL",
+      source:      "Person · Source",
+      companyName: "Company · Name",
+    };
+    var FIELD_OPTIONS = Object.keys(FIELD_LABELS);
+
+    async function init() {
+      try {
+        JOB = await SS_API.Imports.getJob(jobId);
+
+        // File info card
+        document.getElementById("file-info-card").innerHTML =
+          '<div class="card-head">' +
+            '<div>' +
+              '<div class="card-title">' + JOB.filename + '</div>' +
+              '<div class="card-sub">' + JOB.totalRows.toLocaleString() + ' rows · ' + JOB.headers.length + ' columns</div>' +
+            '</div>' +
+            '<span class="badge positive">PARSED OK</span>' +
+          '</div>';
+
+        renderMappingTable();
+      } catch (e) {
+        document.getElementById("file-info-card").innerHTML =
+          '<div style="padding:16px;color:#c53030;">Could not load import job. <a href="import-upload.html">Start over</a></div>';
+      }
+    }
+
+    function renderMappingTable() {
+      var suggestions = JOB.suggestions || [];
+      var savedMappings = JOB.mappings || [];
+      var savedMap = {};
+      savedMappings.forEach(function(m) { savedMap[m.csvColumn] = m.targetField; });
+
+      var suggestedCount = suggestions.filter(function(s) { return (savedMap[s.csvColumn] || s.targetField); }).length;
+      document.getElementById("suggested-count").textContent = suggestedCount + " OF " + suggestions.length + " AUTO-MAPPED";
+
+      var rows = suggestions.map(function(s, i) {
+        var sampleVal = JOB.sampleRows && JOB.sampleRows[0] ? (JOB.sampleRows[0][i] || "—") : "—";
+        var current   = savedMap[s.csvColumn] !== undefined ? savedMap[s.csvColumn] : s.targetField;
+
+        var selectHtml = '<select id="map-' + i + '" data-col="' + encodeURIComponent(s.csvColumn) + '" onchange="onMappingChange()">' +
+          '<option value="">— Skip this column —</option>' +
+          FIELD_OPTIONS.map(function(f) {
+            return '<option value="' + f + '"' + (current === f ? ' selected' : '') + '>' + FIELD_LABELS[f] + '</option>';
+          }).join('') +
+          '</select>';
+
+        var rowClass = current ? '' : ' style="background:var(--ink-03);"';
+        return '<tr' + rowClass + '>' +
+          '<td class="text-mono">' + s.csvColumn + '</td>' +
+          '<td style="color:var(--ink-50);font-size:12px;">' + sampleVal + '</td>' +
+          '<td>→</td>' +
+          '<td>' + selectHtml + '</td>' +
+          '</tr>';
+      }).join('');
+
+      document.getElementById("mapping-table-wrap").innerHTML =
+        '<table class="table"><thead><tr>' +
+          '<th>CSV column</th><th>Sample value</th><th></th><th>Target field</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+
+    function onMappingChange() {
+      // Hide stale validation KPIs when user changes mappings
+      document.getElementById("validation-kpis").style.display = "none";
+    }
+
+    function collectMappings() {
+      var mappings = [];
+      document.querySelectorAll("[id^='map-']").forEach(function(sel) {
+        mappings.push({
+          csvColumn:   decodeURIComponent(sel.dataset.col),
+          targetField: sel.value || null,
+        });
+      });
+      return mappings;
+    }
+
+    async function saveMappingsAndContinue() {
+      var btn = document.getElementById("continue-btn");
+      btn.disabled = true;
+      btn.textContent = "Validating…";
+
+      try {
+        var mappings = collectMappings();
+        await SS_API.Imports.saveMappings(jobId, mappings);
+        var result = await SS_API.Imports.validate(jobId);
+
+        document.getElementById("kpi-valid").textContent  = result.validRows.toLocaleString();
+        document.getElementById("kpi-dupes").textContent  = result.duplicates.toLocaleString();
+        document.getElementById("kpi-errors").textContent = result.errorCount.toLocaleString();
+        document.getElementById("kpi-total").textContent  = result.totalRows.toLocaleString();
+        document.getElementById("validation-kpis").style.display = "grid";
+
+        // Proceed to review
+        window.location.href = "import-review.html?jobId=" + jobId;
+      } catch (e) {
+        alert("Validation failed: " + (e.message || "Unknown error"));
+        btn.disabled = false;
+        btn.textContent = "Continue to review →";
+      }
+    }
+
+    init();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
