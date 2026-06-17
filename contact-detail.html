@@ -248,12 +248,9 @@
     // ── Load activities for this contact ──────────────────────────────────
     async function loadActivities() {
       try {
-        var raw  = await SS_API.Activities.list();
-        var all  = (raw.activities || raw.data || raw || []);
-        var cid  = String(contactId);
-        var acts = all.filter(function(a) {
-          return a.contactId && String(a.contactId) === cid;
-        });
+        var raw  = await SS_API.Activities.list({ contactId: contactId, limit: 100 });
+        var acts = (raw.activities || raw.data || raw || [])
+          .filter(function(a) { return a.type !== "note"; });
 
         var tlEl = document.getElementById("timeline-list");
         if (acts.length === 0) {
@@ -262,7 +259,7 @@
           var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
           tlEl.innerHTML = sorted.map(function(a) {
             var type = (a.type || "NOTE").toUpperCase();
-            var who  = a.user ? ((a.user.firstName||"") + " " + (a.user.lastName||"")).trim() : "";
+            var who  = a.user ? (a.user.name || "") : "";
             return "<div class='timeline-item'>" +
               "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
               "<span class='badge muted'>" + type + "</span>" +
@@ -282,8 +279,8 @@
     // ── Load deals linked to this contact's company ───────────────────────
     async function loadDeals() {
       try {
-        var craw = await SS_API.Contacts.get(contactId);
-        var c    = unwrap(craw, "contact");
+        // CONTACT is populated by loadContact() which runs first via .then() chaining in boot
+        var c = CONTACT;
         if (!c || !c.company) {
           document.getElementById("sidebar-deals").innerHTML =
             "<li><div style='color:var(--ink-50);font-size:12px;'>No company linked.</div></li>";
@@ -441,12 +438,9 @@
 
     async function loadNotes() {
       try {
-        var raw   = await SS_API.Activities.list();
-        var all   = (raw.activities || raw.data || raw || []);
-        var cid   = String(contactId);
-        var notes = all.filter(function(a) {
-          return a.type === "note" && a.contactId && String(a.contactId) === cid;
-        }).sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        var raw   = await SS_API.Activities.list({ contactId: contactId, type: "note", limit: 50 });
+        var notes = (raw.activities || raw.data || raw || [])
+          .slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
 
         var el = document.getElementById("notes-list");
         if (notes.length === 0) {
@@ -484,9 +478,9 @@
     }
 
     // ── Boot ─────────────────────────────────────────────────────────────
-    loadContact();
+    // loadDeals needs CONTACT.company, so sequence it after loadContact resolves
+    loadContact().then(function() { loadDeals(); });
     loadActivities();
-    loadDeals();
     loadTasks();
     loadNotes();
   </script>

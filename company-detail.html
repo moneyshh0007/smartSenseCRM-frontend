@@ -371,7 +371,7 @@
           var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
           tlEl.innerHTML = sorted.slice(0, 20).map(function(a) {
             var type = (a.type||"NOTE").toUpperCase();
-            var who  = a.user ? ((a.user.firstName||"") + " " + (a.user.lastName||"")).trim() : "";
+            var who  = a.user ? (a.user.name || "") : "";
             return "<div class='timeline-item'>" +
               "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
               "<span class='badge muted'>" + type + "</span>" +
