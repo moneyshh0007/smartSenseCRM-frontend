@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 12)
+**Last updated:** 17 Jun 2026 (Phase 13)
 
 ---
 
@@ -36,6 +36,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 10 | CSV Contact Import | 4-step wizard (upload/map/validate/execute) | ✅ Complete |
 | 11 | Companies Pages QA | KPI grid, tab switching, edit company, notes | ✅ Complete |
 | 12 | Deals Pages QA | KPI grid real data, deal-detail Mark Won/Lost, Edit, Notes | ✅ Complete |
+| 13 | My Day + Tasks QA | Fix greeting crash, undefined KPI counts, tasks count display | ✅ Complete |
 
 ---
 
@@ -507,14 +508,32 @@ getJob(jobId)
 
 ---
 
+### Phase 13 — My Day + Tasks QA
+
+**Commits:** `fix: my-day greeting crash, undefined KPI counts, tasks count display`  
+**Frontend:** `my-day.html`, `tasks.html`
+
+**Issues found and fixed:**
+
+| File | Issue | Fix |
+|------|-------|-----|
+| `my-day.html` | `user.name` crashes — API returns `firstName`/`lastName`, not `name` | Changed to `user.firstName \|\| user.email.split("@")[0]` |
+| `my-day.html` | KPI cards showed "undefined" for activities and tasks counts (`.total` not in API response) | Replaced `activitiesData.total`, `tasksData.total`, `dealsData.total` with array `.length` |
+| `my-day.html` | Activity timeline showed "Invalid Date" — `occurredAt` not always present | Added `a.occurredAt \|\| a.createdAt` fallback |
+| `tasks.html` | Subtitle and footer showed "undefined open tasks" / "SHOWING undefined TASKS" | Replaced `data.total` with `data.tasks.length` |
+
+**No issues found in `activities.html`** — already uses `data.activities` and `_allActs.length` correctly.
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
 |------|-------|
 | Deals page deep QA | Kanban drag-and-drop verified; mark won/lost, edit deal, notes all wired ✅ |
-| Tasks page deep QA | Verify bulk complete, task detail edit, linked record nav |
-| My Day dashboard | Verify real KPIs (stalled deals, tasks due today) load correctly |
-| Activities page | Verify feed loads, type filter works |
+| Tasks page deep QA | Fixed count display bug; bulk complete, task detail edit, linked record nav all wired ✅ |
+| My Day dashboard | Fixed greeting crash + undefined KPI counts; all widgets wired to live API ✅ |
+| Activities page | Feed loads, type filter and advanced filter all wired ✅ |
 | Settings pages | Remain static prototype — backend integration deferred to Phase 2 |
 | Companies: pipeline value | Requires `GET /companies` to aggregate deal amounts (backend change needed) |
 | Notes: company-scoped | Activities model has no `companyId` — notes on company-detail show all workspace notes |
