@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -163,6 +163,12 @@
       margin-bottom: var(--space-6);
     }
     .email-connect-note { font-size: 11px; color: var(--ink-30); margin-top: var(--space-4); display: flex; align-items: center; gap: 5px; }
+    .email-connect-error {
+      display: none; margin-top: var(--space-4); padding: 10px 16px;
+      background: #fff5f5; border: 1px solid #fc8181; border-radius: var(--radius);
+      font-size: 12px; color: #c53030; max-width: 360px;
+    }
+    .email-connect-error.visible { display: block; }
 
     /* ── Provider modal ──────────────────────────────── */
     .modal-overlay {
@@ -193,7 +199,8 @@
       background: var(--paper); width: 100%;
       text-align: left; font-family: var(--body);
     }
-    .provider-option:hover { border-color: var(--ink); background: var(--ink-03); }
+    .provider-option:hover:not(:disabled) { border-color: var(--ink); background: var(--ink-03); }
+    .provider-option:disabled { opacity: .45; cursor: default; }
     .provider-icon {
       width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
@@ -206,59 +213,6 @@
     .provider-name  { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.3; }
     .provider-hint  { font-size: 11px; color: var(--ink-40); margin-top: 1px; }
     .provider-arrow { margin-left: auto; color: var(--ink-20); font-size: 14px; }
-
-    /* ── Auth consent modal ──────────────────────────── */
-    .auth-provider-header {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-    }
-    .auth-provider-icon {
-      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 700; color: white;
-    }
-    .auth-provider-icon.gmail   { background: #EA4335; }
-    .auth-provider-icon.outlook { background: #0078D4; }
-    .auth-provider-icon.yahoo   { background: #6001D2; }
-    .auth-provider-icon.imap    { background: #4a4a4a; }
-    .auth-permissions {
-      background: var(--paper-warm); border: var(--rule);
-      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px;
-    }
-    .auth-permissions p {
-      font-size: 12px; color: var(--ink-60); margin: 0 0 6px 0; font-family: var(--mono);
-      text-transform: uppercase; letter-spacing: .07em;
-    }
-    .auth-permissions ul {
-      margin: 0; padding: 0 0 0 16px; list-style: none;
-    }
-    .auth-permissions li {
-      font-size: 13px; color: var(--ink-70); padding: 3px 0;
-      position: relative;
-    }
-    .auth-permissions li::before { content: "✓"; position: absolute; left: -16px; color: var(--ink-30); font-size: 11px; top: 4px; }
-    .auth-email-field {
-      width: 100%; padding: 9px 12px; border: var(--rule);
-      border-radius: var(--radius); font-size: 13px; font-family: var(--body);
-      background: var(--paper); color: var(--ink); outline: none;
-      margin-bottom: 18px; box-sizing: border-box;
-    }
-    .auth-email-field:focus { border-color: var(--ink); }
-    .auth-actions { display: flex; gap: 10px; }
-    .auth-actions .btn { flex: 1; justify-content: center; padding: 9px 0; }
-
-    /* ── Connecting spinner modal ────────────────────── */
-    .connecting-body {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 12px 0 8px; gap: 14px; text-align: center;
-    }
-    .spinner {
-      width: 38px; height: 38px; border-radius: 50%;
-      border: 3px solid var(--ink-10); border-top-color: var(--ink);
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .connecting-text { font-size: 14px; color: var(--ink); font-weight: 500; }
-    .connecting-sub  { font-size: 12px; color: var(--ink-40); }
 
     /* ── Connected account badge in sidebar ─────────── */
     .connected-account-badge {
@@ -326,7 +280,6 @@
         <div class="breadcrumb"><a href="contacts.html">Records</a><span class="sep">/</span><a href="emails.html" class="current">Email</a></div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
-          
         </div>
       </div>
 
@@ -339,10 +292,10 @@
             <span class="connected-account-email" id="connected-account-email"></span>
             <button class="connected-account-disconnect" onclick="disconnectEmail()" title="Disconnect inbox">✕</button>
           </div>
-          <button class="compose-btn" id="compose-btn" onclick="openCompose()">✎ &nbsp;Compose</button>
+          <button class="compose-btn" id="compose-btn" style="display:none;" onclick="openCompose()">✎ &nbsp;Compose</button>
 
           <button class="folder-item active" onclick="switchFolder('inbox', this)">
-            <span>Inbox</span><span class="folder-count" id="cnt-inbox">3</span>
+            <span>Inbox</span><span class="folder-count" id="cnt-inbox"></span>
           </button>
           <button class="folder-item" onclick="switchFolder('starred', this)">
             <span>Starred</span><span class="folder-count"></span>
@@ -351,7 +304,7 @@
             <span>Sent</span><span class="folder-count"></span>
           </button>
           <button class="folder-item" onclick="switchFolder('drafts', this)">
-            <span>Drafts</span><span class="folder-count">1</span>
+            <span>Drafts</span><span class="folder-count"></span>
           </button>
 
           <div class="folder-divider"></div>
@@ -370,7 +323,7 @@
           <div class="email-connect-icon">✉</div>
           <div class="email-connect-title">Connect your inbox</div>
           <div class="email-connect-desc">
-            Sync your Gmail or Outlook emails with SmartSense CRM.
+            Sync your Gmail emails with SmartSense CRM.
             Emails are automatically linked to your contacts and deals — all in one place.
           </div>
           <button class="btn primary" style="padding:10px 28px;font-size:14px;" onclick="openProviderModal()">
@@ -379,10 +332,11 @@
           <div class="email-connect-note">
             <span>🔒</span> Your emails are encrypted and only visible to you.
           </div>
+          <div class="email-connect-error" id="connect-error"></div>
         </div>
 
         <!-- ── Email list + detail ────────────────────── -->
-        <div class="email-main" id="email-main">
+        <div class="email-main" id="email-main" style="display:none;">
 
           <!-- List pane -->
           <div class="email-list-pane">
@@ -460,7 +414,7 @@
           <div class="modal-title">Connect your email inbox</div>
           <div class="modal-sub">Choose your email provider to get started.</div>
 
-          <button class="provider-option" onclick="openAuthModal('gmail','Gmail','G')">
+          <button class="provider-option" onclick="startGmailOAuth()">
             <div class="provider-icon gmail">G</div>
             <div>
               <div class="provider-name">Gmail</div>
@@ -469,74 +423,29 @@
             <span class="provider-arrow">›</span>
           </button>
 
-          <button class="provider-option" onclick="openAuthModal('outlook','Microsoft Outlook','O')">
+          <button class="provider-option" disabled>
             <div class="provider-icon outlook">O</div>
             <div>
               <div class="provider-name">Microsoft Outlook</div>
-              <div class="provider-hint">Outlook.com, Office 365, or Exchange</div>
+              <div class="provider-hint">Coming soon</div>
             </div>
-            <span class="provider-arrow">›</span>
           </button>
 
-          <button class="provider-option" onclick="openAuthModal('yahoo','Yahoo Mail','Y')">
+          <button class="provider-option" disabled>
             <div class="provider-icon yahoo">Y</div>
             <div>
               <div class="provider-name">Yahoo Mail</div>
-              <div class="provider-hint">@yahoo.com accounts</div>
+              <div class="provider-hint">Coming soon</div>
             </div>
-            <span class="provider-arrow">›</span>
           </button>
 
-          <button class="provider-option" onclick="openAuthModal('imap','IMAP / SMTP','@')">
+          <button class="provider-option" disabled>
             <div class="provider-icon imap">@</div>
             <div>
               <div class="provider-name">Other (IMAP / SMTP)</div>
-              <div class="provider-hint">Any email provider with IMAP support</div>
+              <div class="provider-hint">Coming soon</div>
             </div>
-            <span class="provider-arrow">›</span>
           </button>
-        </div>
-      </div>
-
-      <!-- ── Auth consent modal ─────────────────────────── -->
-      <div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
-        <div class="modal-box">
-          <button class="modal-close" onclick="closeAuthModal()">×</button>
-          <div class="auth-provider-header">
-            <div class="auth-provider-icon" id="auth-provider-icon"></div>
-            <div>
-              <div class="modal-title" id="auth-modal-title"></div>
-              <div style="font-size:13px;color:var(--ink-50);">Authorize SmartSense CRM</div>
-            </div>
-          </div>
-
-          <div class="auth-permissions">
-            <p>SmartSense will be able to</p>
-            <ul>
-              <li>Read emails in your inbox, sent, and drafts</li>
-              <li>Send emails on your behalf</li>
-              <li>Manage labels and organise your inbox</li>
-              <li>Link emails to your contacts and deals</li>
-            </ul>
-          </div>
-
-          <input class="auth-email-field" id="auth-email-input" type="email" placeholder="your@email.com" />
-
-          <div class="auth-actions">
-            <button class="btn" onclick="closeAuthModal()">Cancel</button>
-            <button class="btn primary" onclick="authorizeAccess()">Authorize access →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Connecting spinner modal ───────────────────── -->
-      <div class="modal-overlay" id="connecting-modal">
-        <div class="modal-box" style="width:320px;text-align:center;">
-          <div class="connecting-body">
-            <div class="spinner"></div>
-            <div class="connecting-text" id="connecting-text">Connecting to Gmail…</div>
-            <div class="connecting-sub">Authorizing access and syncing your inbox</div>
-          </div>
         </div>
       </div>
 
@@ -547,333 +456,181 @@
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
-    // ── Mock email data ─────────────────────────────────────────────
-    var EMAILS = [
-      {
-        id: 1, folder: "inbox", unread: true, starred: false,
-        from: "Sarah Chen", fromEmail: "sarah.chen@acme.com",
-        to: "Mayur S.", toEmail: "mayur@smartsense.io",
-        subject: "Re: Pricing options for annual license",
-        preview: "Thanks for the breakdown. The mid-tier looks right for us…",
-        body: "Hi Mayur,\n\nThanks for the breakdown. The mid-tier looks right for us, but our CFO wants to confirm the data residency commitment — can you send the EU DPA?\n\nAlso, David flagged that they need SSO (Okta) and audit log export before sign-off. Can you confirm these are on your roadmap?\n\nLooking forward to moving this forward.\n\nBest,\nSarah Chen\nVP Engineering, Acme Corp",
-        date: "2026-06-08T09:32:00", dateLabel: "09:32",
-        linkedContact: "Sarah Chen", linkedDeal: "Acme — Annual License",
-        linkedContactId: "", linkedDealId: ""
-      },
-      {
-        id: 2, folder: "inbox", unread: true, starred: true,
-        from: "Riya Gupta", fromEmail: "riya.gupta@northwind.com",
-        to: "Mayur S.", toEmail: "mayur@smartsense.io",
-        subject: "Follow-up: Northwind Multi-year deal",
-        preview: "Hi Mayur, just checking in on the multi-year proposal you sent…",
-        body: "Hi Mayur,\n\nJust checking in on the multi-year proposal you sent over last week. Our procurement team has reviewed it and we have a few questions:\n\n1. Can you offer a volume discount for the 500-seat tier?\n2. What are the SLA terms for enterprise support?\n3. Is there flexibility on the payment schedule — we prefer quarterly billing.\n\nWe're hoping to get this wrapped up by end of June.\n\nThanks,\nRiya Gupta\nHead of Sales, Northwind Corp",
-        date: "2026-06-07T14:20:00", dateLabel: "Yesterday",
-        linkedContact: "Riya Gupta", linkedDeal: "Northwind — Multi-year",
-        linkedContactId: "", linkedDealId: ""
-      },
-      {
-        id: 3, folder: "inbox", unread: true, starred: false,
-        from: "Hana Kim", fromEmail: "hana.kim@initech.com",
-        to: "Mayur S.", toEmail: "mayur@smartsense.io",
-        subject: "Initech Enterprise — Security questionnaire",
-        preview: "Please find attached our standard security questionnaire…",
-        body: "Hi Mayur,\n\nPlease find attached our standard security questionnaire for new SaaS vendors. Our security team requires this to be completed before we can proceed with any contract.\n\nKey areas they'll focus on:\n- SOC 2 Type II compliance\n- Data residency options (we need EU hosting)\n- Penetration testing reports from the last 12 months\n- Incident response SLA\n\nPlease complete and return within 5 business days.\n\nBest,\nHana Kim\nHead of People, Initech",
-        date: "2026-06-06T10:45:00", dateLabel: "2 Jun",
-        linkedContact: "Hana Kim", linkedDeal: "Initech — Enterprise",
-        linkedContactId: "", linkedDealId: ""
-      },
-      {
-        id: 4, folder: "sent", unread: false, starred: false,
-        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
-        to: "Sarah Chen", toEmail: "sarah.chen@acme.com",
-        subject: "Pricing options for annual license",
-        preview: "Hi Sarah, attached are the three tier options we discussed…",
-        body: "Hi Sarah,\n\nAttached are the three tier options we discussed on yesterday's call:\n\n• Starter (up to 50 seats): $24,000/yr\n• Mid-tier (up to 200 seats): $48,000/yr  \n• Enterprise (unlimited): $96,000/yr\n\nAll tiers include SSO, audit logging, and 99.9% SLA. EU data residency is available on mid-tier and above.\n\nHappy to set up a follow-up call this week to walk through the details.\n\nBest,\nMayur S.\nSmartSense CRM",
-        date: "2026-06-05T18:47:00", dateLabel: "5 Jun",
-        linkedContact: "Sarah Chen", linkedDeal: "Acme — Annual License",
-        linkedContactId: "", linkedDealId: ""
-      },
-      {
-        id: 5, folder: "sent", unread: false, starred: false,
-        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
-        to: "Riya Gupta", toEmail: "riya.gupta@northwind.com",
-        subject: "Northwind — Multi-year proposal",
-        preview: "Hi Riya, please find attached the multi-year pricing proposal…",
-        body: "Hi Riya,\n\nPlease find attached the multi-year pricing proposal for Northwind Corp.\n\nHighlights:\n- 3-year deal at $96,000/year (saves $18,000 vs monthly billing)\n- Dedicated CSM from day one\n- Quarterly business reviews\n- Custom onboarding program\n\nThis pricing is valid until 30 June 2026. Let me know if you'd like to discuss further.\n\nBest,\nMayur S.",
-        date: "2026-06-02T11:30:00", dateLabel: "2 Jun",
-        linkedContact: "Riya Gupta", linkedDeal: "Northwind — Multi-year",
-        linkedContactId: "", linkedDealId: ""
-      },
-      {
-        id: 6, folder: "drafts", unread: false, starred: false,
-        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
-        to: "Aiko Liu", toEmail: "aiko.liu@globex.io",
-        subject: "Globex Inc — Annual contract renewal",
-        preview: "Hi Aiko, I wanted to touch base on Globex's upcoming renewal…",
-        body: "Hi Aiko,\n\nI wanted to touch base on Globex's upcoming renewal — your current contract expires on 31 July 2026.\n\n[DRAFT — need to add pricing details]",
-        date: "2026-06-09T08:00:00", dateLabel: "Draft",
-        linkedContact: "Aiko Liu", linkedDeal: "",
-        linkedContactId: "", linkedDealId: ""
-      }
-    ];
-
-    var currentFolder = "inbox";
+    // ── State ──────────────────────────────────────────────────────
+    var EMAILS = [];
+    var currentFolder  = "inbox";
     var selectedEmailId = null;
+    var emailConnected    = false;
+    var connectedProvider = "";
+    var connectedEmail    = "";
 
-    // ── Folder switching ───────────────────────────────────────────
-    function switchFolder(folder, btn) {
-      currentFolder = folder;
-      document.querySelectorAll(".folder-item").forEach(function(f) { f.classList.remove("active"); });
-      if (btn) btn.classList.add("active");
-      selectedEmailId = null;
-      showDetailEmpty();
-      renderEmailList();
-    }
-
-    // ── Render email list ──────────────────────────────────────────
-    function renderEmailList(filter) {
-      var list = document.getElementById("email-list");
-      var emails = EMAILS.filter(function(e) {
-        if (currentFolder === "starred") return e.starred;
-        if (currentFolder === "deals")    return !!e.linkedDeal;
-        if (currentFolder === "contacts") return !!e.linkedContact;
-        return e.folder === currentFolder;
-      });
-      if (filter) {
-        var q = filter.toLowerCase();
-        emails = emails.filter(function(e) {
-          return (e.from + e.subject + e.preview).toLowerCase().includes(q);
-        });
+    // ── Direct API helper (used for email-specific endpoints) ──────
+    async function emailApiFetch(path, options) {
+      var token = localStorage.getItem("ss_token");
+      var init  = { method: "GET" };
+      if (options) Object.assign(init, options);
+      init.headers = Object.assign({ "Authorization": "Bearer " + token }, (options && options.headers) || {});
+      if (init.body) init.headers["Content-Type"] = "application/json";
+      var res  = await fetch(API_URL + path, init);
+      var data;
+      try { data = await res.json(); } catch(e) { data = {}; }
+      if (!res.ok) {
+        var err = new Error((data && data.error) || "Request failed");
+        err.status = res.status;
+        err.data   = data;
+        throw err;
       }
-      if (emails.length === 0) {
-        list.innerHTML = "<div style='padding:40px;text-align:center;color:var(--ink-50);font-size:13px;'>No emails in this folder.</div>";
-        return;
+      return data;
+    }
+
+    // ── Handle OAuth callback return from Google ───────────────────
+    function handleOAuthCallback() {
+      var params    = new URLSearchParams(window.location.search);
+      var connected = params.get("connected");
+      if (!connected) return;
+
+      // Strip the query params from the URL immediately
+      history.replaceState({}, "", window.location.pathname);
+
+      if (connected === "1") {
+        var provider = params.get("provider") || "gmail";
+        var email    = params.get("email")    || "";
+        localStorage.setItem("ss_email_connected", "true");
+        localStorage.setItem("ss_email_provider",  provider);
+        localStorage.setItem("ss_email_address",   email);
+        setTimeout(function() {
+          if (window.SS_toast) window.SS_toast("Gmail connected", { sub: email });
+        }, 400);
+      } else if (connected === "0") {
+        var reason = params.get("reason") || "unknown_error";
+        var msg = {
+          "access_denied":     "You cancelled the Gmail authorization.",
+          "invalid_state":     "Authorization session expired. Please try again.",
+          "no_access_token":   "Google did not return an access token.",
+          "server_error":      "A server error occurred. Please try again.",
+        }[reason] || "Connection failed (" + reason + "). Please try again.";
+        setTimeout(function() {
+          var errEl = document.getElementById("connect-error");
+          if (errEl) { errEl.textContent = msg; errEl.classList.add("visible"); }
+        }, 400);
       }
-      list.innerHTML = emails.map(function(e) {
-        var inits = e.from.split(" ").map(function(w) { return w[0]; }).join("").toUpperCase().slice(0,2);
-        var linkBadge = e.linkedDeal
-          ? "<span class='email-link-badge'>◇ " + e.linkedDeal + "</span>"
-          : e.linkedContact
-          ? "<span class='email-link-badge'>○ " + e.linkedContact + "</span>"
-          : "";
-        return "<div class='email-row" + (e.unread ? " unread" : "") + (e.id === selectedEmailId ? " active" : "") + "' onclick='selectEmail(" + e.id + ")'>" +
-          "<div class='email-avatar' style='background:" + avatarColor(e.from) + ";'>" + inits + "</div>" +
-          "<div style='min-width:0;'>" +
-            "<div class='email-sender'>" + e.from + "</div>" +
-            "<div class='email-subject'>" + e.subject + "</div>" +
-            "<div class='email-preview'>" + e.preview + "</div>" +
-            linkBadge +
-          "</div>" +
-          "<div class='email-meta'>" +
-            "<span class='email-time'>" + e.dateLabel + "</span>" +
-            (e.unread ? "<span class='email-unread-dot'></span>" : "") +
-            (e.starred ? "<span style='font-size:11px;color:var(--ink-50);'>★</span>" : "") +
-          "</div>" +
-        "</div>";
-      }).join("");
     }
-
-    function avatarColor(name) {
-      var colors = ["#1d3461","#1b5e37","#5a3e85","#663c1f","#2a4858","#5c3d1e"];
-      var h = 0;
-      for (var i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
-      return colors[Math.abs(h) % colors.length];
-    }
-
-    function filterEmails(q) { renderEmailList(q); }
-
-    function markAllRead() {
-      EMAILS.forEach(function(e) { if (e.folder === currentFolder) e.unread = false; });
-      document.getElementById("cnt-inbox").textContent =
-        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
-      renderEmailList();
-    }
-
-    // ── Select & show email ────────────────────────────────────────
-    function selectEmail(id) {
-      var email = EMAILS.find(function(e) { return e.id === id; });
-      if (!email) return;
-      email.unread = false;
-      selectedEmailId = id;
-      renderEmailList();
-      showDetail(email);
-      // Update inbox unread count
-      document.getElementById("cnt-inbox").textContent =
-        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
-    }
-
-    function showDetail(email) {
-      document.getElementById("detail-empty").style.display = "none";
-      var dc = document.getElementById("detail-content");
-      dc.style.display = "flex";
-
-      document.getElementById("detail-subject").textContent = email.subject;
-
-      var meta = "<span><strong>From</strong>" + email.from + " &lt;" + email.fromEmail + "&gt;</span>" +
-                 "<span><strong>To</strong>" + email.to + " &lt;" + email.toEmail + "&gt;</span>" +
-                 "<span><strong>Date</strong>" + new Date(email.date).toLocaleString() + "</span>";
-      document.getElementById("detail-meta").innerHTML = meta;
-
-      var bodyHtml = "<div class='email-body'>" + escHtml(email.body) + "</div>";
-
-      // Linked contact/deal cards
-      var linked = "";
-      if (email.linkedContact) {
-        linked += "<div class='email-linked-card' onclick='void(0)'>" +
-          "<span class='left-icon'>○</span>" +
-          "<div><div style='font-weight:500;'>" + email.linkedContact + "</div>" +
-          "<div class='text-muted' style='font-size:11px;'>Linked contact</div></div>" +
-          "</div>";
-      }
-      if (email.linkedDeal) {
-        linked += "<div class='email-linked-card' onclick='void(0)'>" +
-          "<span class='left-icon'>◇</span>" +
-          "<div><div style='font-weight:500;'>" + email.linkedDeal + "</div>" +
-          "<div class='text-muted' style='font-size:11px;'>Linked deal</div></div>" +
-          "</div>";
-      }
-      if (linked) linked = "<div style='margin-top:var(--space-5);'><div class='text-muted mb-2' style='font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;'>Linked records</div>" + linked + "</div>";
-
-      document.getElementById("detail-body").innerHTML = bodyHtml + linked;
-    }
-
-    function showDetailEmpty() {
-      document.getElementById("detail-empty").style.display = "flex";
-      var dc = document.getElementById("detail-content");
-      dc.style.display = "none";
-    }
-
-    function escHtml(str) {
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    }
-
-    // ── Email actions ──────────────────────────────────────────────
-    function replyEmail() {
-      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
-      if (!email) return;
-      document.getElementById("compose-to").value = email.fromEmail;
-      document.getElementById("compose-subject").value = "Re: " + email.subject.replace(/^Re:\s*/i, "");
-      document.getElementById("compose-body").value = "\n\n--- Original message ---\n" + email.body;
-      openCompose();
-    }
-
-    function replyAllEmail() { replyEmail(); }
-
-    function forwardEmail() {
-      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
-      if (!email) return;
-      document.getElementById("compose-to").value = "";
-      document.getElementById("compose-subject").value = "Fwd: " + email.subject.replace(/^Fwd:\s*/i, "");
-      document.getElementById("compose-body").value = "\n\n--- Forwarded message ---\nFrom: " + email.from + " <" + email.fromEmail + ">\n\n" + email.body;
-      openCompose();
-    }
-
-    function deleteEmail() {
-      if (!selectedEmailId) return;
-      EMAILS = EMAILS.filter(function(e) { return e.id !== selectedEmailId; });
-      selectedEmailId = null;
-      showDetailEmpty();
-      renderEmailList();
-      if (window.SS_toast) window.SS_toast("Email deleted");
-    }
-
-    // ── Compose ────────────────────────────────────────────────────
-    function openCompose() {
-      document.getElementById("compose-overlay").classList.add("open");
-      setTimeout(function() { document.getElementById("compose-to").focus(); }, 100);
-    }
-
-    function closeCompose() {
-      document.getElementById("compose-overlay").classList.remove("open");
-      document.getElementById("compose-to").value = "";
-      document.getElementById("compose-cc").value = "";
-      document.getElementById("compose-subject").value = "";
-      document.getElementById("compose-body").value = "";
-    }
-
-    function minimiseCompose() {
-      document.getElementById("compose-overlay").classList.remove("open");
-    }
-
-    function sendEmail() {
-      var to      = document.getElementById("compose-to").value.trim();
-      var subject = document.getElementById("compose-subject").value.trim();
-      var body    = document.getElementById("compose-body").value.trim();
-      if (!to)      { alert("Please enter a recipient."); return; }
-      if (!subject) { alert("Please enter a subject."); return; }
-      if (!body)    { alert("Please write a message."); return; }
-
-      // Add to Sent folder
-      var newEmail = {
-        id: Date.now(), folder: "sent", unread: false, starred: false,
-        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
-        to: to, toEmail: to,
-        subject: subject,
-        preview: body.slice(0, 80) + (body.length > 80 ? "…" : ""),
-        body: body,
-        date: new Date().toISOString(), dateLabel: "Just now",
-        linkedContact: "", linkedDeal: ""
-      };
-      EMAILS.unshift(newEmail);
-      closeCompose();
-      if (window.SS_toast) window.SS_toast("Email sent", { sub: "To: " + to });
-    }
-
-    function saveDraft() {
-      var to      = document.getElementById("compose-to").value.trim();
-      var subject = document.getElementById("compose-subject").value.trim() || "(no subject)";
-      var body    = document.getElementById("compose-body").value.trim();
-
-      var draft = {
-        id: Date.now(), folder: "drafts", unread: false, starred: false,
-        from: "Mayur S.", fromEmail: "mayur@smartsense.io",
-        to: to || "", toEmail: to || "",
-        subject: subject,
-        preview: body.slice(0, 80),
-        body: body,
-        date: new Date().toISOString(), dateLabel: "Draft",
-        linkedContact: "", linkedDeal: ""
-      };
-      EMAILS.unshift(draft);
-      closeCompose();
-      if (window.SS_toast) window.SS_toast("Draft saved");
-    }
-
-    // ── Populate contacts datalist ─────────────────────────────────
-    async function loadContactSuggestions() {
-      try {
-        var data = await SS_API.Contacts.list();
-        var dl   = document.getElementById("contacts-list");
-        (data.contacts || []).forEach(function(c) {
-          if (c.email) {
-            var opt = document.createElement("option");
-            opt.value = c.email;
-            opt.label = c.firstName + " " + c.lastName;
-            dl.appendChild(opt);
-          }
-        });
-      } catch(e) {}
-    }
-
-    // ── Connection state ───────────────────────────────────────────
-    var emailConnected    = localStorage.getItem("ss_email_connected") === "true";
-    var connectedProvider = localStorage.getItem("ss_email_provider")  || "";
-    var connectedEmail    = localStorage.getItem("ss_email_address")   || "";
-    var pendingProvider   = null;
-    var pendingProviderLabel = "";
 
     // ── Init ───────────────────────────────────────────────────────
-    function initEmailPage() {
-      if (emailConnected) {
-        showEmailClient();
-        renderEmailList();
-        loadContactSuggestions();
-        renderConnectedBadge();
-      } else {
-        showConnectScreen();
+    async function initEmailPage() {
+      handleOAuthCallback();
+
+      try {
+        var statusData  = await emailApiFetch("/email/oauth/status");
+        var connections = statusData.connections || [];
+
+        if (connections.length > 0) {
+          var conn      = connections[0];
+          connectedProvider = conn.provider;
+          connectedEmail    = conn.email;
+          emailConnected    = true;
+          localStorage.setItem("ss_email_connected", "true");
+          localStorage.setItem("ss_email_provider",  conn.provider);
+          localStorage.setItem("ss_email_address",   conn.email);
+          showEmailClient();
+          renderConnectedBadge();
+          loadRealEmails();
+          loadContactSuggestions();
+        } else {
+          emailConnected = false;
+          localStorage.removeItem("ss_email_connected");
+          localStorage.removeItem("ss_email_provider");
+          localStorage.removeItem("ss_email_address");
+          showConnectScreen();
+        }
+      } catch (e) {
+        // API unreachable — fall back to localStorage so offline/dev still works
+        emailConnected    = localStorage.getItem("ss_email_connected") === "true";
+        connectedProvider = localStorage.getItem("ss_email_provider")  || "";
+        connectedEmail    = localStorage.getItem("ss_email_address")   || "";
+        if (emailConnected) {
+          showEmailClient();
+          renderConnectedBadge();
+          loadRealEmails();
+          loadContactSuggestions();
+        } else {
+          showConnectScreen();
+        }
       }
     }
 
+    // ── Load real emails from backend ──────────────────────────────
+    async function loadRealEmails() {
+      var listEl = document.getElementById("email-list");
+      listEl.innerHTML =
+        "<div style='padding:40px;text-align:center;color:var(--ink-40);font-size:13px;'>" +
+        "<div style='margin-bottom:8px;font-size:20px;'>⟳</div>Loading inbox…</div>";
+
+      try {
+        var data = await emailApiFetch("/email/messages?provider=" + connectedProvider);
+
+        EMAILS = (data.messages || []).map(function(m) {
+          return {
+            id:           m.id,
+            folder:       "inbox",
+            unread:       !m.isRead,
+            starred:      m.isStarred,
+            from:         m.from.name || m.from.email,
+            fromEmail:    m.from.email,
+            to:           m.to.length > 0 ? (m.to[0].name || m.to[0].email) : "",
+            toEmail:      m.to.length > 0 ? m.to[0].email : "",
+            subject:      m.subject || "(no subject)",
+            preview:      m.snippet || "",
+            body:         m.bodyText || m.snippet || "",
+            date:         m.date,
+            dateLabel:    formatEmailTime(m.date),
+            linkedContact: m.linkedContactName || "",
+            linkedContactId: m.linkedContactId || "",
+            linkedDeal:   "",
+            linkedDealId: "",
+          };
+        });
+
+        document.getElementById("cnt-inbox").textContent =
+          EMAILS.filter(function(e) { return e.unread; }).length || "";
+
+        renderEmailList();
+      } catch (err) {
+        if (err && err.status === 401) {
+          listEl.innerHTML =
+            "<div style='padding:14px 16px;background:var(--paper-warm);border-bottom:var(--rule);" +
+            "font-size:12px;color:var(--ink-70);display:flex;align-items:center;gap:10px;'>" +
+            "<span>⚠ Your Gmail session expired.</span>" +
+            "<button class='btn sm' onclick='reconnectGmail()'>Reconnect →</button>" +
+            "</div>";
+        } else {
+          listEl.innerHTML =
+            "<div style='padding:40px;text-align:center;color:var(--ink-40);font-size:13px;'>" +
+            "Failed to load emails. Please refresh the page.</div>";
+        }
+      }
+    }
+
+    function reconnectGmail() {
+      var token = localStorage.getItem("ss_token");
+      if (!token) { window.location.href = "index.html"; return; }
+      window.location.href = API_URL + "/email/oauth/gmail/start?token=" + encodeURIComponent(token);
+    }
+
+    function formatEmailTime(dateStr) {
+      if (!dateStr) return "";
+      var d      = new Date(dateStr);
+      var now    = new Date();
+      var diffMs = now - d;
+      var diffH  = diffMs / (1000 * 60 * 60);
+      if (diffH < 24) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      if (diffH < 48) return "Yesterday";
+      var diffD = Math.floor(diffH / 24);
+      if (diffD < 7) return diffD + "d ago";
+      return d.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+
+    // ── Show / hide screens ────────────────────────────────────────
     function showEmailClient() {
       document.getElementById("connect-screen").style.display = "none";
       document.getElementById("email-main").style.display     = "grid";
@@ -904,79 +661,25 @@
       document.getElementById("provider-modal").classList.remove("open");
     }
 
-    // ── Auth consent modal ─────────────────────────────────────────
-    function openAuthModal(provider, label, letter) {
+    function startGmailOAuth() {
+      var token = localStorage.getItem("ss_token");
+      if (!token) { window.location.href = "index.html"; return; }
       closeProviderModal();
-      pendingProvider      = provider;
-      pendingProviderLabel = label;
-
-      // Set provider icon
-      var icon = document.getElementById("auth-provider-icon");
-      icon.textContent  = letter;
-      icon.className    = "auth-provider-icon " + provider;
-
-      // Set title
-      document.getElementById("auth-modal-title").textContent = "Connect " + label;
-
-      // Clear email field
-      document.getElementById("auth-email-input").value = "";
-
-      document.getElementById("auth-modal").classList.add("open");
-      setTimeout(function() { document.getElementById("auth-email-input").focus(); }, 120);
-    }
-
-    function closeAuthModal() {
-      document.getElementById("auth-modal").classList.remove("open");
-      pendingProvider      = null;
-      pendingProviderLabel = "";
-    }
-
-    // ── Authorize access ───────────────────────────────────────────
-    function authorizeAccess() {
-      var email = document.getElementById("auth-email-input").value.trim();
-      if (!email || !email.includes("@")) {
-        document.getElementById("auth-email-input").focus();
-        document.getElementById("auth-email-input").style.borderColor = "#e53e3e";
-        setTimeout(function() {
-          document.getElementById("auth-email-input").style.borderColor = "";
-        }, 1500);
-        return;
-      }
-
-      closeAuthModal();
-
-      // Show connecting spinner
-      document.getElementById("connecting-text").textContent =
-        "Connecting to " + pendingProviderLabel + "…";
-      document.getElementById("connecting-modal").classList.add("open");
-
-      var provider = pendingProvider;
-      var label    = pendingProviderLabel;
-
-      // Simulate OAuth handshake (1.8 s)
-      setTimeout(function() {
-        document.getElementById("connecting-modal").classList.remove("open");
-
-        // Persist connection
-        localStorage.setItem("ss_email_connected", "true");
-        localStorage.setItem("ss_email_provider",  provider);
-        localStorage.setItem("ss_email_address",   email);
-        emailConnected    = true;
-        connectedProvider = provider;
-        connectedEmail    = email;
-
-        showEmailClient();
-        renderEmailList();
-        loadContactSuggestions();
-        renderConnectedBadge();
-
-        if (window.SS_toast) window.SS_toast("Inbox connected", { sub: email });
-      }, 1800);
+      window.location.href = API_URL + "/email/oauth/gmail/start?token=" + encodeURIComponent(token);
     }
 
     // ── Disconnect inbox ───────────────────────────────────────────
-    function disconnectEmail() {
+    async function disconnectEmail() {
       if (!confirm("Disconnect " + connectedEmail + "?\n\nYour CRM data won't be affected.")) return;
+
+      try {
+        await emailApiFetch("/email/oauth/disconnect", {
+          method: "DELETE",
+          body: JSON.stringify({ provider: connectedProvider }),
+        });
+      } catch (e) {
+        // Clean up locally even if the API call fails
+      }
 
       localStorage.removeItem("ss_email_connected");
       localStorage.removeItem("ss_email_provider");
@@ -984,11 +687,251 @@
       emailConnected    = false;
       connectedProvider = "";
       connectedEmail    = "";
+      EMAILS            = [];
 
       document.getElementById("connected-account-badge").classList.remove("visible");
       showConnectScreen();
 
       if (window.SS_toast) window.SS_toast("Inbox disconnected");
+    }
+
+    // ── Folder switching ───────────────────────────────────────────
+    function switchFolder(folder, btn) {
+      currentFolder = folder;
+      document.querySelectorAll(".folder-item").forEach(function(f) { f.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      selectedEmailId = null;
+      showDetailEmpty();
+      renderEmailList();
+    }
+
+    // ── Render email list ──────────────────────────────────────────
+    function renderEmailList(filter) {
+      var list   = document.getElementById("email-list");
+      var emails = EMAILS.filter(function(e) {
+        if (currentFolder === "starred")  return e.starred;
+        if (currentFolder === "deals")    return !!e.linkedDeal;
+        if (currentFolder === "contacts") return !!e.linkedContact;
+        return e.folder === currentFolder;
+      });
+      if (filter) {
+        var q = filter.toLowerCase();
+        emails = emails.filter(function(e) {
+          return (e.from + e.subject + e.preview).toLowerCase().includes(q);
+        });
+      }
+      if (emails.length === 0) {
+        list.innerHTML = "<div style='padding:40px;text-align:center;color:var(--ink-50);font-size:13px;'>No emails in this folder.</div>";
+        return;
+      }
+      list.innerHTML = emails.map(function(e) {
+        var inits    = e.from.split(" ").map(function(w) { return w[0]; }).join("").toUpperCase().slice(0, 2);
+        var linkBadge = e.linkedDeal
+          ? "<span class='email-link-badge'>◇ " + escHtml(e.linkedDeal) + "</span>"
+          : e.linkedContact
+          ? "<span class='email-link-badge'>○ " + escHtml(e.linkedContact) + "</span>"
+          : "";
+        // Use JSON.stringify to safely embed the string ID in the onclick
+        var idJson = JSON.stringify(e.id);
+        return "<div class='email-row" + (e.unread ? " unread" : "") + (e.id === selectedEmailId ? " active" : "") + "' onclick='selectEmail(" + idJson + ")'>" +
+          "<div class='email-avatar' style='background:" + avatarColor(e.from) + ";'>" + inits + "</div>" +
+          "<div style='min-width:0;'>" +
+            "<div class='email-sender'>" + escHtml(e.from) + "</div>" +
+            "<div class='email-subject'>" + escHtml(e.subject) + "</div>" +
+            "<div class='email-preview'>" + escHtml(e.preview) + "</div>" +
+            linkBadge +
+          "</div>" +
+          "<div class='email-meta'>" +
+            "<span class='email-time'>" + e.dateLabel + "</span>" +
+            (e.unread  ? "<span class='email-unread-dot'></span>" : "") +
+            (e.starred ? "<span style='font-size:11px;color:var(--ink-50);'>★</span>" : "") +
+          "</div>" +
+        "</div>";
+      }).join("");
+    }
+
+    function avatarColor(name) {
+      var colors = ["#1d3461","#1b5e37","#5a3e85","#663c1f","#2a4858","#5c3d1e"];
+      var h = 0;
+      for (var i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+      return colors[Math.abs(h) % colors.length];
+    }
+
+    function filterEmails(q) { renderEmailList(q); }
+
+    function markAllRead() {
+      EMAILS.forEach(function(e) { if (e.folder === currentFolder) e.unread = false; });
+      document.getElementById("cnt-inbox").textContent =
+        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
+      renderEmailList();
+    }
+
+    // ── Select & show email ────────────────────────────────────────
+    function selectEmail(id) {
+      var email = EMAILS.find(function(e) { return e.id === id; });
+      if (!email) return;
+      email.unread    = false;
+      selectedEmailId = id;
+      renderEmailList();
+      showDetail(email);
+      document.getElementById("cnt-inbox").textContent =
+        EMAILS.filter(function(e) { return e.folder === "inbox" && e.unread; }).length || "";
+    }
+
+    function showDetail(email) {
+      document.getElementById("detail-empty").style.display = "none";
+      var dc = document.getElementById("detail-content");
+      dc.style.display = "flex";
+
+      document.getElementById("detail-subject").textContent = email.subject;
+
+      var meta =
+        "<span><strong>From</strong>" + escHtml(email.from) + " &lt;" + escHtml(email.fromEmail) + "&gt;</span>" +
+        "<span><strong>To</strong>"   + escHtml(email.to)   + " &lt;" + escHtml(email.toEmail)   + "&gt;</span>" +
+        "<span><strong>Date</strong>" + new Date(email.date).toLocaleString() + "</span>";
+      document.getElementById("detail-meta").innerHTML = meta;
+
+      var bodyHtml = "<div class='email-body'>" + escHtml(email.body) + "</div>";
+
+      var linked = "";
+      if (email.linkedContact) {
+        linked += "<div class='email-linked-card' onclick='void(0)'>" +
+          "<span class='left-icon'>○</span>" +
+          "<div><div style='font-weight:500;'>" + escHtml(email.linkedContact) + "</div>" +
+          "<div class='text-muted' style='font-size:11px;'>Linked contact</div></div>" +
+          "</div>";
+      }
+      if (email.linkedDeal) {
+        linked += "<div class='email-linked-card' onclick='void(0)'>" +
+          "<span class='left-icon'>◇</span>" +
+          "<div><div style='font-weight:500;'>" + escHtml(email.linkedDeal) + "</div>" +
+          "<div class='text-muted' style='font-size:11px;'>Linked deal</div></div>" +
+          "</div>";
+      }
+      if (linked) linked =
+        "<div style='margin-top:var(--space-5);'>" +
+        "<div class='text-muted mb-2' style='font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;'>Linked records</div>" +
+        linked + "</div>";
+
+      document.getElementById("detail-body").innerHTML = bodyHtml + linked;
+    }
+
+    function showDetailEmpty() {
+      document.getElementById("detail-empty").style.display = "flex";
+      var dc = document.getElementById("detail-content");
+      dc.style.display = "none";
+    }
+
+    function escHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    // ── Email actions ──────────────────────────────────────────────
+    function replyEmail() {
+      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
+      if (!email) return;
+      document.getElementById("compose-to").value      = email.fromEmail;
+      document.getElementById("compose-subject").value = "Re: " + email.subject.replace(/^Re:\s*/i, "");
+      document.getElementById("compose-body").value    = "\n\n--- Original message ---\n" + email.body;
+      openCompose();
+    }
+
+    function replyAllEmail() { replyEmail(); }
+
+    function forwardEmail() {
+      var email = EMAILS.find(function(e) { return e.id === selectedEmailId; });
+      if (!email) return;
+      document.getElementById("compose-to").value      = "";
+      document.getElementById("compose-subject").value = "Fwd: " + email.subject.replace(/^Fwd:\s*/i, "");
+      document.getElementById("compose-body").value    = "\n\n--- Forwarded message ---\nFrom: " + email.from + " <" + email.fromEmail + ">\n\n" + email.body;
+      openCompose();
+    }
+
+    function deleteEmail() {
+      if (!selectedEmailId) return;
+      EMAILS          = EMAILS.filter(function(e) { return e.id !== selectedEmailId; });
+      selectedEmailId = null;
+      showDetailEmpty();
+      renderEmailList();
+      if (window.SS_toast) window.SS_toast("Email removed");
+    }
+
+    // ── Compose ────────────────────────────────────────────────────
+    function openCompose() {
+      document.getElementById("compose-overlay").classList.add("open");
+      setTimeout(function() { document.getElementById("compose-to").focus(); }, 100);
+    }
+
+    function closeCompose() {
+      document.getElementById("compose-overlay").classList.remove("open");
+      document.getElementById("compose-to").value      = "";
+      document.getElementById("compose-cc").value      = "";
+      document.getElementById("compose-subject").value = "";
+      document.getElementById("compose-body").value    = "";
+    }
+
+    function minimiseCompose() {
+      document.getElementById("compose-overlay").classList.remove("open");
+    }
+
+    function sendEmail() {
+      var to      = document.getElementById("compose-to").value.trim();
+      var subject = document.getElementById("compose-subject").value.trim();
+      var body    = document.getElementById("compose-body").value.trim();
+      if (!to)      { alert("Please enter a recipient."); return; }
+      if (!subject) { alert("Please enter a subject.");   return; }
+      if (!body)    { alert("Please write a message.");   return; }
+
+      var newEmail = {
+        id: "draft-" + Date.now(), folder: "sent", unread: false, starred: false,
+        from: "Me", fromEmail: connectedEmail,
+        to: to, toEmail: to,
+        subject: subject,
+        preview: body.slice(0, 80) + (body.length > 80 ? "…" : ""),
+        body: body,
+        date: new Date().toISOString(), dateLabel: "Just now",
+        linkedContact: "", linkedContactId: "", linkedDeal: "", linkedDealId: ""
+      };
+      EMAILS.unshift(newEmail);
+      closeCompose();
+      if (window.SS_toast) window.SS_toast("Email sent", { sub: "To: " + to });
+    }
+
+    function saveDraft() {
+      var to      = document.getElementById("compose-to").value.trim();
+      var subject = document.getElementById("compose-subject").value.trim() || "(no subject)";
+      var body    = document.getElementById("compose-body").value.trim();
+
+      var draft = {
+        id: "draft-" + Date.now(), folder: "drafts", unread: false, starred: false,
+        from: "Me", fromEmail: connectedEmail,
+        to: to || "", toEmail: to || "",
+        subject: subject,
+        preview: body.slice(0, 80),
+        body: body,
+        date: new Date().toISOString(), dateLabel: "Draft",
+        linkedContact: "", linkedContactId: "", linkedDeal: "", linkedDealId: ""
+      };
+      EMAILS.unshift(draft);
+      closeCompose();
+      if (window.SS_toast) window.SS_toast("Draft saved");
+    }
+
+    // ── Populate contacts datalist ─────────────────────────────────
+    async function loadContactSuggestions() {
+      try {
+        var data = await SS_API.Contacts.list();
+        var dl   = document.getElementById("contacts-list");
+        (data.contacts || []).forEach(function(c) {
+          if (c.email) {
+            var opt   = document.createElement("option");
+            opt.value = c.email;
+            opt.label = c.firstName + " " + c.lastName;
+            dl.appendChild(opt);
+          }
+        });
+      } catch(e) {}
     }
 
     initEmailPage();
