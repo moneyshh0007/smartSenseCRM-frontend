@@ -105,7 +105,7 @@
     document.getElementById("today-date").textContent = days[now.getDay()] + " · " + now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
 
     var user = SS_API.getUser();
-    document.getElementById("greeting").textContent = greeting + (user ? ", " + (user.firstName || (user.email||"").split("@")[0] || "") + "." : ".");
+    document.getElementById("greeting").textContent = greeting + (user ? ", " + (user.name || (user.email||"").split("@")[0] || "") + "." : ".");
 
     function formatCurrency(amount) {
       if (amount >= 1000000) return "$" + (amount / 1000000).toFixed(1) + "M";

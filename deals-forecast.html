@@ -204,7 +204,7 @@
             cat.deals.forEach(function(d) {
               var prob     = d.probability || STAGE_PROB[d.stage] || 0;
               var weighted = Math.round(Number(d.amount||0) * prob / 100);
-              var owner    = d.owner ? ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim() : "—";
+              var owner    = d.owner ? (d.owner.name || "—") : "—";
               rows.push("<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
                 "<td><span class='" + cat.cls + "'>" + cat.label + "</span></td>" +
                 "<td>" + d.name + "</td>" +
