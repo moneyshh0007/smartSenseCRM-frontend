@@ -225,7 +225,7 @@
             "</td>" +
             "<td style='" + (isOverdue ? "color:var(--ink);font-weight:500;" : "") + "'>" + due + "</td>" +
             "<td><span class='" + badgeClass + "'>" + priority.toUpperCase() + "</span></td>" +
-            "<td>—</td>" +
+            "<td>" + (t.owner ? t.owner.name : "—") + "</td>" +
             "</tr>";
         }).join("");
 
