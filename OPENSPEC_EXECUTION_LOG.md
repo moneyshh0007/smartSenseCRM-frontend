@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 17)
+**Last updated:** 17 Jun 2026 (Phase 18)
 
 ---
 
@@ -41,6 +41,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 15 | Dedup + Settings Workspace | Client-side duplicate detection; settings-workspace populated from auth | ✅ Complete |
 | 16 | Audit Log | Backend GET /audit-logs route; settings-audit-log.html wired with KPIs + client-side filter | ✅ Complete |
 | 17 | Companies Pipeline Value | Fetch deals in parallel with companies; show open pipeline per company in table + KPI | ✅ Complete |
+| 18 | Contact + Company Detail QA | Fix user name bug in timelines; server-side contactId filtering; remove double contact fetch | ✅ Complete |
 
 ---
 
