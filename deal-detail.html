@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="page-title">Deal · SmartSense CRM</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    .dd-edit-btn { background:none; border:none; font-size:11px; color:var(--ink-40); cursor:pointer; padding:0; font-family:var(--body); }
+    .dd-edit-btn:hover { color:var(--ink); text-decoration:underline; }
+    .details-card-head { display:flex; justify-content:space-between; align-items:center; }
+    .notes-toolbar { padding:12px var(--space-4,16px); border-bottom:var(--rule); display:flex; justify-content:flex-end; }
+    .note-item { padding:14px var(--space-4,16px); border-bottom:var(--rule); font-size:13px; }
+    .note-item-date { font-family:var(--mono); font-size:10px; color:var(--ink-40); margin-bottom:4px; }
+    .note-item-body { color:var(--ink-70); line-height:1.5; white-space:pre-wrap; }
+  </style>
 </head>
 <body data-page="deals" class="">
   <div class="app">
@@ -28,6 +37,8 @@
     <div class="row gap-2">
       <button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-activity')">Log activity</button>
       <button class="btn" id="stage-btn">Stage: — ▾</button>
+      <button class="btn" id="mark-lost-btn" onclick="openMarkLost()" style="display:none;">Mark Lost</button>
+      <button class="btn primary" id="mark-won-btn" onclick="markDealWon()" style="display:none;">Mark Won ✓</button>
     </div>
   </div>
 
@@ -94,13 +105,21 @@
 
       <!-- Notes tab -->
       <div class="tab-pane" data-pane="notes">
-        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this deal.</div>
+        <div class="notes-toolbar">
+          <button class="btn sm" onclick="openAddNote()">+ Add note</button>
+        </div>
+        <div id="notes-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading notes…</div>
+        </div>
       </div>
     </div>
 
     <div class="meta-aside">
       <div class="card">
-        <div class="label">Deal details</div>
+        <div class="details-card-head">
+          <div class="label">Deal details</div>
+          <button class="dd-edit-btn" onclick="openEditDeal()">Edit</button>
+        </div>
         <dl class="kv-grid mt-3">
           <dt>Pipeline</dt><dd id="dd-pipeline">—</dd>
           <dt>Stage</dt><dd id="dd-stage">—</dd>
@@ -155,7 +174,11 @@
       throw new Error("No deal ID");
     }
 
+    // ── State ────────────────────────────────────────────────────────────
+    var DEAL = {};
+
     // ── Helpers ──────────────────────────────────────────────────────────
+    function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
     function fmtDate(iso) {
       if (!iso) return "—";
       return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
@@ -231,6 +254,13 @@
         document.getElementById("dd-close").textContent    = fmtDate(d.closeDate || d.expectedCloseDate);
         document.getElementById("dd-owner").textContent    = d.owner ? ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim() : "—";
         document.getElementById("dd-created").textContent  = fmtDate(d.createdAt);
+
+        DEAL = d;
+        var closedStages = ["Closed Won", "Closed Lost"];
+        var isOpen = closedStages.indexOf(d.stage) === -1;
+        document.getElementById("mark-won-btn").style.display  = isOpen ? "" : "none";
+        document.getElementById("mark-lost-btn").style.display = isOpen ? "" : "none";
+
         if (d.forecastCategory) {
           document.getElementById("dd-forecast").innerHTML = "<span class='badge solid'>" + d.forecastCategory.toUpperCase() + "</span>";
         }
@@ -311,11 +341,11 @@
     // ── Load activities for this deal ────────────────────────────────────
     async function loadActivities() {
       try {
-        var raw  = await SS_API.Activities.list();
+        var raw  = await SS_API.Activities.list({ dealId: dealId });
         var all  = (raw.activities || raw.data || raw || []);
         var did  = String(dealId);
         var acts = all.filter(function(a) {
-          return a.dealId && String(a.dealId) === did;
+          return a.type !== "note";
         });
 
         // Update last-activity KPI
@@ -410,10 +440,176 @@
       }
     }
 
+    // ── Mark Won ─────────────────────────────────────────────────────────
+    async function markDealWon() {
+      if (!confirm("Mark this deal as Closed Won?")) return;
+      try {
+        await SS_API.Deals.markWon(dealId);
+        document.getElementById("mark-won-btn").style.display  = "none";
+        document.getElementById("mark-lost-btn").style.display = "none";
+        document.getElementById("stage-btn").textContent = "Stage: Closed Won ▾";
+        document.getElementById("dd-stage").textContent  = "Closed Won";
+        document.getElementById("kpi-prob").textContent  = "100%";
+        document.getElementById("dd-prob").textContent   = "100%";
+        var banner = document.createElement("div");
+        banner.style.cssText = "background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;";
+        banner.textContent = "Deal marked as Closed Won";
+        var kpiGrid = document.querySelector(".kpi-grid");
+        if (kpiGrid) kpiGrid.insertAdjacentElement("afterend", banner);
+        DEAL.stage = "Closed Won";
+      } catch(err) {
+        console.error("markWon:", err);
+        alert("Could not mark deal as won.");
+      }
+    }
+
+    // ── Mark Lost ─────────────────────────────────────────────────────────
+    function openMarkLost() {
+      if (!window.SS_openSlide) return;
+      SS_openSlide({
+        title: "Mark Deal Lost",
+        body: '<div class="field"><label>Reason for losing<span class="field-required-marker">*</span></label>' +
+              '<textarea id="ml-reason" rows="3" placeholder="e.g. went with competitor, budget cut…"></textarea></div>',
+        primaryLabel: "Mark Lost",
+        onSave: function(panel) {
+          var reason = ((panel.querySelector("#ml-reason") || {}).value || "").trim();
+          if (!reason) { alert("Please enter a reason."); return false; }
+          SS_API.Deals.markLost(dealId, reason)
+            .then(function() {
+              document.getElementById("mark-won-btn").style.display  = "none";
+              document.getElementById("mark-lost-btn").style.display = "none";
+              document.getElementById("stage-btn").textContent = "Stage: Closed Lost ▾";
+              document.getElementById("dd-stage").textContent  = "Closed Lost";
+              document.getElementById("kpi-prob").textContent  = "0%";
+              document.getElementById("dd-prob").textContent   = "0%";
+              var banner = document.createElement("div");
+              banner.style.cssText = "background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;";
+              banner.textContent = "Deal marked as Closed Lost — " + reason;
+              var kpiGrid = document.querySelector(".kpi-grid");
+              if (kpiGrid) kpiGrid.insertAdjacentElement("afterend", banner);
+              DEAL.stage = "Closed Lost";
+            })
+            .catch(function(err) { console.error("markLost:", err); alert("Could not mark deal as lost."); });
+        }
+      });
+    }
+
+    // ── Edit Deal ────────────────────────────────────────────────────────
+    function openEditDeal() {
+      if (!window.SS_openSlide) return;
+      var d = DEAL;
+      var closeDateVal = (d.closeDate || d.expectedCloseDate || "").slice(0, 10);
+      var stageOpts = ["Discovery","Qualified","Proposal","Negotiation","Closed Won","Closed Lost"].map(function(s) {
+        return '<option value="' + s + '"' + (s === d.stage ? ' selected' : '') + '>' + s + '</option>';
+      }).join("");
+      SS_openSlide({
+        title: "Edit Deal",
+        body: '<div class="field"><label>Deal name</label><input type="text" id="ed-name" value="' + esc(d.name||"") + '" /></div>' +
+              '<div class="field-row">' +
+                '<div class="field"><label>Amount ($)</label><input type="number" id="ed-amount" value="' + (d.amount||"") + '" /></div>' +
+                '<div class="field"><label>Close date</label><input type="date" id="ed-closedate" value="' + esc(closeDateVal) + '" /></div>' +
+              '</div>' +
+              '<div class="field"><label>Stage</label><select id="ed-stage">' + stageOpts + '</select></div>' +
+              '<div class="field"><label>Pipeline</label><input type="text" id="ed-pipeline" value="' + esc(d.pipeline||"") + '" /></div>',
+        primaryLabel: "Save changes",
+        onSave: function(panel) {
+          var patch = {};
+          var name      = ((panel.querySelector("#ed-name")      || {}).value || "").trim();
+          var amount    = ((panel.querySelector("#ed-amount")    || {}).value || "");
+          var stage     = ((panel.querySelector("#ed-stage")     || {}).value || "");
+          var closeDate = ((panel.querySelector("#ed-closedate") || {}).value || "");
+          var pipeline  = ((panel.querySelector("#ed-pipeline")  || {}).value || "").trim();
+          if (name)      patch.name      = name;
+          if (amount)    patch.amount    = Number(amount);
+          if (stage)     patch.stage     = stage;
+          if (closeDate) patch.closeDate = closeDate;
+          if (pipeline)  patch.pipeline  = pipeline;
+          SS_API.Deals.update(dealId, patch)
+            .then(function() {
+              if (patch.name) {
+                document.getElementById("deal-name").textContent       = patch.name;
+                document.getElementById("breadcrumb-name").textContent = patch.name;
+                document.getElementById("page-title").textContent      = patch.name + " · SmartSense CRM";
+                DEAL.name = patch.name;
+              }
+              if (patch.amount) {
+                document.getElementById("kpi-amount").textContent = fmt$(patch.amount);
+                document.getElementById("dd-amount").textContent  = fmt$(patch.amount);
+                DEAL.amount = patch.amount;
+              }
+              if (patch.stage) {
+                document.getElementById("dd-stage").textContent  = patch.stage;
+                document.getElementById("stage-btn").textContent = "Stage: " + patch.stage + " ▾";
+                var prob = STAGE_PROB[patch.stage] !== undefined ? STAGE_PROB[patch.stage] : (DEAL.probability || 0);
+                document.getElementById("kpi-prob").textContent = prob + "%";
+                document.getElementById("dd-prob").textContent  = prob + "%";
+                var closedStages = ["Closed Won", "Closed Lost"];
+                var isOpen = closedStages.indexOf(patch.stage) === -1;
+                document.getElementById("mark-won-btn").style.display  = isOpen ? "" : "none";
+                document.getElementById("mark-lost-btn").style.display = isOpen ? "" : "none";
+                DEAL.stage = patch.stage;
+              }
+              if (patch.closeDate) {
+                document.getElementById("dd-close").textContent = fmtDate(patch.closeDate);
+                DEAL.closeDate = patch.closeDate;
+              }
+              if (patch.pipeline) {
+                document.getElementById("dd-pipeline").textContent = patch.pipeline;
+                DEAL.pipeline = patch.pipeline;
+              }
+            })
+            .catch(function(err) { console.error("editDeal:", err); alert("Could not save changes."); });
+        }
+      });
+    }
+
+    // ── Notes ─────────────────────────────────────────────────────────────
+    function openAddNote() {
+      if (!window.SS_openSlide) return;
+      SS_openSlide({
+        title: "Add note",
+        body: '<div class="field"><label>Note</label>' +
+              '<textarea id="note-body" rows="5" placeholder="Add a note about this deal…" style="min-height:120px;"></textarea></div>',
+        primaryLabel: "Save note",
+        onSave: function(panel) {
+          var body = ((panel.querySelector("#note-body") || {}).value || "").trim();
+          if (!body) { alert("Please write a note."); return false; }
+          SS_API.Activities.create({ type: "note", title: "Note", body: body, dealId: dealId })
+            .then(function() { loadNotes(); })
+            .catch(function(err) { console.error("addNote:", err); });
+        }
+      });
+    }
+
+    async function loadNotes() {
+      var listEl = document.getElementById("notes-list");
+      if (!listEl) return;
+      try {
+        var raw   = await SS_API.Activities.list({ dealId: dealId });
+        var all   = (raw.activities || raw.data || raw || []);
+        var notes = all.filter(function(a) { return a.type === "note"; });
+        if (notes.length === 0) {
+          listEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No notes yet — add the first note about this deal.</div>";
+          return;
+        }
+        var sorted = notes.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        listEl.innerHTML = sorted.map(function(n) {
+          return "<div class='note-item'>" +
+            "<div class='note-item-date'>" + fmtDate(n.createdAt) + "</div>" +
+            "<div class='note-item-body'>" + esc(n.body || n.title || "") + "</div>" +
+            "</div>";
+        }).join("");
+      } catch(err) {
+        console.error("loadNotes:", err);
+        listEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>Could not load notes.</div>";
+      }
+    }
+
     // ── Boot ─────────────────────────────────────────────────────────────
     loadDeal();
     loadActivities();
     loadContacts();
+    loadNotes();
   </script>
   <script src="assets/chrome.js"></script>
 </body>

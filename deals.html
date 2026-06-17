@@ -39,13 +39,13 @@
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Open pipeline</div>
-      <div class="kpi-value">$487k</div>
+      <div class="kpi-value" id="kpi-pipeline">—</div>
       <div class="kpi-delta">Active stages</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Total deals</div>
-      <div class="kpi-value">47</div>
-      <div class="kpi-delta">Across 3 pipelines</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-delta" id="kpi-total-sub">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Stalled deals</div>
@@ -54,7 +54,7 @@
     </div>
     <div class="kpi">
       <div class="kpi-label">Closing this month</div>
-      <div class="kpi-value">8</div>
+      <div class="kpi-value" id="kpi-closing">—</div>
       <div class="kpi-delta">By expected close date</div>
     </div>
   </div>
@@ -302,17 +302,33 @@
 
         wireKanbanDragDrop();
 
-        // ── Compute stalled count and sync KPI tile + sidebar ────────────
+        // ── Compute all KPIs from real data ──────────────────────────────
         var activeStages = ["Discovery", "Qualified", "Proposal", "Negotiation"];
-        var stalledCount = data.deals.filter(function(d) {
-          if (activeStages.indexOf(d.stage) === -1) return false;
+        var openDeals    = data.deals.filter(function(d) { return activeStages.indexOf(d.stage) !== -1; });
+        var pipeline     = openDeals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+        var stalledCount = openDeals.filter(function(d) {
           if (!d.updatedAt) return false;
           return (Date.now() - new Date(d.updatedAt).getTime()) / 86400000 >= 21;
         }).length;
+        var now      = new Date();
+        var closingThisMonth = data.deals.filter(function(d) {
+          var cd = d.closeDate || d.expectedCloseDate;
+          if (!cd) return false;
+          var dt = new Date(cd);
+          return dt.getFullYear() === now.getFullYear() && dt.getMonth() === now.getMonth()
+            && activeStages.indexOf(d.stage) !== -1;
+        }).length;
 
-        // Update KPI tile
-        var kpiStalled = document.getElementById("kpi-stalled");
-        if (kpiStalled) kpiStalled.textContent = stalledCount;
+        // Format pipeline value
+        var pipelineStr = pipeline >= 1000000
+          ? "$" + (pipeline / 1000000).toFixed(1) + "M"
+          : pipeline >= 1000 ? "$" + Math.round(pipeline / 1000) + "k" : "$" + pipeline;
+
+        document.getElementById("kpi-pipeline").textContent  = pipelineStr;
+        document.getElementById("kpi-total").textContent     = data.total;
+        document.getElementById("kpi-total-sub").textContent = openDeals.length + " open · " + (data.deals.filter(function(d){ return d.stage === "Closed Won"; }).length) + " won";
+        document.getElementById("kpi-stalled").textContent   = stalledCount;
+        document.getElementById("kpi-closing").textContent   = closingThisMonth;
 
 
       } catch (err) {
