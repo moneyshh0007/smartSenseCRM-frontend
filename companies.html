@@ -38,9 +38,9 @@
       <div class="kpi-delta">All records</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">With open deals</div>
-      <div class="kpi-value" id="kpi-with-deals">—</div>
-      <div class="kpi-delta" id="kpi-with-deals-pct">—</div>
+      <div class="kpi-label">Total pipeline</div>
+      <div class="kpi-value" id="kpi-pipeline">—</div>
+      <div class="kpi-delta" id="kpi-pipeline-sub">Open deal value</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Total contacts</div>
@@ -130,6 +130,13 @@
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
     var _allCo = [], _coFilters = [];
+
+    function fmtCurrency(n) {
+      n = Number(n || 0);
+      if (n >= 1000000) return "$" + (n/1000000).toFixed(1) + "M";
+      if (n >= 1000)    return "$" + Math.round(n/1000) + "k";
+      return "$" + n;
+    }
     var CO_OPS = { name:["contains","equals","does not contain"], industry:["is","is not"], size:["equals","greater than","less than"], deals:["equals","greater than","less than"] };
 
     function coToggleFilter(e) {
@@ -188,7 +195,7 @@
           if (f.field === "name") { var n=(c.name||"").toLowerCase(); return op==="contains"?n.includes(v):op==="equals"?n===v:!n.includes(v); }
           if (f.field === "industry") { return op==="is not" ? (c.industry||"")!==f.value : (c.industry||"")===f.value; }
           if (f.field === "size") { var s=Number(c.size||0),fv=Number(f.value); return op==="greater than"?s>fv:op==="less than"?s<fv:s===fv; }
-          if (f.field === "deals") { var d=c._count?c._count.deals:0,dv=Number(f.value); return op==="greater than"?d>dv:op==="less than"?d<dv:d===dv; }
+          if (f.field === "deals") { var d=c._pipeline?c._pipeline.count:0,dv=Number(f.value); return op==="greater than"?d>dv:op==="less than"?d<dv:d===dv; }
           return true;
         });
       });
@@ -203,8 +210,11 @@
         var domain = c.domain ? "<div class='text-muted' style='font-size:11px;'>" + c.domain + "</div>" : "";
         var industry = c.industry || "—";
         var size = c.size ? c.size.toLocaleString() : "—";
-        var contacts = c._count ? (c._count.contacts || 0) : 0;
-        var deals    = c._count ? (c._count.deals    || 0) : 0;
+        var contacts  = c._count ? (c._count.contacts || 0) : 0;
+        var pipeline  = c._pipeline || { count: 0, value: 0 };
+        var dealsCell = pipeline.count > 0
+          ? pipeline.count + " · " + fmtCurrency(pipeline.value)
+          : (c._count ? (c._count.deals || 0) : 0);
         var added    = c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" }) : "—";
         return "<tr style='cursor:pointer;' onclick=\"window.location.href='company-detail?id="+c.id+"'\">" +
           "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
@@ -212,14 +222,33 @@
           "<td>" + industry + "</td>" +
           "<td>" + size + "</td>" +
           "<td>" + contacts + "</td>" +
-          "<td>" + deals + "</td>" +
+          "<td>" + dealsCell + "</td>" +
           "<td style='font-size:12px;color:var(--ink-40);'>" + added + "</td></tr>";
       }).join("");
     }
 
     async function loadCompanies() {
       try {
-        const data = await SS_API.Companies.list();
+        var results = await Promise.all([
+          SS_API.Companies.list(),
+          SS_API.Deals.list(),
+        ]);
+        var data  = results[0];
+        var dRaw  = results[1];
+        var deals = dRaw.deals || dRaw.data || dRaw || [];
+
+        // Build pipeline map: companyId → { count, value } for open deals only
+        var pipelineMap = {};
+        var closedStages = ["Closed Won", "Closed Lost"];
+        deals.forEach(function(d) {
+          var cid = d.company ? String(d.company.id) : (d.companyId ? String(d.companyId) : null);
+          if (!cid) return;
+          if (closedStages.indexOf(d.stage) !== -1) return;
+          if (!pipelineMap[cid]) pipelineMap[cid] = { count: 0, value: 0 };
+          pipelineMap[cid].count++;
+          pipelineMap[cid].value += Number(d.amount || 0);
+        });
+
         const sub = document.getElementById("companies-sub");
         var seen = new Map();
         data.companies.forEach(function(c) {
@@ -229,19 +258,26 @@
           if (!existing || score > existingScore) seen.set(key, c);
         });
         _allCo = Array.from(seen.values());
+
+        // Attach pipeline data to each company
+        _allCo.forEach(function(c) {
+          c._pipeline = pipelineMap[String(c.id)] || { count: 0, value: 0 };
+        });
+
         sub.textContent = _allCo.length + " Companies · Live from database";
 
-        // Update KPIs
-        var withDeals   = _allCo.filter(function(c) { return c._count && c._count.deals > 0; }).length;
-        var pct         = _allCo.length > 0 ? Math.round(withDeals / _allCo.length * 100) : 0;
-        var totalConts  = _allCo.reduce(function(s, c) { return s + (c._count ? (c._count.contacts || 0) : 0); }, 0);
-        var thirtyDays  = Date.now() - 30 * 86400000;
-        var newMonth    = _allCo.filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() > thirtyDays; }).length;
-        document.getElementById("kpi-total").textContent         = _allCo.length.toLocaleString();
-        document.getElementById("kpi-with-deals").textContent    = withDeals.toLocaleString();
-        document.getElementById("kpi-with-deals-pct").textContent = pct + "% of companies";
-        document.getElementById("kpi-contacts").textContent      = totalConts.toLocaleString();
-        document.getElementById("kpi-new-month").textContent     = newMonth.toLocaleString();
+        // KPIs
+        var withOpenDeals = _allCo.filter(function(c) { return c._pipeline.count > 0; }).length;
+        var totalPipeline = _allCo.reduce(function(s, c) { return s + c._pipeline.value; }, 0);
+        var totalConts    = _allCo.reduce(function(s, c) { return s + (c._count ? (c._count.contacts || 0) : 0); }, 0);
+        var thirtyDays    = Date.now() - 30 * 86400000;
+        var newMonth      = _allCo.filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() > thirtyDays; }).length;
+
+        document.getElementById("kpi-total").textContent        = _allCo.length.toLocaleString();
+        document.getElementById("kpi-pipeline").textContent     = fmtCurrency(totalPipeline);
+        document.getElementById("kpi-pipeline-sub").textContent = withOpenDeals + " companies with open deals";
+        document.getElementById("kpi-contacts").textContent     = totalConts.toLocaleString();
+        document.getElementById("kpi-new-month").textContent    = newMonth.toLocaleString();
 
         coRender(coFiltered());
       } catch (err) {
