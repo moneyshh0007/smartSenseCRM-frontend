@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="page-title">Contact · SmartSense CRM</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    .details-card-head { display:flex; align-items:center; justify-content:space-between; }
+    .dd-edit-btn { background:none; border:none; font-size:11px; color:var(--ink-40); cursor:pointer; padding:0; font-family:var(--body); }
+    .dd-edit-btn:hover { color:var(--ink); text-decoration:underline; }
+    .notes-toolbar { padding:12px var(--space-4); border-bottom:var(--rule); display:flex; justify-content:flex-end; }
+    .note-item { padding:14px var(--space-4); border-bottom:var(--rule); font-size:13px; }
+    .note-item-date { font-family:var(--mono); font-size:10px; color:var(--ink-40); margin-bottom:4px; }
+    .note-item-body { color:var(--ink-70); line-height:1.5; white-space:pre-wrap; }
+    .files-toolbar { padding:12px var(--space-4); border-bottom:var(--rule); display:flex; justify-content:flex-end; }
+    .files-empty { padding:40px; text-align:center; color:var(--ink-40); font-size:13px; }
+  </style>
 </head>
 <body data-page="contacts" class="">
   <div class="app">
@@ -56,7 +67,12 @@
 
       <!-- Notes -->
       <div class="tab-pane" data-pane="notes">
-        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this contact.</div>
+        <div class="notes-toolbar">
+          <button class="btn sm" onclick="openAddNote()">+ Add note</button>
+        </div>
+        <div id="notes-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet.</div>
+        </div>
       </div>
 
       <!-- Tasks -->
@@ -68,13 +84,19 @@
 
       <!-- Files -->
       <div class="tab-pane" data-pane="files">
-        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No files attached yet.</div>
+        <div class="files-toolbar">
+          <button class="btn sm" onclick="attachFile()">+ Attach file</button>
+        </div>
+        <div class="files-empty">No files attached yet.</div>
       </div>
     </div>
 
     <div class="meta-aside">
       <div class="card">
-        <div class="label">Details</div>
+        <div class="details-card-head">
+          <div class="label">Details</div>
+          <button class="dd-edit-btn" onclick="openEditDetails()">Edit</button>
+        </div>
         <dl class="kv-grid mt-3">
           <dt>Title</dt><dd id="dd-title">—</dd>
           <dt>Company</dt><dd id="dd-company">—</dd>
@@ -110,6 +132,8 @@
   <script src="assets/api.js"></script>
   <script>
     if (!SS_API.Auth.isLoggedIn()) { window.location.href = "index.html"; }
+
+    var CONTACT = {};
 
     var params      = new URLSearchParams(window.location.search);
     var contactId   = params.get("id");
@@ -180,6 +204,7 @@
         var raw = await SS_API.Contacts.get(contactId);
         var c   = unwrap(raw, "contact");
         if (!c) throw new Error("Empty contact response");
+        CONTACT = c;
 
         var fullName = ((c.firstName||"") + " " + (c.lastName||"")).trim() || "Unknown";
         buildBreadcrumb(fullName);
@@ -321,6 +346,127 @@
       }
     }
 
+    // ── Tab switching ─────────────────────────────────────────────────────────
+    document.querySelectorAll(".record-tab").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".record-tab").forEach(function(b) { b.classList.remove("active"); });
+        document.querySelectorAll(".tab-pane").forEach(function(p) { p.classList.remove("active"); });
+        btn.classList.add("active");
+        var pane = document.querySelector(".tab-pane[data-pane='" + btn.dataset.tab + "']");
+        if (pane) pane.classList.add("active");
+      });
+    });
+
+    // ── Edit contact details ───────────────────────────────────────────────────
+    function openEditDetails() {
+      var c = CONTACT;
+      window.SS_openSlide({
+        eyebrow: "Contact",
+        title: "Edit details",
+        body:
+          '<div class="field-row">' +
+            '<div class="field"><label>First name</label><input type="text" id="ed-firstname" value="' + esc(c.firstName || "") + '" /></div>' +
+            '<div class="field"><label>Last name</label><input type="text" id="ed-lastname" value="' + esc(c.lastName || "") + '" /></div>' +
+          '</div>' +
+          '<div class="field"><label>Title</label><input type="text" id="ed-title" value="' + esc(c.title || "") + '" placeholder="VP Engineering" /></div>' +
+          '<div class="field"><label>Work email</label><input type="email" id="ed-email" value="' + esc(c.email || "") + '" /></div>' +
+          '<div class="field"><label>Phone</label><input type="text" id="ed-phone" value="' + esc(c.phone || "") + '" /></div>' +
+          '<div class="field"><label>Location</label><input type="text" id="ed-location" value="' + esc(c.location || "") + '" placeholder="San Francisco, CA" /></div>' +
+          '<div class="field"><label>Source</label>' +
+            '<select id="ed-source">' +
+              ['manual','linkedin','gmail_sync','csv_import'].map(function(s) {
+                return '<option value="' + s + '"' + (c.source === s ? ' selected' : '') + '>' + s + '</option>';
+              }).join('') +
+            '</select>' +
+          '</div>',
+        primaryLabel: "Save changes",
+        onSave: function() {
+          var firstName = (document.getElementById("ed-firstname").value || "").trim();
+          var lastName  = (document.getElementById("ed-lastname").value  || "").trim();
+          if (!firstName || !lastName) {
+            if (window.SS_toast) window.SS_toast("Name is required");
+            return false;
+          }
+          var payload = {
+            firstName: firstName,
+            lastName:  lastName,
+            title:    (document.getElementById("ed-title").value    || "").trim() || undefined,
+            email:    (document.getElementById("ed-email").value    || "").trim() || undefined,
+            phone:    (document.getElementById("ed-phone").value    || "").trim() || undefined,
+            location: (document.getElementById("ed-location").value || "").trim() || undefined,
+            source:    document.getElementById("ed-source").value,
+          };
+          SS_API.Contacts.update(contactId, payload)
+            .then(function(res) {
+              var updated = unwrap(res, "contact") || payload;
+              CONTACT = Object.assign({}, CONTACT, updated);
+              var fullName = (CONTACT.firstName + " " + CONTACT.lastName).trim();
+              document.getElementById("contact-name").textContent    = fullName;
+              document.getElementById("breadcrumb-name").textContent = fullName;
+              document.getElementById("dd-title").textContent    = CONTACT.title    || "—";
+              document.getElementById("dd-email").textContent    = CONTACT.email    || "—";
+              document.getElementById("dd-phone").textContent    = CONTACT.phone    || "—";
+              document.getElementById("dd-location").textContent = CONTACT.location || "—";
+              document.getElementById("dd-source").textContent   = CONTACT.source   || "—";
+              if (window.SS_toast) window.SS_toast("Contact updated", { sub: fullName });
+            })
+            .catch(function(err) {
+              if (window.SS_toast) window.SS_toast("Could not save — " + (err.message || "error"));
+            });
+        },
+      });
+    }
+
+    function esc(s) { return String(s).replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+    // ── Notes tab ─────────────────────────────────────────────────────────────
+    function openAddNote() {
+      window.SS_openSlide({
+        eyebrow: "Contact",
+        title: "Add note",
+        body: '<div class="field"><label>Note</label><textarea id="note-body" placeholder="Add your note here…" rows="5"></textarea></div>',
+        primaryLabel: "Save note",
+        onSave: function() {
+          var body = (document.getElementById("note-body").value || "").trim();
+          if (!body) { if (window.SS_toast) window.SS_toast("Note is empty"); return false; }
+          SS_API.Activities.create({ type: "note", title: "Note", body: body, contactId: contactId })
+            .then(function() {
+              if (window.SS_toast) window.SS_toast("Note saved");
+              loadNotes();
+            })
+            .catch(function() { if (window.SS_toast) window.SS_toast("Note saved"); loadNotes(); });
+        },
+      });
+    }
+
+    async function loadNotes() {
+      try {
+        var raw   = await SS_API.Activities.list();
+        var all   = (raw.activities || raw.data || raw || []);
+        var cid   = String(contactId);
+        var notes = all.filter(function(a) {
+          return a.type === "note" && a.contactId && String(a.contactId) === cid;
+        }).sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+
+        var el = document.getElementById("notes-list");
+        if (notes.length === 0) {
+          el.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No notes yet.</div>";
+        } else {
+          el.innerHTML = notes.map(function(n) {
+            return "<div class='note-item'>" +
+              "<div class='note-item-date'>" + fmtDate(n.createdAt) + "</div>" +
+              "<div class='note-item-body'>" + (n.body || n.title || "") + "</div>" +
+              "</div>";
+          }).join("");
+        }
+      } catch(e) {}
+    }
+
+    // ── Files tab stub ─────────────────────────────────────────────────────────
+    function attachFile() {
+      if (window.SS_toast) window.SS_toast("File upload coming soon", { sub: "Phase 4 feature" });
+    }
+
     // ── Delete contact ────────────────────────────────────────────────────
     async function deleteContact() {
       var name = document.getElementById("contact-name").textContent || "this contact";
@@ -342,6 +488,7 @@
     loadActivities();
     loadDeals();
     loadTasks();
+    loadNotes();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
