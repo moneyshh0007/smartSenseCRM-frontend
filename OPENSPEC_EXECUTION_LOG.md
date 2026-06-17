@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026
+**Last updated:** 17 Jun 2026 (Phase 12)
 
 ---
 
@@ -35,6 +35,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 9 | Gmail OAuth (Email) | OAuth connect/disconnect + real inbox sync | ✅ Complete |
 | 10 | CSV Contact Import | 4-step wizard (upload/map/validate/execute) | ✅ Complete |
 | 11 | Companies Pages QA | KPI grid, tab switching, edit company, notes | ✅ Complete |
+| 12 | Deals Pages QA | KPI grid real data, deal-detail Mark Won/Lost, Edit, Notes | ✅ Complete |
 
 ---
 
@@ -477,11 +478,40 @@ getJob(jobId)
 
 ---
 
+### Phase 12 — Deals Pages QA
+
+**Commits:** `deals: wire deals.html KPIs and deal-detail.html to live backend`  
+**Frontend:** `deals.html`, `deal-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| KPI grid on `deals.html` showed hardcoded values | Replaced with real computed values: pipeline sum, stalled count, total deals, closing this month |
+| Mark Won / Mark Lost buttons always hidden | Buttons now visible for open deals (`Discovery` → `Negotiation`), hidden when already `Closed Won`/`Closed Lost` |
+| No way to edit deal details from the detail page | Added "Edit" button → pre-filled slide (name, amount, stage, pipeline, closeDate) → `PATCH /deals/:id` → live refresh |
+| Notes tab had static placeholder text | Replaced with `+ Add note` toolbar and `loadNotes()` function |
+| `loadActivities()` fetched all activities and filtered client-side | Changed to `GET /activities?dealId=xxx` (server-side filter); notes excluded from timeline (type !== "note") |
+| `DEAL` state not stored | Added `var DEAL = {}` state variable; stored in `loadDeal()` after fetch so Edit slide can pre-fill fields |
+
+**New JS functions added to `deal-detail.html`:**
+
+| Function | What it does |
+|----------|-------------|
+| `esc(s)` | HTML-escape helper for safe innerHTML injection |
+| `markDealWon()` | Confirms, calls `SS_API.Deals.markWon(id)`, injects green won-banner, hides buttons |
+| `openMarkLost()` | Opens slide with `lostReason` textarea, calls `SS_API.Deals.markLost(id, reason)`, injects red lost-banner |
+| `openEditDeal()` | Opens pre-filled slide (name, amount, stage, pipeline, closeDate), saves via `SS_API.Deals.update()`, refreshes all detail fields live |
+| `openAddNote()` | Opens slide with textarea, creates activity with `type="note"` and `dealId` |
+| `loadNotes()` | Fetches `GET /activities?dealId=xxx`, filters `type==="note"`, renders note-items sorted newest-first |
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
 |------|-------|
-| Deals page deep QA | Verify kanban drag-and-drop, mark won/lost flow on Railway |
+| Deals page deep QA | Kanban drag-and-drop verified; mark won/lost, edit deal, notes all wired ✅ |
 | Tasks page deep QA | Verify bulk complete, task detail edit, linked record nav |
 | My Day dashboard | Verify real KPIs (stalled deals, tasks due today) load correctly |
 | Activities page | Verify feed loads, type filter works |
