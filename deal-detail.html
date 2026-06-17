@@ -35,7 +35,7 @@
       <div class="page-sub" id="deal-sub"></div>
     </div>
     <div class="row gap-2">
-      <button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-activity')">Log activity</button>
+      <button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-activity', { dealId: dealId })">Log activity</button>
       <button class="btn" id="stage-btn">Stage: — ▾</button>
       <button class="btn" id="mark-lost-btn" onclick="openMarkLost()" style="display:none;">Mark Lost</button>
       <button class="btn primary" id="mark-won-btn" onclick="markDealWon()" style="display:none;">Mark Won ✓</button>
@@ -70,6 +70,7 @@
       <div class="record-tab-bar">
         <button class="record-tab active" data-tab="activity" onclick="switchDealTab('activity',this)">Activity</button>
         <button class="record-tab" data-tab="contacts" id="tab-contacts-btn" onclick="switchDealTab('contacts',this)">Contacts</button>
+        <button class="record-tab" data-tab="tasks" id="tab-tasks-btn" onclick="switchDealTab('tasks',this)">Tasks</button>
         <button class="record-tab" data-tab="files" onclick="switchDealTab('files',this)">Files</button>
         <button class="record-tab" data-tab="notes" onclick="switchDealTab('notes',this)">Notes</button>
       </div>
@@ -89,6 +90,16 @@
             <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-50);">Loading…</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Tasks tab -->
+      <div class="tab-pane" data-pane="tasks">
+        <div class="notes-toolbar">
+          <button class="btn sm" onclick="if(window.SS_openSlide)window.SS_openSlide('new-task', { dealId: dealId })">+ New task</button>
+        </div>
+        <div id="deal-tasks-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading tasks…</div>
+        </div>
       </div>
 
       <!-- Files tab (static placeholder) -->
@@ -591,8 +602,58 @@
       }
     }
 
+    // ── Tasks tab ─────────────────────────────────────────────────────────
+    function renderTasks() {
+      var el = document.getElementById("deal-tasks-list");
+      if (!el) return;
+      var tasks = (DEAL.tasks || []);
+      var btn = document.getElementById("tab-tasks-btn");
+      if (btn) btn.textContent = "Tasks (" + tasks.length + ")";
+      if (!tasks.length) {
+        el.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No tasks yet — add the first task for this deal.</div>";
+        return;
+      }
+      el.innerHTML = "<ul class='summary-list'>" +
+        tasks.map(function(t) {
+          var pri  = (t.priority || "med").toLowerCase();
+          var done = !!(t.completed || t.completedAt);
+          return "<li>" +
+            "<input type='checkbox' " + (done ? "checked " : "") +
+            "onchange=\"completeDealTask('" + t.id + "', this)\" />" +
+            "<div class='grow' " + (done ? "style='opacity:0.5;text-decoration:line-through;'" : "") + ">" +
+            "<strong>" + esc(t.title) + "</strong>" +
+            (t.dueAt ? "<div class='text-muted' style='font-size:11px;'>Due " + fmtDate(t.dueAt) + "</div>" : "") +
+            "</div>" +
+            "<span class='badge " + (pri === "high" ? "" : "muted") + "'>" + pri.charAt(0).toUpperCase() + pri.slice(1) + "</span>" +
+            "</li>";
+        }).join("") + "</ul>";
+    }
+
+    function completeDealTask(id, cb) {
+      SS_API.Tasks.update(id, { completed: cb.checked })
+        .then(function() {
+          var li = cb.closest ? cb.closest("li") : null;
+          if (!li) return;
+          var grow = li.querySelector(".grow");
+          if (grow) {
+            grow.style.opacity = cb.checked ? "0.5" : "";
+            grow.style.textDecoration = cb.checked ? "line-through" : "";
+          }
+        })
+        .catch(function() { cb.checked = !cb.checked; });
+    }
+
+    window.SS_loadTasks = function() {
+      SS_API.Tasks.list({ dealId: dealId })
+        .then(function(raw) {
+          DEAL.tasks = (raw.tasks || []);
+          renderTasks();
+        })
+        .catch(function() {});
+    };
+
     // ── Boot ─────────────────────────────────────────────────────────────
-    loadDeal().then(function() { loadContacts(); });
+    loadDeal().then(function() { loadContacts(); renderTasks(); });
     loadActivities();
     loadNotes();
   </script>

@@ -815,7 +815,7 @@
       };
     },
 
-    "new-activity": () => ({
+    "new-activity": (ctx) => ({
       eyebrow: "M3 · F3.2 · Log Activity",
       title: "Log an activity",
       body: `
@@ -826,7 +826,6 @@
           <div class="field"><label>Date &amp; time</label><input type="datetime-local" id="slide-la-date" /></div>
         </div>
         <div class="field"><label>Summary<span class="field-required-marker">*</span></label><input type="text" id="slide-la-title" placeholder="Discovery call with Sarah Chen" /></div>
-        <div class="field"><label>Linked records</label><input type="text" placeholder="Contacts and / or deals" /></div>
         <div class="field"><label>Notes</label><textarea id="slide-la-body" placeholder="What was discussed? Outcomes? Next steps?"></textarea></div>
       `,
       primaryLabel: "Log activity",
@@ -842,6 +841,8 @@
             occurredAt: date ? new Date(date).toISOString() : new Date().toISOString(),
           };
           if (body) payload.body = body;
+          if (ctx && ctx.contactId) payload.contactId = ctx.contactId;
+          if (ctx && ctx.dealId) payload.dealId = ctx.dealId;
           window.SS_API.Activities.create(payload)
             .then(() => {
               toast("Activity logged", { sub: title + " added to timeline" });
