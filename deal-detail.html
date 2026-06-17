@@ -382,32 +382,19 @@
       }
     }
 
-    // ── Load contacts linked to this deal's company ───────────────────────
-    async function loadContacts() {
+    // ── Load contacts directly linked to this deal ───────────────────────
+    function loadContacts() {
       try {
-        // First get the deal to know the company, then get contacts
-        var raw  = await SS_API.Deals.get(dealId);
-        var d    = unwrap(raw, "deal");
-        if (!d || !d.company) {
-          document.getElementById("contacts-tbody").innerHTML =
-            "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No company linked to this deal.</td></tr>";
-          return;
-        }
-
-        var craw     = await SS_API.Contacts.list();
-        var allConts = (craw.contacts || craw.data || craw || []);
-        var cid      = String(d.company.id);
-        var contacts = allConts.filter(function(c) {
-          return c.company && (String(c.company.id) === cid || String(c.companyId) === cid);
-        });
+        var d        = DEAL;
+        var contacts = (d.contacts || []).map(function(dc) { return dc.contact; }).filter(Boolean);
+        var dealCtx  = "&from=deal&fromId=" + encodeURIComponent(dealId) + "&fromName=" + encodeURIComponent(d.name || "Deal");
 
         document.getElementById("tab-contacts-btn").textContent = "Contacts (" + contacts.length + ")";
 
         var tbody = document.getElementById("contacts-tbody");
         if (contacts.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts for this company.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--ink-50);'>No contacts linked to this deal.</td></tr>";
         } else {
-          var dealCtx = "&from=deal&fromId=" + encodeURIComponent(dealId) + "&fromName=" + encodeURIComponent(d.name || "Deal");
           tbody.innerHTML = contacts.map(function(c) {
             return "<tr style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + dealCtx + "'\">" +
               "<td><div class='row gap-2'>" +
@@ -423,11 +410,10 @@
         var scLabel = document.getElementById("sidebar-contacts-label");
         var scList  = document.getElementById("sidebar-contacts-list");
         scLabel.textContent = "Contacts (" + contacts.length + ")";
-        var dealCtxSide = "&from=deal&fromId=" + encodeURIComponent(dealId) + "&fromName=" + encodeURIComponent(d.name || "Deal");
         scList.innerHTML = contacts.length === 0
           ? "<li><div style='color:var(--ink-50);font-size:12px;'>No contacts yet.</div></li>"
           : contacts.slice(0, 4).map(function(c) {
-              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + dealCtxSide + "'\">" +
+              return "<li style='cursor:pointer;' onclick=\"window.location.href='contact-detail?id=" + c.id + dealCtx + "'\">" +
                 "<div class='avatar' style='width:24px;height:24px;font-size:9px;'>" + initials(c.firstName, c.lastName) + "</div>" +
                 "<div class='grow'><strong>" + (c.firstName||"") + " " + (c.lastName||"") + "</strong>" +
                 "<div class='text-muted' style='font-size:11px;'>" + (c.title||"—") + "</div></div></li>";
@@ -606,9 +592,8 @@
     }
 
     // ── Boot ─────────────────────────────────────────────────────────────
-    loadDeal();
+    loadDeal().then(function() { loadContacts(); });
     loadActivities();
-    loadContacts();
     loadNotes();
   </script>
   <script src="assets/chrome.js"></script>
