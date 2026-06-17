@@ -146,6 +146,133 @@
     .email-linked-card:hover { border-color: var(--ink); }
     .email-linked-card .left-icon { font-size: 16px; color: var(--ink-50); }
 
+    /* ── Connect inbox screen ────────────────────────── */
+    .email-connect-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; gap: 0; padding: var(--space-8); text-align: center;
+    }
+    .email-connect-icon {
+      width: 72px; height: 72px; border-radius: 18px;
+      background: var(--ink-05); border: var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin-bottom: var(--space-5); color: var(--ink-30);
+    }
+    .email-connect-title { font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: var(--space-2); }
+    .email-connect-desc {
+      font-size: 14px; color: var(--ink-50); max-width: 360px; line-height: 1.7;
+      margin-bottom: var(--space-6);
+    }
+    .email-connect-note { font-size: 11px; color: var(--ink-30); margin-top: var(--space-4); display: flex; align-items: center; gap: 5px; }
+
+    /* ── Provider modal ──────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 300;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--paper); border-radius: 12px;
+      width: 440px; padding: 28px 28px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18); border: var(--rule);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; font-size: 20px; color: var(--ink-30);
+      cursor: pointer; line-height: 1; padding: 0;
+    }
+    .modal-close:hover { color: var(--ink); }
+    .modal-title { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--ink-50); margin-bottom: 22px; }
+    .provider-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 15px; border: var(--rule); border-radius: var(--radius);
+      cursor: pointer; margin-bottom: 8px;
+      transition: border-color 100ms, background 100ms;
+      background: var(--paper); width: 100%;
+      text-align: left; font-family: var(--body);
+    }
+    .provider-option:hover { border-color: var(--ink); background: var(--ink-03); }
+    .provider-icon {
+      width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 700; color: white;
+    }
+    .provider-icon.gmail   { background: #EA4335; }
+    .provider-icon.outlook { background: #0078D4; }
+    .provider-icon.yahoo   { background: #6001D2; }
+    .provider-icon.imap    { background: #4a4a4a; }
+    .provider-name  { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+    .provider-hint  { font-size: 11px; color: var(--ink-40); margin-top: 1px; }
+    .provider-arrow { margin-left: auto; color: var(--ink-20); font-size: 14px; }
+
+    /* ── Auth consent modal ──────────────────────────── */
+    .auth-provider-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .auth-provider-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; color: white;
+    }
+    .auth-provider-icon.gmail   { background: #EA4335; }
+    .auth-provider-icon.outlook { background: #0078D4; }
+    .auth-provider-icon.yahoo   { background: #6001D2; }
+    .auth-provider-icon.imap    { background: #4a4a4a; }
+    .auth-permissions {
+      background: var(--paper-warm); border: var(--rule);
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px;
+    }
+    .auth-permissions p {
+      font-size: 12px; color: var(--ink-60); margin: 0 0 6px 0; font-family: var(--mono);
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .auth-permissions ul {
+      margin: 0; padding: 0 0 0 16px; list-style: none;
+    }
+    .auth-permissions li {
+      font-size: 13px; color: var(--ink-70); padding: 3px 0;
+      position: relative;
+    }
+    .auth-permissions li::before { content: "✓"; position: absolute; left: -16px; color: var(--ink-30); font-size: 11px; top: 4px; }
+    .auth-email-field {
+      width: 100%; padding: 9px 12px; border: var(--rule);
+      border-radius: var(--radius); font-size: 13px; font-family: var(--body);
+      background: var(--paper); color: var(--ink); outline: none;
+      margin-bottom: 18px; box-sizing: border-box;
+    }
+    .auth-email-field:focus { border-color: var(--ink); }
+    .auth-actions { display: flex; gap: 10px; }
+    .auth-actions .btn { flex: 1; justify-content: center; padding: 9px 0; }
+
+    /* ── Connecting spinner modal ────────────────────── */
+    .connecting-body {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 0 8px; gap: 14px; text-align: center;
+    }
+    .spinner {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 3px solid var(--ink-10); border-top-color: var(--ink);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .connecting-text { font-size: 14px; color: var(--ink); font-weight: 500; }
+    .connecting-sub  { font-size: 12px; color: var(--ink-40); }
+
+    /* ── Connected account badge in sidebar ─────────── */
+    .connected-account-badge {
+      display: none; align-items: center; gap: 7px;
+      padding: 7px 8px; border: var(--rule); border-radius: var(--radius);
+      margin-bottom: var(--space-4); background: var(--paper);
+      cursor: default;
+    }
+    .connected-account-badge.visible { display: flex; }
+    .connected-account-dot { width: 7px; height: 7px; border-radius: 50%; background: #22a552; flex-shrink: 0; }
+    .connected-account-email { font-size: 11px; color: var(--ink-70); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); }
+    .connected-account-disconnect { font-size: 10px; color: var(--ink-30); cursor: pointer; flex-shrink: 0; background: none; border: none; font-family: var(--body); padding: 0; }
+    .connected-account-disconnect:hover { color: var(--ink); }
+
     /* Compose panel */
     .compose-overlay {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35);
@@ -207,7 +334,12 @@
 
         <!-- ── Folder sidebar ─────────────────────────── -->
         <div class="email-folders">
-          <button class="compose-btn" onclick="openCompose()">✎ &nbsp;Compose</button>
+          <div class="connected-account-badge" id="connected-account-badge">
+            <span class="connected-account-dot"></span>
+            <span class="connected-account-email" id="connected-account-email"></span>
+            <button class="connected-account-disconnect" onclick="disconnectEmail()" title="Disconnect inbox">✕</button>
+          </div>
+          <button class="compose-btn" id="compose-btn" onclick="openCompose()">✎ &nbsp;Compose</button>
 
           <button class="folder-item active" onclick="switchFolder('inbox', this)">
             <span>Inbox</span><span class="folder-count" id="cnt-inbox">3</span>
@@ -233,8 +365,24 @@
           </button>
         </div>
 
+        <!-- ── Connect inbox screen (shown when not connected) ── -->
+        <div class="email-connect-screen" id="connect-screen" style="display:none;">
+          <div class="email-connect-icon">✉</div>
+          <div class="email-connect-title">Connect your inbox</div>
+          <div class="email-connect-desc">
+            Sync your Gmail or Outlook emails with SmartSense CRM.
+            Emails are automatically linked to your contacts and deals — all in one place.
+          </div>
+          <button class="btn primary" style="padding:10px 28px;font-size:14px;" onclick="openProviderModal()">
+            Connect inbox →
+          </button>
+          <div class="email-connect-note">
+            <span>🔒</span> Your emails are encrypted and only visible to you.
+          </div>
+        </div>
+
         <!-- ── Email list + detail ────────────────────── -->
-        <div class="email-main">
+        <div class="email-main" id="email-main">
 
           <!-- List pane -->
           <div class="email-list-pane">
@@ -301,6 +449,93 @@
             <button class="btn primary" onclick="sendEmail()">Send</button>
             <button class="btn" onclick="saveDraft()">Save draft</button>
             <button class="btn sm" style="margin-left:auto;" onclick="closeCompose()">Discard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Provider selection modal ──────────────────── -->
+      <div class="modal-overlay" id="provider-modal" onclick="if(event.target===this)closeProviderModal()">
+        <div class="modal-box">
+          <button class="modal-close" onclick="closeProviderModal()">×</button>
+          <div class="modal-title">Connect your email inbox</div>
+          <div class="modal-sub">Choose your email provider to get started.</div>
+
+          <button class="provider-option" onclick="openAuthModal('gmail','Gmail','G')">
+            <div class="provider-icon gmail">G</div>
+            <div>
+              <div class="provider-name">Gmail</div>
+              <div class="provider-hint">Google Workspace or personal Gmail</div>
+            </div>
+            <span class="provider-arrow">›</span>
+          </button>
+
+          <button class="provider-option" onclick="openAuthModal('outlook','Microsoft Outlook','O')">
+            <div class="provider-icon outlook">O</div>
+            <div>
+              <div class="provider-name">Microsoft Outlook</div>
+              <div class="provider-hint">Outlook.com, Office 365, or Exchange</div>
+            </div>
+            <span class="provider-arrow">›</span>
+          </button>
+
+          <button class="provider-option" onclick="openAuthModal('yahoo','Yahoo Mail','Y')">
+            <div class="provider-icon yahoo">Y</div>
+            <div>
+              <div class="provider-name">Yahoo Mail</div>
+              <div class="provider-hint">@yahoo.com accounts</div>
+            </div>
+            <span class="provider-arrow">›</span>
+          </button>
+
+          <button class="provider-option" onclick="openAuthModal('imap','IMAP / SMTP','@')">
+            <div class="provider-icon imap">@</div>
+            <div>
+              <div class="provider-name">Other (IMAP / SMTP)</div>
+              <div class="provider-hint">Any email provider with IMAP support</div>
+            </div>
+            <span class="provider-arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Auth consent modal ─────────────────────────── -->
+      <div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+        <div class="modal-box">
+          <button class="modal-close" onclick="closeAuthModal()">×</button>
+          <div class="auth-provider-header">
+            <div class="auth-provider-icon" id="auth-provider-icon"></div>
+            <div>
+              <div class="modal-title" id="auth-modal-title"></div>
+              <div style="font-size:13px;color:var(--ink-50);">Authorize SmartSense CRM</div>
+            </div>
+          </div>
+
+          <div class="auth-permissions">
+            <p>SmartSense will be able to</p>
+            <ul>
+              <li>Read emails in your inbox, sent, and drafts</li>
+              <li>Send emails on your behalf</li>
+              <li>Manage labels and organise your inbox</li>
+              <li>Link emails to your contacts and deals</li>
+            </ul>
+          </div>
+
+          <input class="auth-email-field" id="auth-email-input" type="email" placeholder="your@email.com" />
+
+          <div class="auth-actions">
+            <button class="btn" onclick="closeAuthModal()">Cancel</button>
+            <button class="btn primary" onclick="authorizeAccess()">Authorize access →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Connecting spinner modal ───────────────────── -->
+      <div class="modal-overlay" id="connecting-modal">
+        <div class="modal-box" style="width:320px;text-align:center;">
+          <div class="connecting-body">
+            <div class="spinner"></div>
+            <div class="connecting-text" id="connecting-text">Connecting to Gmail…</div>
+            <div class="connecting-sub">Authorizing access and syncing your inbox</div>
           </div>
         </div>
       </div>
@@ -620,9 +855,143 @@
       } catch(e) {}
     }
 
+    // ── Connection state ───────────────────────────────────────────
+    var emailConnected    = localStorage.getItem("ss_email_connected") === "true";
+    var connectedProvider = localStorage.getItem("ss_email_provider")  || "";
+    var connectedEmail    = localStorage.getItem("ss_email_address")   || "";
+    var pendingProvider   = null;
+    var pendingProviderLabel = "";
+
     // ── Init ───────────────────────────────────────────────────────
-    renderEmailList();
-    loadContactSuggestions();
+    function initEmailPage() {
+      if (emailConnected) {
+        showEmailClient();
+        renderEmailList();
+        loadContactSuggestions();
+        renderConnectedBadge();
+      } else {
+        showConnectScreen();
+      }
+    }
+
+    function showEmailClient() {
+      document.getElementById("connect-screen").style.display = "none";
+      document.getElementById("email-main").style.display     = "grid";
+      document.getElementById("compose-btn").style.display    = "block";
+    }
+
+    function showConnectScreen() {
+      document.getElementById("connect-screen").style.display = "flex";
+      document.getElementById("email-main").style.display     = "none";
+      document.getElementById("compose-btn").style.display    = "none";
+    }
+
+    function renderConnectedBadge() {
+      var badge = document.getElementById("connected-account-badge");
+      var label = document.getElementById("connected-account-email");
+      if (connectedEmail) {
+        label.textContent = connectedEmail;
+        badge.classList.add("visible");
+      }
+    }
+
+    // ── Provider modal ─────────────────────────────────────────────
+    function openProviderModal() {
+      document.getElementById("provider-modal").classList.add("open");
+    }
+
+    function closeProviderModal() {
+      document.getElementById("provider-modal").classList.remove("open");
+    }
+
+    // ── Auth consent modal ─────────────────────────────────────────
+    function openAuthModal(provider, label, letter) {
+      closeProviderModal();
+      pendingProvider      = provider;
+      pendingProviderLabel = label;
+
+      // Set provider icon
+      var icon = document.getElementById("auth-provider-icon");
+      icon.textContent  = letter;
+      icon.className    = "auth-provider-icon " + provider;
+
+      // Set title
+      document.getElementById("auth-modal-title").textContent = "Connect " + label;
+
+      // Clear email field
+      document.getElementById("auth-email-input").value = "";
+
+      document.getElementById("auth-modal").classList.add("open");
+      setTimeout(function() { document.getElementById("auth-email-input").focus(); }, 120);
+    }
+
+    function closeAuthModal() {
+      document.getElementById("auth-modal").classList.remove("open");
+      pendingProvider      = null;
+      pendingProviderLabel = "";
+    }
+
+    // ── Authorize access ───────────────────────────────────────────
+    function authorizeAccess() {
+      var email = document.getElementById("auth-email-input").value.trim();
+      if (!email || !email.includes("@")) {
+        document.getElementById("auth-email-input").focus();
+        document.getElementById("auth-email-input").style.borderColor = "#e53e3e";
+        setTimeout(function() {
+          document.getElementById("auth-email-input").style.borderColor = "";
+        }, 1500);
+        return;
+      }
+
+      closeAuthModal();
+
+      // Show connecting spinner
+      document.getElementById("connecting-text").textContent =
+        "Connecting to " + pendingProviderLabel + "…";
+      document.getElementById("connecting-modal").classList.add("open");
+
+      var provider = pendingProvider;
+      var label    = pendingProviderLabel;
+
+      // Simulate OAuth handshake (1.8 s)
+      setTimeout(function() {
+        document.getElementById("connecting-modal").classList.remove("open");
+
+        // Persist connection
+        localStorage.setItem("ss_email_connected", "true");
+        localStorage.setItem("ss_email_provider",  provider);
+        localStorage.setItem("ss_email_address",   email);
+        emailConnected    = true;
+        connectedProvider = provider;
+        connectedEmail    = email;
+
+        showEmailClient();
+        renderEmailList();
+        loadContactSuggestions();
+        renderConnectedBadge();
+
+        if (window.SS_toast) window.SS_toast("Inbox connected", { sub: email });
+      }, 1800);
+    }
+
+    // ── Disconnect inbox ───────────────────────────────────────────
+    function disconnectEmail() {
+      if (!confirm("Disconnect " + connectedEmail + "?\n\nYour CRM data won't be affected.")) return;
+
+      localStorage.removeItem("ss_email_connected");
+      localStorage.removeItem("ss_email_provider");
+      localStorage.removeItem("ss_email_address");
+      emailConnected    = false;
+      connectedProvider = "";
+      connectedEmail    = "";
+
+      document.getElementById("connected-account-badge").classList.remove("visible");
+      showConnectScreen();
+
+      if (window.SS_toast) window.SS_toast("Inbox disconnected");
+    }
+
+    initEmailPage();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
