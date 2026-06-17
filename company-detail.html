@@ -338,19 +338,29 @@
     // ── Load activities ───────────────────────────────────────────────────
     async function loadActivities() {
       try {
-        var raw  = await SS_API.Activities.list();
-        var acts = (raw.activities || raw.data || raw || []);
+        var raw  = await SS_API.Activities.list({ limit: 100 });
+        var all  = (raw.activities || raw.data || raw || []);
 
-        // Show all activities (no company filter on activities endpoint)
+        // Filter to activities linked to this company's contacts only
+        var contactIds = new Set(_companyContacts.map(function(c) { return c.id; }));
+        var acts = contactIds.size > 0
+          ? all.filter(function(a) { return a.contactId && contactIds.has(a.contactId); })
+          : [];
+
         var thirtyDays = Date.now() - 30 * 86400000;
-        var recent = acts.filter(function(a) { return new Date(a.createdAt).getTime() > thirtyDays; });
+        var recent = acts.filter(function(a) {
+          var d = a.occurredAt || a.createdAt;
+          return d && new Date(d).getTime() > thirtyDays;
+        });
 
         document.getElementById("kpi-activities").textContent     = recent.length;
         document.getElementById("kpi-activities-sub").textContent = "in last 30 days";
 
         if (acts.length > 0) {
-          var latest = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
-          document.getElementById("kpi-last-activity").textContent     = fmtRelative(latest.createdAt);
+          var latest = acts.slice().sort(function(a, b) {
+            return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt);
+          })[0];
+          document.getElementById("kpi-last-activity").textContent     = fmtRelative(latest.occurredAt || latest.createdAt);
           document.getElementById("kpi-last-activity-sub").textContent = latest.type || latest.title || "—";
         } else {
           document.getElementById("kpi-last-activity").textContent     = "—";
@@ -361,12 +371,15 @@
         if (acts.length === 0) {
           tlEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No activities logged yet.</div>";
         } else {
-          var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+          var sorted = acts.slice().sort(function(a, b) {
+            return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt);
+          });
           tlEl.innerHTML = sorted.slice(0, 20).map(function(a) {
             var type = (a.type||"NOTE").toUpperCase();
             var who  = a.user ? (a.user.name || "") : "";
+            var date = fmtDate(a.occurredAt || a.createdAt);
             return "<div class='timeline-item'>" +
-              "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
+              "<div class='timeline-meta'><span>" + date + "</span>" +
               "<span class='badge muted'>" + type + "</span>" +
               (who ? "<span>By " + who + "</span>" : "") + "</div>" +
               "<div class='timeline-title'>" + (a.title||"Activity") + "</div>" +
@@ -514,9 +527,8 @@
 
     // ── Boot ──────────────────────────────────────────────────────────────
     loadCompany();
-    loadContacts().then(function() { loadNotes(); });
+    loadContacts().then(function() { loadNotes(); loadActivities(); });
     loadDeals();
-    loadActivities();
   </script>
   <script src="assets/chrome.js"></script>
 </body>
