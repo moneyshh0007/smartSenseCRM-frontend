@@ -315,7 +315,7 @@
           document.getElementById("deals-summary").textContent = "";
         } else {
           tbody.innerHTML = deals.map(function(d) {
-            var owner = d.owner ? (d.owner.firstName||"") + " " + (d.owner.lastName||"") : "—";
+            var owner = d.owner ? (d.owner.name || "—") : "—";
             return "<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
               "<td><strong>" + d.name + "</strong></td>" +
               "<td><span class='badge muted'>" + (d.stage||"—") + "</span></td>" +

@@ -227,7 +227,7 @@
         var subParts = [];
         if (d.company) subParts.push('<a href="company-detail?id=' + d.company.id + '">' + d.company.name + '</a>');
         if (d.stage)   subParts.push(d.stage + " stage");
-        if (d.owner)   subParts.push("Owner: " + (d.owner.firstName||"") + " " + (d.owner.lastName||"").trim());
+        if (d.owner)   subParts.push("Owner: " + (d.owner.name || ""));
         if (d.closeDate || d.expectedCloseDate) subParts.push("Close: " + fmtDate(d.closeDate || d.expectedCloseDate));
         document.getElementById("deal-sub").innerHTML = subParts.join(" · ");
 
@@ -252,7 +252,7 @@
         document.getElementById("dd-amount").textContent   = fmt$(d.amount);
         document.getElementById("dd-prob").textContent     = prob + "%";
         document.getElementById("dd-close").textContent    = fmtDate(d.closeDate || d.expectedCloseDate);
-        document.getElementById("dd-owner").textContent    = d.owner ? ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim() : "—";
+        document.getElementById("dd-owner").textContent    = d.owner ? (d.owner.name || "—") : "—";
         document.getElementById("dd-created").textContent  = fmtDate(d.createdAt);
 
         DEAL = d;
@@ -300,7 +300,7 @@
               var subParts = [];
               if (d.company) subParts.push('<a href="company-detail?id=' + d.company.id + '">' + d.company.name + '</a>');
               subParts.push(s + " stage");
-              if (d.owner) subParts.push("Owner: " + ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim());
+              if (d.owner) subParts.push("Owner: " + (d.owner.name || ""));
               if (d.closeDate || d.expectedCloseDate) subParts.push("Close: " + fmtDate(d.closeDate || d.expectedCloseDate));
               document.getElementById("deal-sub").innerHTML = subParts.join(" · ");
               stageDd.querySelectorAll("button[data-stage-option]").forEach(function(b) {
@@ -365,7 +365,7 @@
           var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
           tlEl.innerHTML = sorted.map(function(a) {
             var type = (a.type || "NOTE").toUpperCase();
-            var who  = a.user ? ((a.user.firstName||"") + " " + (a.user.lastName||"")).trim() : "";
+            var who  = a.user ? (a.user.name || "") : "";
             return "<div class='timeline-item'>" +
               "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
               "<span class='badge muted'>" + type + "</span>" +

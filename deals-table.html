@@ -285,9 +285,7 @@
         var stageClass = d.stage === "Closed Won"  ? "badge solid" :
                          d.stage === "Closed Lost" ? "badge muted" : "badge";
         var rowClass   = rotting ? " class='warn'" : "";
-        var ownerName  = d.owner
-          ? ((d.owner.firstName || "") + " " + (d.owner.lastName || "")).trim()
-          : "—";
+        var ownerName  = d.owner ? (d.owner.name || "—") : "—";
         return "<tr" + rowClass + " style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
           "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
           "<td><strong>" + d.name + "</strong>" + (rotting ? " <span class='badge warn' style='font-size:9px;'>ROTTING</span>" : "") + "</td>" +

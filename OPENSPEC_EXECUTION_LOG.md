@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 19)
+**Last updated:** 17 Jun 2026 (Phase 21)
 
 ---
 
@@ -43,6 +43,8 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 17 | Companies Pipeline Value | Fetch deals in parallel with companies; show open pipeline per company in table + KPI | ✅ Complete |
 | 18 | Contact + Company Detail QA | Fix user name bug in timelines; server-side contactId filtering; remove double contact fetch | ✅ Complete |
 | 19 | Contacts + Deals Kanban QA | Fix data.total undefined; fix initials crash; wire kanban drag-drop to Deals.update() | ✅ Complete |
+| 20 | Tasks owner + Company notes scoping | Add owner join to GET /tasks; tasks.html shows owner name; company-detail notes scoped to company contacts | ✅ Complete |
+| 21 | Deal owner name fix | Fix d.owner.firstName/lastName → d.owner.name in deal-detail, deals-table, company-detail deals tab | ✅ Complete |
 
 ---
 
@@ -625,7 +627,8 @@ getJob(jobId)
 | Settings — Audit Log | `GET /audit-logs` wired; KPIs + client-side filter ✅ |
 | Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
 | Companies: pipeline value | Client-side join: loads deals in parallel, groups by companyId — open pipeline shown per company ✅ |
-| Notes: company-scoped | Activities model has no `companyId` — notes on company-detail show all workspace notes |
+| Deal owner name (all pages) | d.owner.firstName/lastName → d.owner.name fixed in deal-detail, deals-table, company-detail ✅ |
+| Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
 
 ---
 
