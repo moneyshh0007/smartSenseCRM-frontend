@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="page-title">Company · SmartSense CRM</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    .dd-edit-btn { background:none; border:none; font-size:11px; color:var(--ink-40); cursor:pointer; padding:0; font-family:var(--body); }
+    .dd-edit-btn:hover { color:var(--ink); text-decoration:underline; }
+    .details-card-head { display:flex; justify-content:space-between; align-items:center; }
+    .notes-toolbar { padding:12px var(--space-4,16px); border-bottom:var(--rule); display:flex; justify-content:flex-end; }
+    .note-item { padding:14px var(--space-4,16px); border-bottom:var(--rule); font-size:13px; }
+    .note-item-date { font-family:var(--mono); font-size:10px; color:var(--ink-40); margin-bottom:4px; }
+    .note-item-body { color:var(--ink-70); line-height:1.5; white-space:pre-wrap; }
+  </style>
 </head>
 <body data-page="companies" class="">
   <div class="app">
@@ -92,19 +101,26 @@
       </div>
 
       <div class="tab-pane" data-pane="notes">
-        <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this company.</div>
+        <div class="notes-toolbar">
+          <button class="btn sm" onclick="openAddNote()">+ Add note</button>
+        </div>
+        <div id="notes-list">
+          <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading notes…</div>
+        </div>
       </div>
     </div>
 
     <div class="meta-aside">
       <div class="card">
-        <div class="label">Details</div>
+        <div class="details-card-head">
+          <div class="label">Details</div>
+          <button class="dd-edit-btn" onclick="openEditCompany()">Edit</button>
+        </div>
         <dl class="kv-grid mt-3">
           <dt>Domain</dt><dd id="detail-domain">—</dd>
           <dt>Industry</dt><dd id="detail-industry">—</dd>
           <dt>Size</dt><dd id="detail-size">—</dd>
           <dt>HQ</dt><dd id="detail-hq">—</dd>
-          <dt>Owner</dt><dd id="detail-owner">—</dd>
           <dt>Created</dt><dd id="detail-created">—</dd>
         </dl>
       </div>
@@ -183,6 +199,7 @@
         var raw = await SS_API.Companies.get(companyId);
         var c   = unwrap(raw, "company");
         if (!c || !c.name) throw new Error("Empty company response");
+        COMPANY = c;
 
         document.getElementById("page-title").textContent      = c.name + " · SmartSense CRM";
         document.getElementById("breadcrumb-name").textContent = c.name;
@@ -206,9 +223,8 @@
 
         document.getElementById("detail-domain").textContent   = c.domain   || "—";
         document.getElementById("detail-industry").textContent = c.industry || "—";
-        document.getElementById("detail-size").textContent     = c.size ? c.size + " employees" : "—";
+        document.getElementById("detail-size").textContent     = c.size ? Number(c.size).toLocaleString() + " employees" : "—";
         document.getElementById("detail-hq").textContent       = c.hq      || "—";
-        document.getElementById("detail-owner").textContent    = c.owner    || "—";
         document.getElementById("detail-created").textContent  = fmtDate(c.createdAt);
 
         if (c.tags && c.tags.length) {
@@ -374,11 +390,134 @@
       }
     }
 
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    var COMPANY = {};
+
+    // ── Edit company ─────────────────────────────────────────────────────
+    function openEditCompany() {
+      var c = COMPANY;
+      window.SS_openSlide({
+        eyebrow: "Edit company",
+        title: "Edit " + (c.name || "company"),
+        body:
+          '<div class="field"><label>Company name<span class="field-required-marker">*</span></label>' +
+          '<input type="text" id="ec-name" value="' + esc(c.name) + '" /></div>' +
+          '<div class="field"><label>Website / domain</label>' +
+          '<input type="text" id="ec-domain" value="' + esc(c.domain) + '" placeholder="acme.com" /></div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label>Industry</label>' +
+            '<select id="ec-industry">' +
+              '<option value="">—</option>' +
+              ['SaaS','Fintech','Logistics','Healthcare','Retail','Other'].map(function(v) {
+                return '<option value="' + v + '"' + (c.industry === v ? ' selected' : '') + '>' + v + '</option>';
+              }).join('') +
+            '</select></div>' +
+            '<div class="field"><label>Size (employees)</label>' +
+            '<input type="number" id="ec-size" value="' + esc(c.size) + '" placeholder="500" /></div>' +
+          '</div>' +
+          '<div class="field"><label>HQ location</label>' +
+          '<input type="text" id="ec-hq" value="' + esc(c.hq) + '" placeholder="San Francisco, US" /></div>',
+        primaryLabel: "Save changes",
+        onSave: function() {
+          var name = (document.getElementById("ec-name").value || "").trim();
+          if (!name) { if (window.toast) window.toast("Company name is required"); return; }
+          var patch = { name: name };
+          var domain = (document.getElementById("ec-domain").value || "").trim();
+          var industry = document.getElementById("ec-industry").value;
+          var size = document.getElementById("ec-size").value;
+          var hq = (document.getElementById("ec-hq").value || "").trim();
+          if (domain) patch.domain = domain;
+          if (industry) patch.industry = industry;
+          if (size) patch.size = Number(size);
+          if (hq) patch.hq = hq;
+          SS_API.Companies.update(companyId, patch)
+            .then(function(res) {
+              var updated = res.company || res;
+              COMPANY = Object.assign(COMPANY, updated);
+              document.getElementById("company-name").textContent    = updated.name;
+              document.getElementById("page-title").textContent      = updated.name + " · SmartSense CRM";
+              document.getElementById("breadcrumb-name").textContent = updated.name;
+              document.getElementById("detail-domain").textContent   = updated.domain   || "—";
+              document.getElementById("detail-industry").textContent = updated.industry || "—";
+              document.getElementById("detail-size").textContent     = updated.size ? updated.size.toLocaleString() + " employees" : "—";
+              document.getElementById("detail-hq").textContent       = updated.hq      || "—";
+              if (window.toast) window.toast("Company updated", { sub: updated.name });
+            })
+            .catch(function(err) {
+              if (window.toast) window.toast(err.message || "Could not update company");
+            });
+        },
+      });
+    }
+
+    // ── Notes ─────────────────────────────────────────────────────────────
+    function openAddNote() {
+      window.SS_openSlide({
+        eyebrow: "Note",
+        title: "Add note",
+        body:
+          '<div class="field"><label>Note</label>' +
+          '<textarea id="note-body" rows="5" placeholder="Write your note here…" style="width:100%;border:var(--rule);border-radius:var(--radius);padding:8px 10px;font-size:13px;resize:vertical;box-sizing:border-box;font-family:var(--body);"></textarea></div>',
+        primaryLabel: "Save note",
+        onSave: function() {
+          var body = (document.getElementById("note-body").value || "").trim();
+          if (!body) return;
+          SS_API.Activities.create({ type: "note", title: "Note", body: body })
+            .then(function() {
+              if (window.toast) window.toast("Note saved");
+              loadNotes();
+            })
+            .catch(function(err) {
+              if (window.toast) window.toast(err.message || "Could not save note");
+            });
+        },
+      });
+    }
+
+    async function loadNotes() {
+      try {
+        var raw  = await SS_API.Activities.list();
+        var acts = (raw.activities || raw.data || raw || []);
+        var notes = acts.filter(function(a) { return a.type === "note"; });
+        var el = document.getElementById("notes-list");
+        if (!notes.length) {
+          el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this company.</div>';
+          return;
+        }
+        notes.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        el.innerHTML = notes.slice(0, 20).map(function(n) {
+          return '<div class="note-item">' +
+            '<div class="note-item-date">' + fmtDate(n.createdAt) + '</div>' +
+            '<div class="note-item-body">' + esc(n.body || n.title || "") + '</div>' +
+            '</div>';
+        }).join("");
+      } catch (err) {
+        document.getElementById("notes-list").innerHTML =
+          '<div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Could not load notes.</div>';
+      }
+    }
+
+    // ── Tab switching ────────────────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll(".record-tab").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          document.querySelectorAll(".record-tab").forEach(function(b) { b.classList.remove("active"); });
+          document.querySelectorAll(".tab-pane").forEach(function(p) { p.classList.remove("active"); });
+          btn.classList.add("active");
+          var pane = document.querySelector(".tab-pane[data-pane='" + btn.dataset.tab + "']");
+          if (pane) pane.classList.add("active");
+        });
+      });
+    });
+
     // ── Boot ──────────────────────────────────────────────────────────────
     loadCompany();
     loadContacts();
     loadDeals();
     loadActivities();
+    loadNotes();
   </script>
   <script src="assets/chrome.js"></script>
 </body>

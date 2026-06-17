@@ -2078,6 +2078,11 @@
 
   // Expose key helpers to global scope so the gap-fix IIFE can reuse them
   window.SS_openSlide = function (formKey, ctx) {
+    // Accept a direct config object (e.g. from contact-detail / company-detail edit flows)
+    if (typeof formKey === "object" && formKey !== null) {
+      openSlide(formKey);
+      return;
+    }
     const tpl = Forms[formKey];
     if (!tpl) return;
     openSlide(tpl(ctx));
