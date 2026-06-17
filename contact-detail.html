@@ -314,12 +314,8 @@
     // ── Load tasks for this contact ───────────────────────────────────────
     async function loadTasks() {
       try {
-        var raw   = await SS_API.Tasks.list();
-        var all   = (raw.tasks || raw.data || raw || []);
-        var cid   = String(contactId);
-        var tasks = all.filter(function(t) {
-          return t.contactId && String(t.contactId) === cid;
-        });
+        var raw   = await SS_API.Tasks.list({ contactId: contactId });
+        var tasks = (raw.tasks || raw.data || raw || []);
 
         var el = document.getElementById("tasks-list");
         if (tasks.length === 0) {

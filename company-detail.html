@@ -242,12 +242,8 @@
     // ── Load contacts for this company ───────────────────────────────────
     async function loadContacts() {
       try {
-        var raw      = await SS_API.Contacts.list();
-        var all      = (raw.contacts || raw.data || raw || []);
-        var cid      = String(companyId);
-        var contacts = all.filter(function(c) {
-          return c.company && (String(c.company.id) === cid || String(c.companyId) === cid);
-        });
+        var raw      = await SS_API.Contacts.list({ companyId: companyId });
+        var contacts = (raw.contacts || raw.data || raw || []);
         _companyContacts = contacts;
 
         document.getElementById("kpi-people").textContent    = contacts.length;
@@ -294,12 +290,8 @@
     // ── Load deals for this company ───────────────────────────────────────
     async function loadDeals() {
       try {
-        var raw   = await SS_API.Deals.list();
-        var all   = (raw.deals || raw.data || raw || []);
-        var cid   = String(companyId);
-        var deals = all.filter(function(d) {
-          return d.company && (String(d.company.id) === cid || String(d.companyId) === cid);
-        });
+        var raw   = await SS_API.Deals.list({ companyId: companyId });
+        var deals = (raw.deals || raw.data || raw || []);
         var open  = deals.filter(function(d) {
           return d.stage !== "Closed Won" && d.stage !== "Closed Lost";
         });

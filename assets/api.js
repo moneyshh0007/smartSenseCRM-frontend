@@ -95,8 +95,9 @@ const Auth = {
 
 // ─── Contacts ────────────────────────────────────────────────────────
 const Contacts = {
-  async list() {
-    return apiFetch("/contacts");
+  async list(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/contacts${query ? "?" + query : ""}`);
   },
 
   async get(id) {
