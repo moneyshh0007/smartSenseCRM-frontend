@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 16)
+**Last updated:** 17 Jun 2026 (Phase 17)
 
 ---
 
@@ -40,6 +40,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 14 | Deals Table + Forecast | Wire deals-table.html and deals-forecast.html to live API | ✅ Complete |
 | 15 | Dedup + Settings Workspace | Client-side duplicate detection; settings-workspace populated from auth | ✅ Complete |
 | 16 | Audit Log | Backend GET /audit-logs route; settings-audit-log.html wired with KPIs + client-side filter | ✅ Complete |
+| 17 | Companies Pipeline Value | Fetch deals in parallel with companies; show open pipeline per company in table + KPI | ✅ Complete |
 
 ---
 
@@ -621,7 +622,7 @@ getJob(jobId)
 | Activities page | Feed loads, type filter and advanced filter all wired ✅ |
 | Settings — Audit Log | `GET /audit-logs` wired; KPIs + client-side filter ✅ |
 | Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
-| Companies: pipeline value | Requires `GET /companies` to aggregate deal amounts (backend change needed) |
+| Companies: pipeline value | Client-side join: loads deals in parallel, groups by companyId — open pipeline shown per company ✅ |
 | Notes: company-scoped | Activities model has no `companyId` — notes on company-detail show all workspace notes |
 
 ---
