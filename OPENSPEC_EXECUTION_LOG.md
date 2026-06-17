@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 13)
+**Last updated:** 17 Jun 2026 (Phase 14)
 
 ---
 
@@ -37,6 +37,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 11 | Companies Pages QA | KPI grid, tab switching, edit company, notes | ✅ Complete |
 | 12 | Deals Pages QA | KPI grid real data, deal-detail Mark Won/Lost, Edit, Notes | ✅ Complete |
 | 13 | My Day + Tasks QA | Fix greeting crash, undefined KPI counts, tasks count display | ✅ Complete |
+| 14 | Deals Table + Forecast | Wire deals-table.html and deals-forecast.html to live API | ✅ Complete |
 
 ---
 
@@ -523,6 +524,31 @@ getJob(jobId)
 | `tasks.html` | Subtitle and footer showed "undefined open tasks" / "SHOWING undefined TASKS" | Replaced `data.total` with `data.tasks.length` |
 
 **No issues found in `activities.html`** — already uses `data.activities` and `_allActs.length` correctly.
+
+---
+
+### Phase 14 — Deals Table + Forecast Pages
+
+**Commits:** `deals: wire deals-table and deals-forecast pages to live backend`  
+**Frontend:** `deals-table.html`, `deals-forecast.html`
+
+**`deals-table.html` changes:**
+- All hardcoded rows replaced with real `GET /deals` data
+- KPIs now real: total deals, open pipeline, avg deal size, win rate (all-time)
+- Stalled/ROTTING badge appears for deals with `updatedAt` > 21 days ago
+- Row click navigates to `deal-detail?id=xxx`
+- Competitor column removed (field not returned by `GET /deals`)
+- "+ New deal" button wired to `SS_openSlide('new-deal')`
+- Footer shows real count
+
+**`deals-forecast.html` changes:**
+- All hardcoded KPIs replaced: Closed Won YTD, Commit, Best Case, Pipeline
+- Dynamic roll-up bar chart: bar widths computed as % of max value
+- "By category" table: rows generated from real deals grouped by `forecastCategory`
+- Weighted amount column: `amount × probability / 100`
+- Won/Lost analysis:
+  - Lost: real `lostReason` field grouped and ranked by frequency
+  - Won: total won deals count + value
 
 ---
 
