@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 14)
+**Last updated:** 17 Jun 2026 (Phase 15)
 
 ---
 
@@ -38,6 +38,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 12 | Deals Pages QA | KPI grid real data, deal-detail Mark Won/Lost, Edit, Notes | ✅ Complete |
 | 13 | My Day + Tasks QA | Fix greeting crash, undefined KPI counts, tasks count display | ✅ Complete |
 | 14 | Deals Table + Forecast | Wire deals-table.html and deals-forecast.html to live API | ✅ Complete |
+| 15 | Dedup + Settings Workspace | Client-side duplicate detection; settings-workspace populated from auth | ✅ Complete |
 
 ---
 
@@ -549,6 +550,30 @@ getJob(jobId)
 - Won/Lost analysis:
   - Lost: real `lostReason` field grouped and ranked by frequency
   - Won: total won deals count + value
+
+---
+
+### Phase 15 — Dedup + Settings Workspace
+
+**Commits:** `dedup + settings: wire dedup page with client-side email/name detection; settings-workspace shows real data`  
+**Frontend:** `dedup.html`, `settings-workspace.html`
+
+**`dedup.html` changes:**
+- Loads all contacts from `GET /contacts` on mount and on "Re-scan"
+- **HIGH CONFIDENCE clusters**: contacts sharing the exact same email address
+- **NEEDS REVIEW clusters**: contacts with the same full name but different emails
+- Real KPIs: Total People, Duplicate clusters (% of records), High confidence count, Needs review count
+- Dynamic cluster cards with radio-button "Keep?" selection (top contact pre-selected)
+- "Skip cluster" removes cluster from view without deleting anything
+- "Merge into selected" — deletes non-selected contacts via `DELETE /contacts/:id`
+- "Bulk-merge all high-confidence" — auto-deletes all extras in high-confidence clusters
+- Clean state card shown when no clusters remain: "Your data is clean ✓"
+- **Known limitation**: simplified merge (deletes duplicates without combining activities/deals — full merge deferred to Phase 2)
+
+**`settings-workspace.html` changes:**
+- Workspace name and slug pre-filled from `ss_workspace` localStorage (set during login/register)
+- Page subtitle shows real workspace name + creation date + plan
+- "Save changes" updates localStorage and refreshes subtitle with toast notification
 
 ---
 
