@@ -264,5 +264,13 @@ const Imports = {
   },
 };
 
+// ─── Audit Logs ──────────────────────────────────────────────────────
+const AuditLogs = {
+  async list(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/audit-logs${query ? "?" + query : ""}`);
+  },
+};
+
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, getUser };

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -14,11 +14,11 @@
         <div class="breadcrumb"><a href="settings.html">Workspace Admin</a><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><a href="settings-audit-log.html" class="current">Audit Log</a></div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
-          
+
         </div>
       </div>
       <div class="content ">
-        
+
   <div class="page-header">
     <div>
       <div class="eyebrow">M9 · F9.3</div>
@@ -33,23 +33,23 @@
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Total entries</div>
-      <div class="kpi-value">142,890</div>
-      <div class="kpi-delta">Since 14 May 2026</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-delta" id="kpi-total-sub">Loading…</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">This week</div>
-      <div class="kpi-value">8,247</div>
-      <div class="kpi-delta">1,178 / day avg</div>
+      <div class="kpi-value" id="kpi-week">—</div>
+      <div class="kpi-delta">Last 7 days</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Schema changes</div>
-      <div class="kpi-value">7</div>
-      <div class="kpi-delta">v1 → v3</div>
+      <div class="kpi-value" id="kpi-schema">—</div>
+      <div class="kpi-delta">Field / pipeline edits</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Role changes</div>
-      <div class="kpi-value">12</div>
-      <div class="kpi-delta">3 this week</div>
+      <div class="kpi-value" id="kpi-role">—</div>
+      <div class="kpi-delta">Permission changes</div>
     </div>
   </div>
 
@@ -58,122 +58,173 @@
     <div class="field-row">
       <div class="field">
         <label>Actor</label>
-        <input type="text" placeholder="Any user or system" />
+        <input type="text" id="filter-actor" placeholder="Any user or system" />
       </div>
       <div class="field">
-        <label>Object</label>
-        <input type="text" value="Deal · Acme — Annual License" />
+        <label>Object type</label>
+        <select id="filter-object">
+          <option value="">All</option>
+          <option value="Deal">Deal</option>
+          <option value="Contact">Contact</option>
+          <option value="Company">Company</option>
+          <option value="Task">Task</option>
+          <option value="Activity">Activity</option>
+          <option value="Import">Import</option>
+        </select>
       </div>
       <div class="field">
         <label>Action type</label>
-        <select><option>All</option><option>Field change</option><option>Stage move</option><option>Schema change</option></select>
-      </div>
-      <div class="field">
-        <label>Date range</label>
-        <input type="text" value="Last quarter" />
+        <select id="filter-action">
+          <option value="">All</option>
+          <option value="created">Created</option>
+          <option value="updated">Updated</option>
+          <option value="deleted">Deleted</option>
+          <option value="stage">Stage move</option>
+          <option value="won">Marked won</option>
+          <option value="lost">Marked lost</option>
+        </select>
       </div>
     </div>
     <div class="row mt-3 gap-2">
-      <button class="btn primary">Apply</button>
-      <button class="btn">Clear</button>
-      <span class="text-mono text-muted" style="font-size:11px; margin-left: auto;">7 ENTRIES MATCH</span>
+      <button class="btn primary" onclick="applyFilter()">Apply</button>
+      <button class="btn" onclick="clearFilter()">Clear</button>
+      <span class="text-mono text-muted" style="font-size:11px; margin-left: auto;" id="filter-count"></span>
     </div>
   </div>
 
   <table class="table">
     <thead>
       <tr>
-        <th>Timestamp (UTC)</th>
+        <th>Timestamp</th>
         <th>Actor</th>
         <th>Action</th>
         <th>Object</th>
-        <th>Diff</th>
         <th>IP</th>
-        <th></th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">26 May 09:32:14</td>
-        <td>system (sync)</td>
-        <td><span class="badge muted">ACTIVITY</span> meeting.created</td>
-        <td>Deal · Acme</td>
-        <td>+meeting #m_4821</td>
-        <td class="text-mono">10.0.0.1</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">25 May 14:12:08</td>
-        <td>Mayur S.</td>
-        <td><span class="badge muted">FIELD</span> stage.changed</td>
-        <td>Deal · Acme</td>
-        <td>Qualified → Proposal</td>
-        <td class="text-mono">115.241.x.x</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">25 May 14:12:08</td>
-        <td>Mayur S.</td>
-        <td><span class="badge muted">FIELD</span> probability.changed</td>
-        <td>Deal · Acme</td>
-        <td>30 → 60</td>
-        <td class="text-mono">115.241.x.x</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">22 May 16:30:42</td>
-        <td>Mayur S.</td>
-        <td><span class="badge muted">FIELD</span> competitor.changed</td>
-        <td>Deal · Acme</td>
-        <td>"" → "HubSpot"</td>
-        <td class="text-mono">115.241.x.x</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">22 May 16:29:53</td>
-        <td>Mayur S.</td>
-        <td><span class="badge muted">FIELD</span> amount.changed</td>
-        <td>Deal · Acme</td>
-        <td>$36,000 → $48,000</td>
-        <td class="text-mono">115.241.x.x</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">22 May 11:30:01</td>
-        <td>system (sync)</td>
-        <td><span class="badge muted">ACTIVITY</span> email.received</td>
-        <td>Deal · Acme</td>
-        <td>+email #e_3201</td>
-        <td class="text-mono">10.0.0.1</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
-      <tr>
-        <td class="text-mono" style="font-size:11px;">14 May 11:08:22</td>
-        <td>Mayur S.</td>
-        <td><span class="badge">CREATE</span> deal.created</td>
-        <td>Deal · Acme</td>
-        <td>Source: LinkedIn outbound</td>
-        <td class="text-mono">115.241.x.x</td>
-        <td><button class="btn sm">View</button></td>
-      </tr>
+    <tbody id="audit-tbody">
+      <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--ink-50);">Loading audit log…</td></tr>
     </tbody>
   </table>
 
-  <div class="empty-state-compact mt-5 mb-3">
-    <strong>Audit-row drill-down (E7, G9):</strong> clicking "View" on any row above now opens a slide-over with full request body, session ID, user-agent, IP geolocation, and related-record diffs.
-  </div>
-
   <div class="row mt-4">
-    <span class="text-mono text-muted" style="font-size:11px;">
-      ✓ All 7 entries cryptographically chained — any tampering would be detected
+    <span class="text-mono text-muted" style="font-size:11px;" id="audit-footer">
+      ✓ All entries cryptographically chained — any tampering would be detected
     </span>
   </div>
-  
+
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var _allLogs = [];
+
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      var d = new Date(iso);
+      return d.toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" }) +
+             " " + d.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
+    }
+
+    function actorLabel(log) {
+      if (log.actor) {
+        return log.actor.name || log.actor.email || "—";
+      }
+      return log.actorType === "system" ? "system" : "—";
+    }
+
+    function actionBadgeClass(action) {
+      if (!action) return "badge muted";
+      var a = action.toLowerCase();
+      if (a.includes("created")) return "badge";
+      if (a.includes("deleted")) return "badge warn";
+      if (a.includes("won"))     return "badge solid";
+      if (a.includes("lost"))    return "badge muted";
+      return "badge muted";
+    }
+
+    function renderRows(logs) {
+      var tbody = document.getElementById("audit-tbody");
+      document.getElementById("filter-count").textContent = logs.length + " ENTRIES SHOWN";
+      if (!logs.length) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--ink-50);'>No entries match the filter.</td></tr>";
+        return;
+      }
+      tbody.innerHTML = logs.map(function(log) {
+        return "<tr>" +
+          "<td class='text-mono' style='font-size:11px;'>" + fmtDate(log.createdAt) + "</td>" +
+          "<td>" + actorLabel(log) + "</td>" +
+          "<td><span class='" + actionBadgeClass(log.action) + "'>" + (log.objectType || "").toUpperCase() + "</span> " + (log.action || "—") + "</td>" +
+          "<td>" + (log.objectType || "—") + " · <span class='text-mono' style='font-size:11px;'>" + (log.objectId || "").slice(0, 12) + "…</span></td>" +
+          "<td class='text-mono' style='font-size:11px;'>" + (log.ip || "—") + "</td>" +
+          "</tr>";
+      }).join("");
+    }
+
+    function applyFilter() {
+      var actor  = (document.getElementById("filter-actor").value  || "").trim().toLowerCase();
+      var object = (document.getElementById("filter-object").value || "").toLowerCase();
+      var action = (document.getElementById("filter-action").value || "").toLowerCase();
+
+      var filtered = _allLogs.filter(function(log) {
+        if (object && (log.objectType || "").toLowerCase() !== object) return false;
+        if (action && (log.action || "").toLowerCase().indexOf(action) === -1) return false;
+        if (actor) {
+          var name = actorLabel(log).toLowerCase();
+          if (name.indexOf(actor) === -1) return false;
+        }
+        return true;
+      });
+      renderRows(filtered);
+    }
+
+    function clearFilter() {
+      document.getElementById("filter-actor").value  = "";
+      document.getElementById("filter-object").value = "";
+      document.getElementById("filter-action").value = "";
+      renderRows(_allLogs);
+    }
+
+    async function loadAuditLog() {
+      try {
+        var raw  = await SS_API.AuditLogs.list({ limit: 200 });
+        _allLogs = raw.auditLogs || raw.data || raw || [];
+
+        var total = _allLogs.length;
+        var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        var weekCount = _allLogs.filter(function(l) { return new Date(l.createdAt).getTime() > weekAgo; }).length;
+        var schemaCount = _allLogs.filter(function(l) {
+          var a = (l.action || "").toLowerCase();
+          return a.includes("schema") || a.includes("pipeline") || a.includes("field");
+        }).length;
+        var roleCount = _allLogs.filter(function(l) {
+          var a = (l.action || "").toLowerCase();
+          return a.includes("role") || (l.objectType || "").toLowerCase() === "role";
+        }).length;
+
+        document.getElementById("kpi-total").textContent     = total.toLocaleString();
+        document.getElementById("kpi-total-sub").textContent = total === 200 ? "Showing latest 200" : "All entries";
+        document.getElementById("kpi-week").textContent      = weekCount;
+        document.getElementById("kpi-schema").textContent    = schemaCount;
+        document.getElementById("kpi-role").textContent      = roleCount;
+
+        renderRows(_allLogs);
+
+        document.getElementById("audit-footer").textContent =
+          "✓ " + total + " entries loaded · Showing latest 200 · Append-only, cryptographically chained";
+
+      } catch (err) {
+        console.error("loadAuditLog:", err);
+        document.getElementById("audit-tbody").innerHTML =
+          "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--ink-50);'>Failed to load audit log.</td></tr>";
+      }
+    }
+
+    loadAuditLog();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
