@@ -105,7 +105,7 @@
     document.getElementById("today-date").textContent = days[now.getDay()] + " · " + now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
 
     var user = SS_API.getUser();
-    document.getElementById("greeting").textContent = greeting + (user ? ", " + user.name.split(" ")[0] + "." : ".");
+    document.getElementById("greeting").textContent = greeting + (user ? ", " + (user.firstName || (user.email||"").split("@")[0] || "") + "." : ".");
 
     function formatCurrency(amount) {
       if (amount >= 1000000) return "$" + (amount / 1000000).toFixed(1) + "M";
@@ -144,18 +144,22 @@
           return sum + Number(d.amount);
         }, 0);
 
-        document.getElementById("kpi-pipeline").textContent = formatCurrency(totalPipeline);
-        document.getElementById("kpi-commit").textContent = formatCurrency(commitTotal);
-        document.getElementById("kpi-activities").textContent = activitiesData.total;
-        document.getElementById("kpi-tasks").textContent = tasksData.total;
+        var totalActs  = (activitiesData.activities || []).length;
+        var totalTasks = (tasksData.tasks || []).length;
+        var totalDeals = (dealsData.deals || []).length;
+
+        document.getElementById("kpi-pipeline").textContent    = formatCurrency(totalPipeline);
+        document.getElementById("kpi-commit").textContent      = formatCurrency(commitTotal);
+        document.getElementById("kpi-activities").textContent  = totalActs;
+        document.getElementById("kpi-tasks").textContent       = totalTasks;
 
         // Day sub
         var overdueTasks = tasksData.tasks.filter(function(t) {
           return t.dueAt && new Date(t.dueAt) < new Date();
         });
         document.getElementById("day-sub").textContent =
-          tasksData.total + " open tasks · " +
-          dealsData.total + " deals · " +
+          totalTasks + " open tasks · " +
+          totalDeals + " deals · " +
           (overdueTasks.length > 0 ? overdueTasks.length + " overdue" : "nothing overdue ✓");
 
         // ── Today's tasks ─────────────────────────────────
@@ -207,7 +211,7 @@
           timeline.innerHTML = "<div style='text-align:center;padding:40px;color:var(--ink-50);'>No activities yet — log your first activity.</div>";
         } else {
           timeline.innerHTML = activitiesData.activities.map(function(a) {
-            var date = new Date(a.occurredAt).toLocaleDateString("en-GB", {
+            var date = new Date(a.occurredAt || a.createdAt).toLocaleDateString("en-GB", {
               day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
             });
             var typeLabel = a.type.toUpperCase();

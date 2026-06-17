@@ -183,8 +183,9 @@
         var sub    = document.getElementById("tasks-sub");
         var footer = document.getElementById("tasks-footer");
 
-        sub.textContent    = data.total + " " + currentTab + " tasks · Live from database";
-        footer.textContent = "SHOWING " + data.total + " TASKS";
+        var taskCount = (data.tasks || []).length;
+        sub.textContent    = taskCount + " " + currentTab + " tasks · Live from database";
+        footer.textContent = "SHOWING " + taskCount + " TASKS";
 
         if (data.tasks.length === 0) {
           tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:40px;color:var(--ink-50);'>" +
