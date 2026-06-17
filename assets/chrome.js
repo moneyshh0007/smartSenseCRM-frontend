@@ -260,7 +260,7 @@
   // 4. FORM TEMPLATES (for "+ New X" slide-overs)
   // ============================================================
   const Forms = {
-    "new-contact": () => ({
+    "new-contact": (ctx) => ({
       eyebrow: "M1 · F1.1 · New Person",
       title: "Add a new contact",
       body: `
@@ -544,6 +544,7 @@
           if (phone) payload.phone = phone;
           if (location) payload.location = location;
           if (linkedinUrl) payload.linkedinUrl = linkedinUrl;
+          if (ctx && ctx.companyId) payload.companyId = ctx.companyId;
           window.SS_API.Contacts.create(payload)
             .then(() => {
               toast("Contact created", { sub: firstName + " " + lastName + " added" });
@@ -666,6 +667,7 @@
           if (closeDate) payload.closeDate = closeDate;
           if (competitor) payload.competitor = competitor;
           if (source) payload.source = source;
+          if (ctx && ctx.companyId) payload.companyId = ctx.companyId;
           window.SS_API.Deals.create(payload)
             .then(() => {
               toast("Deal created", { sub: name + " added to " + stage });
@@ -725,6 +727,8 @@
         if (title && window.SS_API) {
           const payload = { title, priority };
           if (due) payload.dueAt = new Date(due).toISOString();
+          if (ctx && ctx.contactId) payload.contactId = ctx.contactId;
+          if (ctx && ctx.dealId) payload.dealId = ctx.dealId;
           window.SS_API.Tasks.create(payload)
             .then(() => {
               toast("Task created", { sub: "Visible in My Day and Tasks" });

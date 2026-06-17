@@ -38,8 +38,8 @@
       </div>
     </div>
     <div class="row gap-2">
-<button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-contact')">+ New contact</button>
-      <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-deal')">+ New deal</button>
+<button class="btn" onclick="if(window.SS_openSlide)window.SS_openSlide('new-contact', { companyId: companyId })">+ New contact</button>
+      <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-deal', { companyId: companyId, company: (COMPANY&&COMPANY.name)||'' })">+ New deal</button>
     </div>
   </div>
 
