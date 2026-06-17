@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 15)
+**Last updated:** 17 Jun 2026 (Phase 16)
 
 ---
 
@@ -39,6 +39,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 13 | My Day + Tasks QA | Fix greeting crash, undefined KPI counts, tasks count display | ✅ Complete |
 | 14 | Deals Table + Forecast | Wire deals-table.html and deals-forecast.html to live API | ✅ Complete |
 | 15 | Dedup + Settings Workspace | Client-side duplicate detection; settings-workspace populated from auth | ✅ Complete |
+| 16 | Audit Log | Backend GET /audit-logs route; settings-audit-log.html wired with KPIs + client-side filter | ✅ Complete |
 
 ---
 
@@ -577,6 +578,39 @@ getJob(jobId)
 
 ---
 
+### Phase 16 — Audit Log
+
+**Commits (backend):** `feat: add GET /audit-logs endpoint with workspace-scoped filtering`  
+**Commits (frontend):** `feat(phase-16): wire settings-audit-log to live GET /audit-logs endpoint`  
+**Backend:** `src/routes/audit-log.ts` (new), `src/server.ts` (registered)  
+**Frontend:** `settings-audit-log.html`, `assets/api.js`
+
+**Backend changes (`src/routes/audit-log.ts`):**
+- `GET /audit-logs` — authenticated, workspace-scoped
+- Query params: `objectType`, `objectId`, `actorId`, `action` (case-insensitive contains), `limit` (default 100)
+- Includes `actor` join: `{ id, name, email }` from User model
+- Returns `{ auditLogs: [...], total: N }`
+- Registered in `server.ts` alongside all other route modules
+
+**`assets/api.js` changes:**
+- Added `AuditLogs` namespace with `list(params)` method
+- Exported on `window.SS_API`
+
+**`settings-audit-log.html` changes:**
+- Removed all static rows; tbody now `id="audit-tbody"` — fully dynamic
+- KPI IDs wired: `kpi-total`, `kpi-week`, `kpi-schema`, `kpi-role`
+- `loadAuditLog()` loads latest 200 entries, computes KPIs client-side:
+  - **Total entries**: count of loaded logs
+  - **This week**: entries with `createdAt` > 7 days ago
+  - **Schema changes**: actions containing "schema", "pipeline", or "field"
+  - **Role changes**: actions/objectType containing "role"
+- Actor display: resolves `log.actor.name` or `log.actor.email` (system entries show "system")
+- Action badge: colour-coded (CREATE → solid, DELETE → warn, won → solid, etc.)
+- Client-side filter: Actor name (substring), Object type (dropdown), Action type (dropdown)
+- "Apply" / "Clear" buttons re-render without re-fetching
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
@@ -585,7 +619,8 @@ getJob(jobId)
 | Tasks page deep QA | Fixed count display bug; bulk complete, task detail edit, linked record nav all wired ✅ |
 | My Day dashboard | Fixed greeting crash + undefined KPI counts; all widgets wired to live API ✅ |
 | Activities page | Feed loads, type filter and advanced filter all wired ✅ |
-| Settings pages | Remain static prototype — backend integration deferred to Phase 2 |
+| Settings — Audit Log | `GET /audit-logs` wired; KPIs + client-side filter ✅ |
+| Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
 | Companies: pipeline value | Requires `GET /companies` to aggregate deal amounts (backend change needed) |
 | Notes: company-scoped | Activities model has no `companyId` — notes on company-detail show all workspace notes |
 
