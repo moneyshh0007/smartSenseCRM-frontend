@@ -23,7 +23,7 @@
     <div>
       <div class="eyebrow">M9 · F9.5</div>
       <h1 class="page-title mt-2">Workspace</h1>
-      <div class="page-sub">SmartSense · Created 14 May 2026 · 38 users · Business plan</div>
+      <div class="page-sub" id="ws-sub">Loading…</div>
     </div>
   </div>
 
@@ -74,11 +74,11 @@
     <div class="field-row">
       <div class="field">
         <label>Workspace name</label>
-        <input type="text" value="SmartSense" />
+        <input type="text" id="ws-name" value="" />
       </div>
       <div class="field">
-        <label>Workspace URL</label>
-        <input type="text" value="smartsense" />
+        <label>Workspace URL (slug)</label>
+        <input type="text" id="ws-slug" value="" />
       </div>
       <div class="field">
         <label>Time zone</label>
@@ -99,7 +99,7 @@
         <select><option>1 January</option><option>1 April</option><option>1 July</option></select>
       </div>
     </div>
-    <button class="btn primary">Save changes</button>
+    <button class="btn primary" onclick="saveWorkspace()">Save changes</button>
   </div>
 
   <div class="section-rule">
@@ -130,7 +130,54 @@
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    function loadWorkspace() {
+      try {
+        var ws   = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
+        var user = SS_API.getUser() || {};
+
+        var name = ws.name || "—";
+        var slug = ws.slug || "—";
+        var plan = ws.plan || "Business";
+
+        document.getElementById("ws-name").value = name;
+        document.getElementById("ws-slug").value = slug;
+
+        var created = ws.createdAt
+          ? new Date(ws.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
+          : "—";
+        document.getElementById("ws-sub").textContent =
+          name + " · Created " + created + " · " + plan + " plan";
+
+      } catch (err) {
+        console.error("loadWorkspace:", err);
+      }
+    }
+
+    function saveWorkspace() {
+      var name = (document.getElementById("ws-name").value || "").trim();
+      var slug = (document.getElementById("ws-slug").value || "").trim();
+      if (!name) { alert("Workspace name is required."); return; }
+      // Update localStorage so the page sub reflects the new name immediately
+      try {
+        var ws   = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
+        ws.name  = name;
+        ws.slug  = slug;
+        localStorage.setItem("ss_workspace", JSON.stringify(ws));
+        var plan = ws.plan || "Business";
+        var created = ws.createdAt
+          ? new Date(ws.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
+          : "—";
+        document.getElementById("ws-sub").textContent = name + " · Created " + created + " · " + plan + " plan";
+      } catch(e) {}
+      if (window.SS_toast) SS_toast("Workspace saved", { sub: name + " · Changes saved locally" });
+      else alert("Workspace saved.");
+    }
+
+    loadWorkspace();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>

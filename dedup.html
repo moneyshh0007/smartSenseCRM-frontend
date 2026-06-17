@@ -26,147 +26,229 @@
       <div class="page-sub">Fuzzy match across Name + Email + Phone · Last scan: 03 Jun 2026 · 09:15 · 47 clusters found</div>
     </div>
     <div class="row gap-2">
-      <button class="btn">Re-scan</button>
-      <button class="btn primary">Bulk-merge all high-confidence</button>
+      <button class="btn" onclick="runScan()">Re-scan</button>
+      <button class="btn primary" onclick="bulkMergeHighConf()">Bulk-merge all high-confidence</button>
     </div>
   </div>
 
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Total People</div>
-      <div class="kpi-value">1,847</div>
-      <div class="kpi-delta">After last import</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-delta">In database</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Duplicate clusters</div>
-      <div class="kpi-value">47</div>
-      <div class="kpi-delta">~2.5% of records</div>
+      <div class="kpi-value" id="kpi-clusters">—</div>
+      <div class="kpi-delta" id="kpi-clusters-sub">Scanning…</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">High confidence</div>
-      <div class="kpi-value">38</div>
-      <div class="kpi-delta">Safe to bulk-merge</div>
+      <div class="kpi-value" id="kpi-high">—</div>
+      <div class="kpi-delta">Same email address</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Needs review</div>
-      <div class="kpi-value">9</div>
-      <div class="kpi-delta">Manual decision required</div>
+      <div class="kpi-value" id="kpi-review">—</div>
+      <div class="kpi-delta">Same name, different email</div>
     </div>
   </div>
 
-  <div class="section-rule">
-    <span class="num">01</span>
-    <span class="title">Cluster: Sarah Chen (3 matches)</span>
-    <span class="line"></span>
-    <span class="badge solid">HIGH CONFIDENCE · 96%</span>
-  </div>
-
-  <div class="card">
-    <table class="table" style="margin: -16px;">
-      <thead>
-        <tr>
-          <th>Keep?</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Company</th>
-          <th>Created</th>
-          <th>Activities</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="background: var(--ink-03);">
-          <td><input type="radio" name="keep" checked /></td>
-          <td><strong>Sarah Chen</strong></td>
-          <td>sarah.chen@acme.com</td>
-          <td>+1 415 555 0117</td>
-          <td>Acme Corp</td>
-          <td>14 May 2026</td>
-          <td>23</td>
-        </tr>
-        <tr>
-          <td><input type="radio" name="keep" /></td>
-          <td>Sarah Chen</td>
-          <td>schen@acme.com</td>
-          <td>—</td>
-          <td>Acme Corp</td>
-          <td>18 May 2026</td>
-          <td>4</td>
-        </tr>
-        <tr>
-          <td><input type="radio" name="keep" /></td>
-          <td>S. Chen</td>
-          <td>sarah.chen@acme.com</td>
-          <td>+1 415 555 0117</td>
-          <td>Acme Corporation</td>
-          <td>20 May 2026 (CSV)</td>
-          <td>0</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="row gap-3 mt-4">
-    <button class="btn">Skip cluster</button>
-    <button class="btn primary">Merge into selected →</button>
-    <div class="text-muted" style="font-size: 11px; margin-left: auto;">
-      After merge: activities combined · references re-pointed · audit log entry written · old records soft-deleted (30d undo)
-    </div>
-  </div>
-
-  <div class="section-rule">
-    <span class="num">02</span>
-    <span class="title">Cluster: David Park (2 matches)</span>
-    <span class="line"></span>
-    <span class="badge solid">HIGH CONFIDENCE · 91%</span>
-  </div>
-
-  <div class="card">
-    <table class="table" style="margin: -16px;">
-      <thead>
-        <tr>
-          <th>Keep?</th><th>Name</th><th>Email</th><th>Title</th><th>Activities</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="background: var(--ink-03);">
-          <td><input type="radio" name="keep2" checked /></td>
-          <td><strong>David Park</strong></td>
-          <td>david.park@acme.com</td>
-          <td>CTO</td>
-          <td>12</td>
-        </tr>
-        <tr>
-          <td><input type="radio" name="keep2" /></td>
-          <td>David Park</td>
-          <td>dpark@acme.com</td>
-          <td>Chief Technology Officer</td>
-          <td>1</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="text-muted text-mono mt-6" style="font-size: 11px;">SHOWING 2 OF 47 CLUSTERS · 45 MORE TO REVIEW</div>
-
-  <div class="merge-result-card mt-6">
-    <div class="label">POST-MERGE RESULT STATE (A5)</div>
-    <div class="card-title mt-2">After bulk-merging 38 high-confidence clusters</div>
-    <div class="text-muted mt-2" style="font-size:12px;">
-      Result summary appears: "38 of 47 clusters merged · 84 records combined into 38 · 9 clusters need manual review."
-      Each merged cluster shows a 30-day Undo link. All merges audit-logged (F9.3). Click "Bulk-merge all high-confidence" above to see the confirmation slide-over (G1).
-    </div>
-  </div>
-
-  <div class="empty-state-compact mt-3">
-    <strong>"No duplicates" state (B1):</strong> when scan finds 0 clusters, the page shows "Your data is clean ✓ — no duplicates detected." with last-scan timestamp.
+  <div id="clusters-container">
+    <div style="padding:40px;text-align:center;color:var(--ink-50);font-size:13px;">Scanning contacts for duplicates…</div>
   </div>
   
       </div>
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var _clusters = [];
+    var _skipped  = new Set();
+
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    }
+
+    async function runScan() {
+      document.getElementById("clusters-container").innerHTML =
+        "<div style='padding:40px;text-align:center;color:var(--ink-50);font-size:13px;'>Scanning contacts for duplicates…</div>";
+      document.querySelector(".page-sub").textContent = "Email + name match · Scanning…";
+      _skipped = new Set();
+
+      try {
+        var raw      = await SS_API.Contacts.list();
+        var contacts = raw.contacts || raw.data || raw || [];
+
+        // ── Email clusters (HIGH CONFIDENCE) ─────────────────────────
+        var emailGroups = {};
+        contacts.forEach(function(c) {
+          if (!c.email) return;
+          var key = c.email.toLowerCase().trim();
+          if (!emailGroups[key]) emailGroups[key] = [];
+          emailGroups[key].push(c);
+        });
+        var highConf = Object.values(emailGroups)
+          .filter(function(g) { return g.length > 1; })
+          .map(function(g) { return { contacts: g, confidence: "HIGH" }; });
+
+        // ── Name clusters (NEEDS REVIEW) — not already in email clusters ──
+        var coveredIds = new Set();
+        highConf.forEach(function(cl) {
+          cl.contacts.forEach(function(c) { coveredIds.add(c.id); });
+        });
+
+        var nameGroups = {};
+        contacts.forEach(function(c) {
+          if (coveredIds.has(c.id)) return;
+          var fn  = (c.firstName || "").trim().toLowerCase();
+          var ln  = (c.lastName  || "").trim().toLowerCase();
+          var key = (fn + " " + ln).trim();
+          if (!key || key === " ") return;
+          if (!nameGroups[key]) nameGroups[key] = [];
+          nameGroups[key].push(c);
+        });
+        var needsReview = Object.values(nameGroups)
+          .filter(function(g) { return g.length > 1; })
+          .map(function(g) { return { contacts: g, confidence: "REVIEW" }; });
+
+        _clusters = highConf.concat(needsReview);
+
+        // ── KPIs ──────────────────────────────────────────────────────
+        var pct = contacts.length > 0
+          ? Math.round(_clusters.length / contacts.length * 100)
+          : 0;
+        document.getElementById("kpi-total").textContent        = contacts.length.toLocaleString();
+        document.getElementById("kpi-clusters").textContent     = _clusters.length;
+        document.getElementById("kpi-clusters-sub").textContent = "~" + pct + "% of records";
+        document.getElementById("kpi-high").textContent         = highConf.length;
+        document.getElementById("kpi-review").textContent       = needsReview.length;
+
+        var now = new Date().toLocaleString("en-GB", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+        document.querySelector(".page-sub").textContent =
+          "Email + name match · Last scan: " + now + " · " + _clusters.length + " cluster" +
+          (_clusters.length !== 1 ? "s" : "") + " found";
+
+        renderClusters();
+
+      } catch (err) {
+        console.error("Scan failed:", err);
+        document.getElementById("clusters-container").innerHTML =
+          "<div style='padding:40px;text-align:center;color:var(--ink-50);font-size:13px;'>Failed to load contacts. Please refresh.</div>";
+      }
+    }
+
+    function renderClusters() {
+      var container = document.getElementById("clusters-container");
+      var visible   = _clusters.map(function(c, i) { return { cl: c, idx: i }; })
+                               .filter(function(x) { return !_skipped.has(x.idx); });
+
+      if (!visible.length) {
+        container.innerHTML =
+          "<div class='card' style='text-align:center;padding:48px;'>" +
+            "<div style='font-size:32px;margin-bottom:12px;'>✓</div>" +
+            "<div style='font-size:15px;font-weight:600;'>Your data is clean</div>" +
+            "<div class='text-muted mt-2' style='font-size:13px;'>No duplicate contacts detected.</div>" +
+          "</div>";
+        return;
+      }
+
+      container.innerHTML = visible.map(function(x, visIdx) {
+        var cluster    = x.cl;
+        var realIdx    = x.idx;
+        var c0         = cluster.contacts[0];
+        var name       = ((c0.firstName || "") + " " + (c0.lastName || "")).trim() || "Unknown";
+        var isHigh     = cluster.confidence === "HIGH";
+        var badgeLabel = isHigh ? "HIGH CONFIDENCE · Same email" : "NEEDS REVIEW · Same name";
+        var badgeClass = isHigh ? "badge solid" : "badge";
+        var groupName  = "keep-" + realIdx;
+        var numStr     = visIdx + 1 < 10 ? "0" + (visIdx + 1) : String(visIdx + 1);
+
+        var rows = cluster.contacts.map(function(c, ci) {
+          return "<tr" + (ci === 0 ? " style='background:var(--ink-03);'" : "") + ">" +
+            "<td><input type='radio' name='" + groupName + "' value='" + c.id + "'" + (ci === 0 ? " checked" : "") + " /></td>" +
+            "<td><strong>" + (c.firstName || "") + " " + (c.lastName || "") + "</strong></td>" +
+            "<td>" + (c.email || "—") + "</td>" +
+            "<td>" + (c.phone || "—") + "</td>" +
+            "<td>" + (c.company ? c.company.name : "—") + "</td>" +
+            "<td>" + fmtDate(c.createdAt) + (c.source === "csv_import" ? " (CSV)" : "") + "</td>" +
+            "<td>—</td>" +
+            "</tr>";
+        }).join("");
+
+        return "<div class='section-rule'>" +
+            "<span class='num'>" + numStr + "</span>" +
+            "<span class='title'>Cluster: " + name + " (" + cluster.contacts.length + " matches)</span>" +
+            "<span class='line'></span>" +
+            "<span class='" + badgeClass + "'>" + badgeLabel + "</span>" +
+          "</div>" +
+          "<div class='card'>" +
+            "<table class='table' style='margin:-16px;'>" +
+              "<thead><tr><th>Keep?</th><th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th>Created</th><th>Activities</th></tr></thead>" +
+              "<tbody>" + rows + "</tbody>" +
+            "</table>" +
+          "</div>" +
+          "<div class='row gap-3 mt-4'>" +
+            "<button class='btn' onclick='skipCluster(" + realIdx + ")'>Skip cluster</button>" +
+            "<button class='btn primary' onclick='mergeCluster(" + realIdx + ")'>Merge into selected →</button>" +
+            "<div class='text-muted' style='font-size:11px;margin-left:auto;'>Deletes duplicate · keeps selected contact · audit-logged</div>" +
+          "</div>";
+      }).join("");
+    }
+
+    function skipCluster(idx) {
+      _skipped.add(idx);
+      renderClusters();
+      var remaining = _clusters.filter(function(_, i) { return !_skipped.has(i); });
+      document.getElementById("kpi-clusters").textContent = remaining.length;
+    }
+
+    async function mergeCluster(idx) {
+      var cluster = _clusters[idx];
+      if (!cluster) return;
+      var keepId  = ((document.querySelector("input[name='keep-" + idx + "']:checked") || {}).value || "");
+      if (!keepId) return;
+      var toDelete = cluster.contacts.filter(function(c) { return String(c.id) !== String(keepId); });
+      if (!confirm("Delete " + toDelete.length + " duplicate record" + (toDelete.length !== 1 ? "s" : "") + "?\n\n" +
+          "Note: a simplified merge — activities on deleted contacts will be removed. " +
+          "Full merge (combining activities) is coming in Phase 2.")) return;
+      try {
+        await Promise.all(toDelete.map(function(c) { return SS_API.Contacts.delete(c.id); }));
+        skipCluster(idx);
+      } catch (err) {
+        console.error("Merge error:", err);
+        alert("Could not delete all duplicates. Some may have linked deals.");
+      }
+    }
+
+    async function bulkMergeHighConf() {
+      var highVisible = _clusters
+        .map(function(c, i) { return { cl: c, idx: i }; })
+        .filter(function(x) { return !_skipped.has(x.idx) && x.cl.confidence === "HIGH"; });
+      if (!highVisible.length) { alert("No high-confidence clusters remaining."); return; }
+      if (!confirm("Auto-merge " + highVisible.length + " high-confidence cluster" +
+          (highVisible.length !== 1 ? "s" : "") + "?\n\nKeeps the first contact in each cluster, deletes the rest. Cannot be undone.")) return;
+      for (var i = 0; i < highVisible.length; i++) {
+        var x  = highVisible[i];
+        var toDelete = x.cl.contacts.slice(1);
+        try {
+          await Promise.all(toDelete.map(function(c) { return SS_API.Contacts.delete(c.id); }));
+          _skipped.add(x.idx);
+        } catch (e) {
+          console.error("Bulk merge error cluster " + x.idx, e);
+        }
+      }
+      renderClusters();
+      var remaining = _clusters.filter(function(_, i) { return !_skipped.has(i); });
+      document.getElementById("kpi-clusters").textContent = remaining.length;
+      document.getElementById("kpi-high").textContent     = remaining.filter(function(c) { return c.confidence === "HIGH"; }).length;
+    }
+
+    runScan();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>
