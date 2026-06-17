@@ -35,22 +35,22 @@
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Closed Won (YTD)</div>
-      <div class="kpi-value">$452k</div>
-      <div class="kpi-delta up">100% — booked</div>
+      <div class="kpi-value" id="kpi-won">—</div>
+      <div class="kpi-delta up" id="kpi-won-sub">Booked</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Commit</div>
-      <div class="kpi-value">$310k</div>
+      <div class="kpi-value" id="kpi-commit">—</div>
       <div class="kpi-delta">High-confidence open deals</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Best Case</div>
-      <div class="kpi-value">$214k</div>
+      <div class="kpi-value" id="kpi-bestcase">—</div>
       <div class="kpi-delta">Stretch goal</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Pipeline</div>
-      <div class="kpi-value">$487k</div>
+      <div class="kpi-value" id="kpi-pipeline">—</div>
       <div class="kpi-delta">All open</div>
     </div>
   </div>
@@ -69,32 +69,8 @@
     <span class="line"></span>
   </div>
 
-  <div class="card">
-    <div class="bar-row">
-      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Closed Won</div>
-      <div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div>
-      <div class="num">$452,000</div>
-    </div>
-    <div class="bar-row">
-      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Commit</div>
-      <div class="bar-track"><div class="bar-fill" style="width:68%;"></div></div>
-      <div class="num">$310,000</div>
-    </div>
-    <div class="bar-row">
-      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Best Case</div>
-      <div class="bar-track"><div class="bar-fill muted" style="width:47%;"></div></div>
-      <div class="num">$214,000</div>
-    </div>
-    <div class="bar-row">
-      <div class="label" style="font-size:13px;color:var(--ink);font-weight:500;">Pipeline</div>
-      <div class="bar-track"><div class="bar-fill light" style="width:100%;"></div></div>
-      <div class="num">$487,000</div>
-    </div>
-    <div class="bar-row">
-      <div class="label" style="font-size:13px;color:var(--ink-50);">Omitted</div>
-      <div class="bar-track"><div class="bar-fill light" style="width:12%;"></div></div>
-      <div class="num">$56,000</div>
-    </div>
+  <div class="card" id="rollup-card">
+    <div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Loading forecast…</div>
   </div>
 
   <div class="section-rule">
@@ -103,7 +79,7 @@
     <span class="line"></span>
   </div>
 
-  <table class="table">
+  <table class="table" id="forecast-table">
     <thead>
       <tr>
         <th>Category</th>
@@ -112,17 +88,11 @@
         <th class="num">Amount</th>
         <th class="num">Weighted</th>
         <th>Close</th>
-        <th>Rep</th>
+        <th>Owner</th>
       </tr>
     </thead>
-    <tbody>
-      <tr><td><span class="badge solid">COMMIT</span></td><td>Hooli — Multi-year</td><td>Negotiation</td><td class="num">$28,000</td><td class="num">$23,800</td><td>10 Jun</td><td>Mayur S.</td></tr>
-      <tr><td><span class="badge solid">COMMIT</span></td><td>Soylent Corp</td><td>Negotiation</td><td class="num">$16,500</td><td class="num">$14,025</td><td>5 Jun</td><td>Sarah K.</td></tr>
-      <tr><td><span class="badge solid">COMMIT</span></td><td>Acme — Annual License</td><td>Proposal</td><td class="num">$48,000</td><td class="num">$28,800</td><td>30 Jun</td><td>Mayur S.</td></tr>
-      <tr><td><span class="badge">BEST CASE</span></td><td>Northwind — Multi-year</td><td>Proposal</td><td class="num">$96,000</td><td class="num">$57,600</td><td>15 Jul</td><td>Mayur S.</td></tr>
-      <tr><td><span class="badge">BEST CASE</span></td><td>Pied Piper — Enterprise</td><td>Proposal</td><td class="num">$43,000</td><td class="num">$25,800</td><td>15 Jul</td><td>Mayur S.</td></tr>
-      <tr><td><span class="badge muted">PIPELINE</span></td><td>Vellichor Ltd — Annual</td><td>Qualified</td><td class="num">$36,000</td><td class="num">$10,800</td><td>30 Jun</td><td>Mayur S.</td></tr>
-      <tr><td><span class="badge muted">OMITTED</span></td><td>Initech — Enterprise</td><td>Qualified</td><td class="num">$72,000</td><td class="num">—</td><td>30 Jul</td><td>Sarah K.</td></tr>
+    <tbody id="forecast-tbody">
+      <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-50);">Loading…</td></tr>
     </tbody>
   </table>
 
@@ -133,49 +103,12 @@
     <a href="#" class="text-muted text-mono" style="font-size: 11px;">F2.6 ↗</a>
   </div>
 
-  <div class="split-2">
+  <div class="split-2" id="wl-analysis">
     <div class="card">
-      <div class="card-head">
-        <div class="card-title">Loss reasons</div>
-        <span class="text-muted text-mono" style="font-size:11px;">18 LOST DEALS</span>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">Lost to competitor — HubSpot</div>
-        <div class="bar-track"><div class="bar-fill" style="width:55%;"></div></div>
-        <div class="num">10</div>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">Budget / Timing</div>
-        <div class="bar-track"><div class="bar-fill" style="width:30%;"></div></div>
-        <div class="num">5</div>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">No decision (status quo)</div>
-        <div class="bar-track"><div class="bar-fill muted" style="width:15%;"></div></div>
-        <div class="num">3</div>
-      </div>
+      <div style="padding:24px;text-align:center;color:var(--ink-50);font-size:13px;">Loading…</div>
     </div>
-
     <div class="card">
-      <div class="card-head">
-        <div class="card-title">Win reasons</div>
-        <span class="text-muted text-mono" style="font-size:11px;">13 WON DEALS</span>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">Product fit / features</div>
-        <div class="bar-track"><div class="bar-fill" style="width:62%;"></div></div>
-        <div class="num">8</div>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">Speed of evaluation</div>
-        <div class="bar-track"><div class="bar-fill" style="width:23%;"></div></div>
-        <div class="num">3</div>
-      </div>
-      <div class="bar-row">
-        <div class="label" style="font-size:13px;color:var(--ink);">Pricing</div>
-        <div class="bar-track"><div class="bar-fill muted" style="width:15%;"></div></div>
-        <div class="num">2</div>
-      </div>
+      <div style="padding:24px;text-align:center;color:var(--ink-50);font-size:13px;">Loading…</div>
     </div>
   </div>
   
@@ -183,7 +116,157 @@
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
+  <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var STAGE_PROB = { Discovery:10, Qualified:30, Proposal:60, Negotiation:85, "Closed Won":100, "Closed Lost":0 };
+
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short" });
+    }
+    function fmtCurrency(n) {
+      n = Number(n || 0);
+      if (n >= 1000000) return "$" + (n/1000000).toFixed(1) + "M";
+      if (n >= 1000)    return "$" + Math.round(n/1000) + "k";
+      return "$" + n;
+    }
+    function fmt$(n) { return "$" + Number(n||0).toLocaleString(); }
+
+    function barRow(label, amount, maxAmount, fillClass) {
+      var pct = maxAmount > 0 ? Math.round(amount / maxAmount * 100) : 0;
+      return "<div class='bar-row'>" +
+        "<div class='label' style='font-size:13px;color:var(--ink);font-weight:500;'>" + label + "</div>" +
+        "<div class='bar-track'><div class='bar-fill" + (fillClass ? " " + fillClass : "") + "' style='width:" + pct + "%;'></div></div>" +
+        "<div class='num'>" + fmtCurrency(amount) + "</div>" +
+        "</div>";
+    }
+
+    async function loadForecast() {
+      try {
+        var raw   = await SS_API.Deals.list();
+        var deals = raw.deals || raw.data || raw || [];
+
+        var won      = deals.filter(function(d) { return d.stage === "Closed Won"; });
+        var lost     = deals.filter(function(d) { return d.stage === "Closed Lost"; });
+        var open     = deals.filter(function(d) { return d.stage !== "Closed Won" && d.stage !== "Closed Lost"; });
+
+        var wonAmt   = won.reduce(function(s,d) { return s + Number(d.amount||0); }, 0);
+        var pipeline = open.reduce(function(s,d) { return s + Number(d.amount||0); }, 0);
+
+        // Forecast categories (backend uses string, normalise case)
+        function isCat(d, cat) {
+          var fc = (d.forecastCategory || "").toLowerCase().replace(/[_\s-]/g,"");
+          return fc === cat;
+        }
+        var commitDeals    = open.filter(function(d) { return isCat(d,"commit"); });
+        var bestCaseDeals  = open.filter(function(d) { return isCat(d,"bestcase"); });
+        var omittedDeals   = open.filter(function(d) { return isCat(d,"omitted"); });
+        var pipelineDeals  = open.filter(function(d) {
+          var fc = (d.forecastCategory || "").toLowerCase().replace(/[_\s-]/g,"");
+          return !fc || fc === "pipeline";
+        });
+
+        var commitAmt   = commitDeals.reduce(function(s,d)   { return s + Number(d.amount||0); }, 0);
+        var bestCaseAmt = bestCaseDeals.reduce(function(s,d) { return s + Number(d.amount||0); }, 0);
+        var omittedAmt  = omittedDeals.reduce(function(s,d)  { return s + Number(d.amount||0); }, 0);
+
+        // KPIs
+        document.getElementById("kpi-won").textContent      = fmtCurrency(wonAmt);
+        document.getElementById("kpi-won-sub").textContent  = won.length + " deal" + (won.length!==1?"s":"") + " booked";
+        document.getElementById("kpi-commit").textContent   = fmtCurrency(commitAmt);
+        document.getElementById("kpi-bestcase").textContent = fmtCurrency(bestCaseAmt);
+        document.getElementById("kpi-pipeline").textContent = fmtCurrency(pipeline);
+
+        // Roll-up bar chart
+        var maxBar = Math.max(wonAmt, pipeline, 1);
+        document.getElementById("rollup-card").innerHTML =
+          barRow("Closed Won", wonAmt, maxBar, "") +
+          barRow("Commit",     commitAmt,   maxBar, "") +
+          barRow("Best Case",  bestCaseAmt, maxBar, "muted") +
+          barRow("Pipeline",   pipeline,    maxBar, "light") +
+          (omittedAmt > 0 ? barRow("Omitted", omittedAmt, maxBar, "light") : "");
+
+        // By category table
+        var tbody = document.getElementById("forecast-tbody");
+        var allCatDeals = commitDeals.concat(bestCaseDeals).concat(pipelineDeals).concat(omittedDeals);
+        if (!allCatDeals.length) {
+          tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;padding:32px;color:var(--ink-50);'>No open deals.</td></tr>";
+        } else {
+          var catOrder = [
+            { key:"commit",   label:"COMMIT",    cls:"badge solid",  deals: commitDeals },
+            { key:"bestcase", label:"BEST CASE", cls:"badge",        deals: bestCaseDeals },
+            { key:"pipeline", label:"PIPELINE",  cls:"badge muted",  deals: pipelineDeals },
+            { key:"omitted",  label:"OMITTED",   cls:"badge muted",  deals: omittedDeals },
+          ];
+          var rows = [];
+          catOrder.forEach(function(cat) {
+            cat.deals.forEach(function(d) {
+              var prob     = d.probability || STAGE_PROB[d.stage] || 0;
+              var weighted = Math.round(Number(d.amount||0) * prob / 100);
+              var owner    = d.owner ? ((d.owner.firstName||"") + " " + (d.owner.lastName||"")).trim() : "—";
+              rows.push("<tr style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
+                "<td><span class='" + cat.cls + "'>" + cat.label + "</span></td>" +
+                "<td>" + d.name + "</td>" +
+                "<td>" + (d.stage||"—") + "</td>" +
+                "<td class='num'>" + fmt$(d.amount) + "</td>" +
+                "<td class='num'>" + (weighted > 0 ? fmt$(weighted) : "—") + "</td>" +
+                "<td>" + fmtDate(d.closeDate || d.expectedCloseDate) + "</td>" +
+                "<td>" + owner + "</td>" +
+                "</tr>");
+            });
+          });
+          tbody.innerHTML = rows.join("") || "<tr><td colspan='7' style='text-align:center;padding:32px;color:var(--ink-50);'>No deals in any forecast category.</td></tr>";
+        }
+
+        // Won/Lost analysis
+        var wlEl = document.getElementById("wl-analysis");
+
+        // Lost reasons — group by lostReason field
+        var lostReasons = {};
+        lost.forEach(function(d) {
+          var reason = (d.lostReason || "Not specified").trim() || "Not specified";
+          lostReasons[reason] = (lostReasons[reason] || 0) + 1;
+        });
+        var lostSorted = Object.keys(lostReasons).sort(function(a,b) { return lostReasons[b] - lostReasons[a]; });
+        var maxLost = lostSorted.length ? lostReasons[lostSorted[0]] : 1;
+        var lostHtml = lostSorted.length
+          ? lostSorted.slice(0,5).map(function(r) {
+              var pct = Math.round(lostReasons[r] / maxLost * 100);
+              return "<div class='bar-row'>" +
+                "<div class='label' style='font-size:12px;color:var(--ink);'>" + r + "</div>" +
+                "<div class='bar-track'><div class='bar-fill' style='width:" + pct + "%;'></div></div>" +
+                "<div class='num'>" + lostReasons[r] + "</div>" +
+                "</div>";
+            }).join("")
+          : "<div style='padding:16px 0;color:var(--ink-50);font-size:13px;'>No lost deals yet.</div>";
+
+        var wonHtml = won.length
+          ? "<div style='font-size:13px;color:var(--ink-50);'>Won " + won.length + " deal" + (won.length!==1?"s":"") + " worth " + fmtCurrency(wonAmt) + " total.</div>"
+          : "<div style='padding:16px 0;color:var(--ink-50);font-size:13px;'>No won deals yet.</div>";
+
+        wlEl.innerHTML =
+          "<div class='card'>" +
+            "<div class='card-head'>" +
+              "<div class='card-title'>Loss reasons</div>" +
+              "<span class='text-muted text-mono' style='font-size:11px;'>" + lost.length + " LOST DEALS</span>" +
+            "</div>" + lostHtml +
+          "</div>" +
+          "<div class='card'>" +
+            "<div class='card-head'>" +
+              "<div class='card-title'>Won deals</div>" +
+              "<span class='text-muted text-mono' style='font-size:11px;'>" + won.length + " WON DEALS</span>" +
+            "</div>" + wonHtml +
+          "</div>";
+
+      } catch (err) {
+        console.error("loadForecast:", err);
+        document.getElementById("kpi-pipeline").textContent = "Error";
+      }
+    }
+
+    loadForecast();
+  </script>
   <script src="assets/chrome.js"></script>
 </body>
 </html>

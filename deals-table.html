@@ -27,30 +27,30 @@
     </div>
     <div class="row gap-2">
       <button class="btn">Edit columns</button>
-      <button class="btn primary">+ New deal</button>
+      <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-deal')">+ New deal</button>
     </div>
   </div>
 
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Total deals</div>
-      <div class="kpi-value">47</div>
+      <div class="kpi-value" id="kpi-total">—</div>
       <div class="kpi-delta">All pipelines</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Open pipeline</div>
-      <div class="kpi-value">$487k</div>
+      <div class="kpi-value" id="kpi-pipeline">—</div>
       <div class="kpi-delta">Excl. closed</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Avg deal size</div>
-      <div class="kpi-value">$26.4k</div>
+      <div class="kpi-value" id="kpi-avg">—</div>
       <div class="kpi-delta">All deal types</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Win rate Q2</div>
-      <div class="kpi-value">68%</div>
-      <div class="kpi-delta up">+4 pp vs Q1</div>
+      <div class="kpi-label">Win rate (all time)</div>
+      <div class="kpi-value" id="kpi-winrate">—</div>
+      <div class="kpi-delta" id="kpi-winrate-sub">Won vs closed</div>
     </div>
   </div>
 
@@ -77,7 +77,6 @@
         <th class="num">Amount</th>
         <th>Probability</th>
         <th>Close date</th>
-        <th>Competitor</th>
         <th>Owner</th>
         <th>Days in stage</th>
       </tr>
@@ -206,12 +205,8 @@
     </tbody>
   </table>
 
-  <div class="empty-state-compact mt-5 mb-5">
-    <strong>Empty states designed (B1, B2):</strong> 0 deals → onboarding CTAs (Create deal, Set up pipeline).
-    Filter returns 0 → "No deals match — clear or refine." Also includes <a href="deals-table-junior.html">Junior Rep view</a> demonstrating field- and record-level RBAC.
-  </div>
   <div class="row between mt-5">
-    <div class="text-muted text-mono" style="font-size: 11px;">SHOWING 10 OF 47 · <strong style="color:var(--ink)">$405,500 TOTAL</strong> on screen</div>
+    <div class="text-muted text-mono" style="font-size: 11px;" id="dt-footer">Loading…</div>
     <div class="row gap-2">
       <button class="btn sm">← Prev</button>
       <button class="btn sm">Next →</button>
@@ -222,8 +217,96 @@
     </main>
   </div>
   <script src="assets/api.js"></script>
-  <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
   <script>
+    if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
+
+    var STAGE_PROB = { Discovery:10, Qualified:30, Proposal:60, Negotiation:85, "Closed Won":100, "Closed Lost":0 };
+
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      return new Date(iso).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    }
+    function fmtCurrency(n) {
+      n = Number(n || 0);
+      if (n >= 1000000) return "$" + (n/1000000).toFixed(1) + "M";
+      if (n >= 1000)    return "$" + Math.round(n/1000) + "k";
+      return "$" + n;
+    }
+    function fmt$(n) { return "$" + Number(n||0).toLocaleString(); }
+
+    var _allDeals = [];
+
+    async function loadDealsTable() {
+      try {
+        var raw   = await SS_API.Deals.list();
+        _allDeals = raw.deals || raw.data || raw || [];
+
+        var closedWon  = _allDeals.filter(function(d) { return d.stage === "Closed Won"; });
+        var closedLost = _allDeals.filter(function(d) { return d.stage === "Closed Lost"; });
+        var open       = _allDeals.filter(function(d) { return d.stage !== "Closed Won" && d.stage !== "Closed Lost"; });
+        var pipeline   = open.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+        var totalAmt   = _allDeals.reduce(function(s, d) { return s + Number(d.amount || 0); }, 0);
+        var avgSize    = _allDeals.length > 0 ? Math.round(totalAmt / _allDeals.length) : 0;
+        var closedTotal = closedWon.length + closedLost.length;
+        var winRate    = closedTotal > 0 ? Math.round(closedWon.length / closedTotal * 100) : 0;
+
+        document.querySelector(".page-sub").textContent =
+          "Table view · " + _allDeals.length + " deals · Live from database";
+        document.getElementById("kpi-total").textContent    = _allDeals.length;
+        document.getElementById("kpi-pipeline").textContent = fmtCurrency(pipeline);
+        document.getElementById("kpi-avg").textContent      = fmtCurrency(avgSize);
+        document.getElementById("kpi-winrate").textContent  = winRate + "%";
+        document.getElementById("kpi-winrate-sub").textContent =
+          closedWon.length + " won / " + closedTotal + " closed";
+
+        renderRows(_allDeals);
+      } catch (err) {
+        console.error("loadDealsTable:", err);
+        document.querySelector(".page-sub").textContent = "Failed to load deals.";
+      }
+    }
+
+    function renderRows(deals) {
+      var tbody = document.querySelector(".table tbody");
+      var footer = document.querySelector(".row.between.mt-5 .text-mono.text-muted");
+
+      if (!deals.length) {
+        tbody.innerHTML = "<tr><td colspan='9' style='text-align:center;padding:40px;color:var(--ink-50);'>No deals yet. Create the first one →</td></tr>";
+        if (footer) footer.textContent = "0 DEALS";
+        return;
+      }
+
+      tbody.innerHTML = deals.map(function(d) {
+        var days = d.updatedAt
+          ? Math.max(1, Math.floor((Date.now() - new Date(d.updatedAt).getTime()) / 86400000))
+          : "—";
+        var rotting    = typeof days === "number" && days > 21;
+        var prob       = d.probability || STAGE_PROB[d.stage] || 0;
+        var stageClass = d.stage === "Closed Won"  ? "badge solid" :
+                         d.stage === "Closed Lost" ? "badge muted" : "badge";
+        var rowClass   = rotting ? " class='warn'" : "";
+        var ownerName  = d.owner
+          ? ((d.owner.firstName || "") + " " + (d.owner.lastName || "")).trim()
+          : "—";
+        return "<tr" + rowClass + " style='cursor:pointer;' onclick=\"window.location.href='deal-detail?id=" + d.id + "'\">" +
+          "<td><input type='checkbox' onclick='event.stopPropagation()' /></td>" +
+          "<td><strong>" + d.name + "</strong>" + (rotting ? " <span class='badge warn' style='font-size:9px;'>ROTTING</span>" : "") + "</td>" +
+          "<td>" + (d.company ? d.company.name : "—") + "</td>" +
+          "<td><span class='" + stageClass + "'>" + (d.stage || "—") + "</span></td>" +
+          "<td class='num'>" + fmt$(d.amount) + "</td>" +
+          "<td class='num'>" + prob + "%</td>" +
+          "<td>" + fmtDate(d.closeDate || d.expectedCloseDate) + "</td>" +
+          "<td>" + ownerName + "</td>" +
+          "<td class='num" + (rotting ? " warn" : "") + "'>" + days + "</td>" +
+          "</tr>";
+      }).join("");
+
+      if (footer) footer.textContent = "SHOWING " + deals.length + " DEALS";
+    }
+
+    window.SS_loadDeals = loadDealsTable;
+    loadDealsTable();
+
     var _dtGrouped = false;
     function dtToggleGroup(btn) {
       _dtGrouped = !_dtGrouped;
