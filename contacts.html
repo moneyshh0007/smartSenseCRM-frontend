@@ -370,7 +370,7 @@
         return;
       }
       tbody.innerHTML = contacts.map(function(c) {
-        var initials = c.firstName[0] + c.lastName[0];
+        var initials = ((c.firstName||"?")[0] + (c.lastName||"?")[0]).toUpperCase();
         var company  = c.company ? c.company.name : "—";
         var title    = c.title || "—";
         var source   = c.source || "manual";
@@ -391,8 +391,8 @@
       try {
         const data = await SS_API.Contacts.list();
         const sub = document.getElementById("contacts-sub");
-        sub.textContent = data.total + " Contacts · Live from database";
         _allContacts = data.contacts || [];
+        sub.textContent = _allContacts.length + " Contacts · Live from database";
         renderContacts(filteredContacts());
       } catch (err) {
         console.error("Failed to load contacts:", err);

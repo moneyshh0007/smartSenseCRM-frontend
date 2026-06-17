@@ -217,12 +217,19 @@
           e.preventDefault();
           col.classList.remove('drag-over');
           if (!_draggedCard || _draggedCard.parentElement === col) return;
-          var oldCol = _draggedCard.parentElement;
+          var oldCol    = _draggedCard.parentElement;
+          var newStage  = col.getAttribute('data-stage');
+          var dealId    = _draggedCard.getAttribute('data-deal-id');
           var emptyInCol = col.querySelector('.kanban-empty');
           if (emptyInCol) col.insertBefore(_draggedCard, emptyInCol);
           else col.appendChild(_draggedCard);
           refreshColState(oldCol);
           refreshColState(col);
+          if (dealId && newStage) {
+            SS_API.Deals.update(dealId, { stage: newStage }).catch(function(err) {
+              console.error("Stage move failed:", err);
+            });
+          }
         });
       });
     }
@@ -231,7 +238,7 @@
       try {
         const data = await SS_API.Deals.list();
         const sub = document.getElementById("deals-sub");
-        sub.textContent = "Direct Sales pipeline · " + data.total + " deals · Live from database";
+        sub.textContent = "Direct Sales pipeline · " + data.deals.length + " deals · Live from database";
 
         // Group by stage
         var grouped = {
@@ -270,6 +277,7 @@
           deals.forEach(function(d) {
             var card = document.createElement("div");
             card.className = "kanban-card";
+            card.setAttribute("data-deal-id", d.id);
             if (stage === "Closed Lost") card.style.opacity = "0.55";
             if (stage === "Closed Won") card.style.opacity = "0.65";
             if (["Qualified", "Proposal", "Negotiation"].indexOf(stage) !== -1 && d.updatedAt) {
@@ -325,7 +333,7 @@
           : pipeline >= 1000 ? "$" + Math.round(pipeline / 1000) + "k" : "$" + pipeline;
 
         document.getElementById("kpi-pipeline").textContent  = pipelineStr;
-        document.getElementById("kpi-total").textContent     = data.total;
+        document.getElementById("kpi-total").textContent     = data.deals.length;
         document.getElementById("kpi-total-sub").textContent = openDeals.length + " open · " + (data.deals.filter(function(d){ return d.stage === "Closed Won"; }).length) + " won";
         document.getElementById("kpi-stalled").textContent   = stalledCount;
         document.getElementById("kpi-closing").textContent   = closingThisMonth;
