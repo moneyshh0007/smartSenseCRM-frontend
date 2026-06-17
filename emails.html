@@ -580,8 +580,8 @@
             to:           m.to.length > 0 ? (m.to[0].name || m.to[0].email) : "",
             toEmail:      m.to.length > 0 ? m.to[0].email : "",
             subject:      m.subject || "(no subject)",
-            preview:      m.snippet || "",
-            body:         m.bodyText || m.snippet || "",
+            preview:      decodeHtmlEntities(m.snippet || ""),
+            body:         decodeHtmlEntities(m.bodyText || m.snippet || ""),
             date:         m.date,
             dateLabel:    formatEmailTime(m.date),
             linkedContact: m.linkedContactName || "",
@@ -825,6 +825,13 @@
     function escHtml(str) {
       if (!str) return "";
       return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function decodeHtmlEntities(str) {
+      if (!str) return "";
+      var el = document.createElement("textarea");
+      el.innerHTML = str;
+      return el.value;
     }
 
     // ── Email actions ──────────────────────────────────────────────
