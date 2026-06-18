@@ -938,75 +938,27 @@
           var name   = nameEl && nameEl.value.trim();
           if (!name) { toast("Pipeline name is required", { sub: "Enter a name and try again" }); return; }
 
-          var desc   = descEl ? descEl.value.trim() : '';
-          var vis    = visEl  ? visEl.value : 'All roles';
-
-          // Collect stages from rows
           var stages = [];
-          document.querySelectorAll('#np-stages .np-stage-row').forEach(function(row) {
+          document.querySelectorAll('#np-stages .np-stage-row').forEach(function(row, i) {
             var inputs = row.querySelectorAll('input[type=text]');
             var stageName = inputs[0] ? inputs[0].value.trim() : '';
-            var prob      = inputs[1] ? inputs[1].value.trim() : '—';
-            if (stageName) stages.push({ name: stageName, prob: prob });
+            var probStr   = inputs[1] ? inputs[1].value.replace('%', '').trim() : '0';
+            var prob      = parseInt(probStr, 10) || 0;
+            if (stageName) stages.push({ name: stageName, probability: prob, order: i });
           });
 
-          var stageCount = stages.length;
-          var stageNames = stages.map(function(s) { return s.name; }).join(' · ') || '—';
+          if (!stages.length) { toast("Add at least one stage", { sub: "A pipeline needs at least one stage" }); return; }
+          if (!window.SS_API) { toast("Not connected to server"); return; }
 
-          // Build stage table rows
-          var stageRows = stages.map(function(s, i) {
-            return '<tr><td>' + (i + 1) + '</td><td><strong>' + s.name + '</strong></td>' +
-              '<td class="num">' + s.prob + '</td><td>0</td><td class="num">—</td><td>—</td></tr>';
-          }).join('');
-
-          var stageNameList = stages.map(function(s) { return s.name; }).join(' · ') || '—';
-          var newId = 'pipeline-' + Date.now();
-
-          // Register in PIPELINE_DATA so Settings panel works
-          if (window.PIPELINE_DATA) {
-            window.PIPELINE_DATA[newId] = {
-              name: name,
-              visibility: vis,
-              isDefault: false,
-              stages: stages.map(function(s) { return { name: s.name, prob: parseInt(s.prob) || 0, deals: 0, value: '—', required: '—' }; })
-            };
-          }
-
-          // Build compact card matching existing pipeline-card style
-          var cardHtml =
-            '<div class="card mb-5 pipeline-card" data-pipeline-id="' + newId + '">' +
-              '<div class="card-head"><div>' +
-                '<div class="card-title">' + name + '</div>' +
-                '<div class="card-sub">' + stageCount + ' stages · 0 open deals · Visible to: ' + vis + '</div>' +
-              '</div>' +
-              '<div class="row gap-2">' +
-                '<span class="badge solid default-badge" style="display:none;">DEFAULT</span>' +
-                '<button class="btn sm" onclick="openPipelineSettings(\'' + newId + '\')">Settings</button>' +
-              '</div></div>' +
-              (desc ? '<div class="text-muted mt-2" style="font-size:12px;">' + desc + '</div>' : '') +
-              '<div class="text-muted mt-3 row gap-3" style="font-size:12px;">' +
-                '<span><strong>Stages:</strong> ' + stageNameList + '</span>' +
-                '<span><strong>Created:</strong> Just now</span>' +
-              '</div>' +
-            '</div>';
-
-          var allCards = document.querySelectorAll('.card.mb-5');
-          var anchor   = allCards[allCards.length - 1];
-          if (anchor) {
-            anchor.insertAdjacentHTML('afterend', cardHtml);
-          } else {
-            var content = document.querySelector('.content');
-            if (content) content.insertAdjacentHTML('beforeend', cardHtml);
-          }
-
-          // Update page subtitle
-          var pageSub = document.querySelector('.page-sub');
-          if (pageSub) {
-            var total = document.querySelectorAll('.card.mb-5').length;
-            pageSub.textContent = total + ' pipelines · Each with its own stages, probabilities, and role-scoped visibility';
-          }
-
-          toast("Pipeline created", { sub: name + ' · ' + stageCount + ' stages added' });
+          window.SS_API.Pipelines.create({ name: name, stages: stages })
+            .then(function() {
+              if (window.SS_reloadPipelines) window.SS_reloadPipelines();
+              toast("Pipeline created", { sub: name + ' · ' + stages.length + ' stages' });
+              if (window.SS_closeSlide) window.SS_closeSlide();
+            })
+            .catch(function(e) {
+              toast("Failed to create pipeline", { sub: (e && e.message) || "Try again" });
+            });
         },
       };
     },
@@ -1676,8 +1628,9 @@
     "pipeline-settings": function(ctx) {
       if (!ctx) ctx = { name: "Pipeline", stages: [], visibility: "All roles", isDefault: false };
 
-      // Store for use by __pipeAddStage and onSave
+      // Store for use by __pipeAddStage, __pipeDeleteCurrent, and onSave
       window.__pipeCtxId = ctx.id || '';
+      window.__pipeCtxName = ctx.name || '';
       window.__pipeCtxStages = (ctx.stages || []).slice();
 
       var stagesHTML = (ctx.stages || []).map(function(s, i) {
@@ -1723,49 +1676,34 @@
           '<button type="button" class="btn sm" style="margin-top:10px;" onclick="window.__pipeAddStage()">+ Add stage</button></div>' +
           makeDefaultSection,
         primaryLabel: "Save changes",
+        note: '<button type="button" class="btn" onclick="window.__pipeDeleteCurrent()" style="border-color:var(--ink);color:var(--ink);">Delete pipeline</button>',
         onSave: function() {
           var name = ((document.getElementById("pipe-name") || {}).value || "").trim() || ctx.name;
-          var vis  = ((document.getElementById("pipe-vis")  || {}).value || "").trim() || ctx.visibility;
 
-          // Collect newly added stages from editable input rows
+          // Collect newly added stages
           var addedStages = [];
           document.querySelectorAll(".pipe-new-stage-row").forEach(function(row) {
             var nameVal = ((row.querySelector(".pipe-stage-name-input") || {}).value || "").trim();
             var probVal = parseInt(((row.querySelector(".pipe-stage-prob-input") || {}).value || "0"), 10) || 0;
-            if (nameVal) addedStages.push({ name: nameVal, prob: probVal, deals: 0, value: "—", required: "—" });
+            if (nameVal) addedStages.push({ name: nameVal, probability: probVal });
           });
-          var allStages = (window.__pipeCtxStages || []).concat(addedStages);
 
-          // Update in-memory PIPELINE_DATA
+          var allStages = (window.__pipeCtxStages || []).concat(addedStages).map(function(s, i) {
+            return { name: s.name, probability: typeof s.probability === 'number' ? s.probability : (parseInt(s.prob, 10) || 0), order: i };
+          });
+
           var pid = window.__pipeCtxId;
-          if (pid && window.PIPELINE_DATA && window.PIPELINE_DATA[pid]) {
-            window.PIPELINE_DATA[pid].name = name;
-            window.PIPELINE_DATA[pid].visibility = vis;
-            window.PIPELINE_DATA[pid].stages = allStages;
-          }
+          if (!pid || !window.SS_API) { toast("Cannot save pipeline"); return; }
 
-          // Persist to localStorage
-          if (pid) {
-            try { localStorage.setItem('ss_pipeline_' + pid, JSON.stringify({ name: name, visibility: vis, stages: allStages })); } catch(e) {}
-          }
-
-          // Update pipeline card on page
-          var card = document.querySelector('.pipeline-card[data-pipeline-id="' + pid + '"]');
-          if (card) {
-            var titleEl = card.querySelector('.card-title');
-            if (titleEl) titleEl.textContent = name;
-            var subEl = card.querySelector('.card-sub');
-            if (subEl) {
-              var openDealsMatch = subEl.textContent.match(/\d+ open deals/);
-              var openDeals = openDealsMatch ? openDealsMatch[0] : '0 open deals';
-              subEl.textContent = allStages.length + ' stages · ' + openDeals + ' · Visible to: ' + vis;
-            }
-            var stagesRow = card.querySelector('.text-muted span:first-child');
-            if (stagesRow) stagesRow.innerHTML = '<strong>Stages:</strong> ' + allStages.map(function(s) { return s.name; }).join(' · ');
-          }
-
-          toast("Pipeline saved", { sub: name + " · Changes saved" });
-          if (window.SS_closeSlide) window.SS_closeSlide();
+          window.SS_API.Pipelines.update(pid, { name: name, stages: allStages })
+            .then(function() {
+              if (window.SS_reloadPipelines) window.SS_reloadPipelines();
+              toast("Pipeline saved", { sub: name + " · Changes saved" });
+              if (window.SS_closeSlide) window.SS_closeSlide();
+            })
+            .catch(function(e) {
+              toast("Failed to save pipeline", { sub: (e && e.message) || "Try again" });
+            });
         },
       };
     },
@@ -2120,6 +2058,23 @@
   };
   window.SS_closeSlide = closeSlide;
   window.SS_toast = toast;
+
+  // Deletes the pipeline currently open in the pipeline-settings slide
+  window.__pipeDeleteCurrent = function() {
+    var pid   = window.__pipeCtxId;
+    var pname = window.__pipeCtxName || "this pipeline";
+    if (!pid || !window.SS_API) return;
+    if (!confirm('Delete "' + pname + '"? This cannot be undone.')) return;
+    window.SS_API.Pipelines.remove(pid)
+      .then(function() {
+        if (window.SS_reloadPipelines) window.SS_reloadPipelines();
+        if (window.SS_closeSlide) window.SS_closeSlide();
+        toast("Pipeline deleted", { sub: '"' + pname + '" has been removed' });
+      })
+      .catch(function(e) {
+        toast("Cannot delete pipeline", { sub: (e && e.message) || "Try again" });
+      });
+  };
 
   // Removes an existing stage row from the pipeline-settings panel
   window.__pipeRemoveStage = function(btn, idx) {

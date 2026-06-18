@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -16,76 +16,30 @@
     <div data-sidebar></div>
     <main class="main">
       <div class="topbar">
-        <div class="breadcrumb" id="pipelines-breadcrumb"><a href="settings.html">Workspace Admin</a><span class="sep">/</span><a href="settings.html">Settings</a><span class="sep">/</span><span class="current">Manage Pipelines</span></div>
+        <div class="breadcrumb" id="pipelines-breadcrumb">
+          <a href="settings.html">Workspace Admin</a><span class="sep">/</span>
+          <a href="settings.html">Settings</a><span class="sep">/</span>
+          <span class="current">Manage Pipelines</span>
+        </div>
         <div class="topbar-actions">
           <button class="icon-btn" title="Notifications">○</button>
-          
         </div>
       </div>
-      <div class="content ">
-        
-  <div class="page-header">
-    <div>
-      <div class="eyebrow">M2 · F2.1</div>
-      <h1 class="page-title mt-2">Pipelines</h1>
-      <div class="page-sub">3 pipelines · Each with its own stages, probabilities, and role-scoped visibility</div>
-    </div>
-    <div class="row gap-2">
-      <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-pipeline')">+ New pipeline</button>
-    </div>
-  </div>
+      <div class="content">
 
-  <div class="card mb-5 pipeline-card" data-pipeline-id="direct-sales">
-    <div class="card-head">
-      <div>
-        <div class="card-title">Direct Sales</div>
-        <div class="card-sub">5 stages · 47 open deals · Visible to: Sales Rep, Sales Manager, RevOps Lead</div>
-      </div>
-      <div class="row gap-2">
-        <span class="badge solid default-badge">DEFAULT</span>
-        <button class="btn sm" onclick="openPipelineSettings('direct-sales')">Settings</button>
-      </div>
-    </div>
-    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
-      <span><strong>Stages:</strong> Discovery · Qualified · Proposal · Negotiation · Closed Won · Closed Lost</span>
-      <span><strong>Created:</strong> 1 Jun 2026 by Mayur</span>
-    </div>
-  </div>
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Settings · Pipelines</div>
+            <h1 class="page-title mt-2">Pipelines</h1>
+            <div class="page-sub" id="pipelines-sub">Loading…</div>
+          </div>
+          <div class="row gap-2">
+            <button class="btn primary" onclick="if(window.SS_openSlide)window.SS_openSlide('new-pipeline')">+ New pipeline</button>
+          </div>
+        </div>
 
-  <div class="card mb-5 pipeline-card" data-pipeline-id="channel-partner">
-    <div class="card-head">
-      <div>
-        <div class="card-title">Channel Partner Deals</div>
-        <div class="card-sub">5 stages · 7 open deals · Visible to: All roles</div>
-      </div>
-      <div class="row gap-2">
-        <span class="badge solid default-badge" style="display:none;">DEFAULT</span>
-        <button class="btn sm" onclick="openPipelineSettings('channel-partner')">Settings</button>
-      </div>
-    </div>
-    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
-      <span><strong>Stages:</strong> Identified · Qualified · Co-sell · Signed · Won</span>
-      <span><strong>Created:</strong> 20 May 2026 by Mayur</span>
-    </div>
-  </div>
+        <div id="pipelines-list"></div>
 
-  <div class="card mb-5 pipeline-card" data-pipeline-id="expansion">
-    <div class="card-head">
-      <div>
-        <div class="card-title">Expansion (renewals)</div>
-        <div class="card-sub">4 stages · 0 open deals · Visible to: CS Manager, Sales Manager</div>
-      </div>
-      <div class="row gap-2">
-        <span class="badge solid default-badge" style="display:none;">DEFAULT</span>
-        <button class="btn sm" onclick="openPipelineSettings('expansion')">Settings</button>
-      </div>
-    </div>
-    <div class="text-muted mt-3 row gap-3" style="font-size:12px;">
-      <span><strong>Stages:</strong> Health Check · At Risk · Renewal Discussion · Renewed</span>
-      <span><strong>Created:</strong> Today by RevOps</span>
-    </div>
-  </div>
-  
       </div>
     </main>
   </div>
@@ -104,130 +58,113 @@
       }
     })();
 
-    var PIPELINE_DATA = {
-      "direct-sales": {
-        name: "Direct Sales",
-        visibility: "Sales Rep, Sales Manager, RevOps Lead",
-        isDefault: true,
-        stages: [
-          { name: "Discovery",   prob: 10,  deals: 8,    value: "$96,000",  required: "—" },
-          { name: "Qualified",   prob: 30,  deals: 12,   value: "$128,000", required: "Source" },
-          { name: "Proposal",    prob: 60,  deals: 9,    value: "$187,000", required: "Competitor" },
-          { name: "Negotiation", prob: 85,  deals: 5,    value: "$76,000",  required: "Close date" },
-          { name: "Closed Won",  prob: 100, deals: "—",  value: "—",        required: "—" },
-          { name: "Closed Lost", prob: 0,   deals: "—",  value: "—",        required: "Loss reason" }
-        ]
-      },
-      "channel-partner": {
-        name: "Channel Partner Deals",
-        visibility: "All roles",
-        isDefault: false,
-        stages: [
-          { name: "Identified", prob: 10,  deals: 2,   value: "—", required: "—" },
-          { name: "Qualified",  prob: 30,  deals: 3,   value: "—", required: "—" },
-          { name: "Co-sell",    prob: 60,  deals: 1,   value: "—", required: "—" },
-          { name: "Signed",     prob: 85,  deals: 1,   value: "—", required: "—" },
-          { name: "Won",        prob: 100, deals: "—", value: "—", required: "—" }
-        ]
-      },
-      "expansion": {
-        name: "Expansion (renewals)",
-        visibility: "CS Manager, Sales Manager",
-        isDefault: false,
-        stages: [
-          { name: "Health Check",       prob: 20,  deals: 0,   value: "—", required: "—" },
-          { name: "At Risk",            prob: 40,  deals: 0,   value: "—", required: "—" },
-          { name: "Renewal Discussion", prob: 70,  deals: 0,   value: "—", required: "—" },
-          { name: "Renewed",            prob: 100, deals: "—", value: "—", required: "—" }
-        ]
-      }
-    };
-
-    window.PIPELINE_DATA = PIPELINE_DATA;
-
+    var _allPipelines = [];
     var _pipeObserver = null;
 
+    async function loadPipelines() {
+      try {
+        var data = await window.SS_API.Pipelines.list();
+        _allPipelines = data.pipelines || [];
+        renderPipelines();
+      } catch(e) {
+        document.getElementById("pipelines-list").innerHTML =
+          '<div class="card" style="text-align:center;padding:32px;color:var(--ink-50);">Failed to load pipelines. Please refresh.</div>';
+        document.getElementById("pipelines-sub").textContent = "Error loading data";
+      }
+    }
+
+    function renderPipelines() {
+      var list = document.getElementById("pipelines-list");
+      var sub  = document.getElementById("pipelines-sub");
+      var count = _allPipelines.length;
+      sub.textContent = count + " pipeline" + (count !== 1 ? "s" : "") + " · Each with its own stages, probabilities, and role-scoped visibility";
+
+      if (!count) {
+        list.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--ink-50);">No pipelines yet · Click <strong>+ New pipeline</strong> to create the first one</div>';
+        return;
+      }
+
+      list.innerHTML = _allPipelines.map(function(p) {
+        var stages = Array.isArray(p.stages) ? p.stages : [];
+        var stageNames = stages.map(function(s) { return s.name; }).join(" · ") || "—";
+        var createdDate = p.createdAt
+          ? new Date(p.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+          : "—";
+        return [
+          '<div class="card mb-5 pipeline-card" data-pipeline-id="' + p.id + '">',
+          '  <div class="card-head">',
+          '    <div>',
+          '      <div class="card-title">' + p.name.replace(/</g, "&lt;") + '</div>',
+          '      <div class="card-sub">' + stages.length + ' stage' + (stages.length !== 1 ? 's' : '') + ' · Visible to: All roles</div>',
+          '    </div>',
+          '    <div class="row gap-2">',
+          '      ' + (p.isDefault ? '<span class="badge solid">DEFAULT</span>' : ''),
+          '      <button class="btn sm" onclick="openPipelineSettings(\'' + p.id + '\')">Settings</button>',
+          '    </div>',
+          '  </div>',
+          '  <div class="text-muted mt-3 row gap-3" style="font-size:12px;">',
+          '    <span><strong>Stages:</strong> ' + stageNames + '</span>',
+          '    <span><strong>Created:</strong> ' + createdDate + '</span>',
+          '  </div>',
+          '</div>',
+        ].join("\n");
+      }).join("\n");
+    }
+
     function openPipelineSettings(id) {
-      var data = PIPELINE_DATA[id];
-      if (!data || !window.SS_openSlide) return;
+      var p = _allPipelines.find(function(x) { return x.id === id; });
+      if (!p || !window.SS_openSlide) return;
 
-      // Highlight the clicked card, clear others
-      document.querySelectorAll('.pipeline-card').forEach(function(c) { c.classList.remove('is-active'); });
+      document.querySelectorAll(".pipeline-card").forEach(function(c) { c.classList.remove("is-active"); });
       var card = document.querySelector('.pipeline-card[data-pipeline-id="' + id + '"]');
-      if (card) card.classList.add('is-active');
+      if (card) card.classList.add("is-active");
 
-      // Include id in context so the form can reference it
-      window.SS_openSlide("pipeline-settings", Object.assign({ id: id }, data));
+      // Normalise stages from API format { name, probability, order }
+      // to the format the pipeline-settings slide expects { name, prob, probability, deals, value, required }
+      var stages = (p.stages || []).map(function(s) {
+        return { name: s.name, prob: s.probability || 0, probability: s.probability || 0, deals: 0, value: "—", required: "—" };
+      });
 
-      // Watch slide-over close → remove active highlight
+      window.SS_openSlide("pipeline-settings", {
+        id: p.id,
+        name: p.name,
+        stages: stages,
+        isDefault: p.isDefault,
+        visibility: "All roles",
+      });
+
+      // Remove active highlight when slide closes
       if (!_pipeObserver) {
-        var panel = document.querySelector('.slide-over');
+        var panel = document.querySelector(".slide-over");
         if (panel) {
           _pipeObserver = new MutationObserver(function() {
-            if (!panel.classList.contains('open')) {
-              document.querySelectorAll('.pipeline-card').forEach(function(c) { c.classList.remove('is-active'); });
+            if (!panel.classList.contains("open")) {
+              document.querySelectorAll(".pipeline-card").forEach(function(c) { c.classList.remove("is-active"); });
             }
           });
-          _pipeObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
+          _pipeObserver.observe(panel, { attributes: true, attributeFilter: ["class"] });
         }
       }
     }
 
-    function applyDefaultPipeline(id) {
-      Object.keys(PIPELINE_DATA).forEach(function(k) { PIPELINE_DATA[k].isDefault = false; });
-      if (PIPELINE_DATA[id]) PIPELINE_DATA[id].isDefault = true;
-      document.querySelectorAll('.pipeline-card').forEach(function(c) {
-        var badge = c.querySelector('.default-badge');
-        if (badge) badge.style.display = c.getAttribute('data-pipeline-id') === id ? '' : 'none';
-      });
-    }
-
-    // Restore persisted pipeline settings and default on load
-    (function() {
-      // Restore saved name / visibility / stages for each pipeline
-      Object.keys(PIPELINE_DATA).forEach(function(id) {
-        try {
-          var raw = localStorage.getItem('ss_pipeline_' + id);
-          if (!raw) return;
-          var parsed = JSON.parse(raw);
-          Object.assign(PIPELINE_DATA[id], parsed);
-
-          var card = document.querySelector('.pipeline-card[data-pipeline-id="' + id + '"]');
-          if (!card) return;
-
-          if (parsed.name) {
-            var titleEl = card.querySelector('.card-title');
-            if (titleEl) titleEl.textContent = parsed.name;
-          }
-
-          var subEl = card.querySelector('.card-sub');
-          if (subEl) {
-            var openDealsMatch = subEl.textContent.match(/\d+ open deals/);
-            var openDeals = openDealsMatch ? openDealsMatch[0] : '0 open deals';
-            var stageCount = parsed.stages ? parsed.stages.length : PIPELINE_DATA[id].stages.length;
-            var vis = parsed.visibility || PIPELINE_DATA[id].visibility;
-            subEl.textContent = stageCount + ' stages · ' + openDeals + ' · Visible to: ' + vis;
-          }
-
-          if (parsed.stages) {
-            var stagesRow = card.querySelector('.text-muted span:first-child');
-            if (stagesRow) stagesRow.innerHTML = '<strong>Stages:</strong> ' + parsed.stages.map(function(s) { return s.name; }).join(' · ');
-          }
-        } catch(e) {}
-      });
-
-      // Restore default pipeline selection
-      var savedDefault = localStorage.getItem('ss_default_pipeline');
-      if (savedDefault) applyDefaultPipeline(savedDefault);
-    })();
-
-    window.makeDefaultPipeline = function(id) {
-      if (!PIPELINE_DATA[id]) return;
-      applyDefaultPipeline(id);
-      localStorage.setItem('ss_default_pipeline', id);
-      if (window.SS_toast) window.SS_toast(PIPELINE_DATA[id].name + ' set as default', { sub: 'All new deals will use this pipeline' });
-      if (window.SS_closeSlide) window.SS_closeSlide();
+    // Called by the pipeline-settings slide "Make default" button
+    window.makeDefaultPipeline = async function(id) {
+      if (!id || !window.SS_API) return;
+      try {
+        await window.SS_API.Pipelines.update(id, { isDefault: true });
+        await loadPipelines();
+        var p = _allPipelines.find(function(x) { return x.id === id; });
+        if (window.SS_toast) window.SS_toast((p ? p.name : "Pipeline") + " set as default", { sub: "All new deals will use this pipeline" });
+        if (window.SS_closeSlide) window.SS_closeSlide();
+      } catch(e) {
+        if (window.SS_toast) window.SS_toast("Failed to set default", { sub: (e && e.message) || "Try again" });
+      }
     };
+
+    // Called by chrome.js slides after create/update/delete
+    window.SS_reloadPipelines = loadPipelines;
+
+    loadPipelines();
   </script>
   <script src="assets/chrome.js"></script>
 </body>

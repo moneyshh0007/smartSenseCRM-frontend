@@ -293,5 +293,21 @@ const Users = {
   },
 };
 
+// ─── Pipelines ───────────────────────────────────────────────────────
+const Pipelines = {
+  async list() {
+    return apiFetch("/pipelines");
+  },
+  async create(data) {
+    return apiFetch("/pipelines", { method: "POST", body: JSON.stringify(data) });
+  },
+  async update(id, data) {
+    return apiFetch(`/pipelines/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  },
+  async remove(id) {
+    return apiFetch(`/pipelines/${id}`, { method: "DELETE" });
+  },
+};
+
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, Pipelines, getUser };
