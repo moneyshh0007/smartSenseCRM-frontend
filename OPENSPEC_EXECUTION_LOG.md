@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (P3-3 Data Model complete)
+**Last updated:** 18 Jun 2026 (Phase 3 complete — all achievable items shipped)
 
 ---
 
@@ -1096,18 +1096,18 @@ All actionable Phase 2 items shipped and verified live.
 
 ---
 
-## Phase 3 — In Progress
+## Phase 3 — Complete ✅
 
-## Deferred (Phase 3 remaining) / External Dependencies
+All Phase 3 items achievable within Phase 1 scope have been shipped (P3-1 through P3-3). Two settings pages remain intentionally deferred — they require external provider integrations that are out of scope for Phase 1.
 
-| Item | Reason |
-|------|--------|
-| `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) |
-| `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) |
-| `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) — already in table above |
-| `settings-authentication.html` | Requires SSO/SCIM provider integration — already in table above |
-| Custom fields engine (Phase 2) | Per-record typed field values for custom objects, filterable via API |
-| Selling rules evaluation engine | Background job to evaluate rules against live deals and populate flagged-deals table |
+## Deferred Items / External Dependencies
+
+| Item | Reason | Phase |
+|------|--------|-------|
+| `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) | Phase 2 |
+| `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) | Phase 2 |
+| Custom fields engine | Per-record typed values for custom objects, filterable via API | Phase 2 |
+| Selling rules evaluation engine | Background job to evaluate rules against live deals and surface flagged-deals table | Phase 2 |
 
 ## Phase 1 — Resolved Items
 
