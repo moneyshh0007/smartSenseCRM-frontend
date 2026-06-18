@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 2 complete)
+**Last updated:** 18 Jun 2026 (Phase 2 complete + hotfixes)
 
 ---
 
@@ -974,9 +974,26 @@ All Phase 1 frontend bugs resolved and deployed on 18 Jun 2026.
 
 ---
 
+---
+
+### Hotfix — 18 Jun 2026 (Post-Deploy)
+
+Two backend fixes applied after observing Railway crash loop in deploy logs.
+
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| HF-1 | `src/routes/workspace.ts` | `GET /workspace` used `include: { _count: { select: { users: true } } }` — potential Prisma adapter incompatibility with `_count` aggregation | Replaced with a separate `prisma.user.count({ where: { workspaceId } })` call; result spread into response as `userCount` |
+| HF-2 | `src/routes/imports.ts` (lines 296, 490) | `parts.slice(1).join(" ") \|\| parts[0] ?? ""` — esbuild rejects mixing `??` and `\|\|` without explicit parentheses; server crashed on every startup with `TransformError: Cannot use "??" with "||" without parentheses` | Added parentheses: `\|\| (parts[0] ?? "")` |
+
+**Root cause of HF-2:** Pre-existing bug introduced before Phase 2; went undetected because Railway was serving the previous successful deployment. Only surfaced after the Phase 2 backend push triggered a fresh container start.
+
+**Verification:** `GET https://smartsensecrm-production.up.railway.app/` → `200 OK` ✅
+
+---
+
 ## Phase 2 — Complete
 
-All actionable Phase 2 items shipped. Remaining deferred items require external service integrations.
+All actionable Phase 2 items shipped and verified live. Remaining deferred items require external service integrations.
 
 ## Deferred to Phase 3 / External Dependencies
 
