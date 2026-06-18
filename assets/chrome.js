@@ -55,13 +55,17 @@
       }
       html += `</div>`;
     }
+    var _sfUser = (function() { try { return JSON.parse(localStorage.getItem("ss_user") || "{}"); } catch(e) { return {}; } })();
+    var _sfName = _sfUser.name || ((_sfUser.firstName || "") + " " + (_sfUser.lastName || "")).trim() || "User";
+    var _sfInitials = _sfName.split(" ").map(function(w) { return w[0] || ""; }).slice(0, 2).join("").toUpperCase() || "U";
+    var _sfRole = localStorage.getItem("ss_role") === "WA" ? "Workspace Admin" : (localStorage.getItem("ss_role") || "Member");
     html += `
         <div class="sidebar-footer">
           <div class="user-chip">
-            <div class="avatar">MS</div>
+            <div class="avatar">${_sfInitials}</div>
             <div>
-              <div class="user-name">Mayur S.</div>
-              <div class="user-role">Workspace Admin</div>
+              <div class="user-name">${_sfName}</div>
+              <div class="user-role">${_sfRole}</div>
             </div>
           </div>
         </div>
@@ -1580,7 +1584,7 @@
 
     "user-profile": () => {
       var u = (function() { try { return JSON.parse(localStorage.getItem("ss_user") || "{}"); } catch(e) { return {}; } })();
-      var name = ((u.firstName || "") + " " + (u.lastName || "")).trim() || "—";
+      var name = u.name || ((u.firstName || "") + " " + (u.lastName || "")).trim() || "—";
       var email = u.email || "—";
       var ws = (function() { try { return JSON.parse(localStorage.getItem("ss_workspace") || "{}"); } catch(e) { return {}; } })();
       var wsName = ws.name || "SmartSense Workspace";

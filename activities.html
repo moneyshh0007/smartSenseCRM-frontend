@@ -201,7 +201,9 @@
         var params = { limit: 50 };
         var data = await SS_API.Activities.list(params);
         var sub = document.getElementById("activities-sub");
-        _allActs = data.activities || [];
+        _allActs = (data.activities || []).sort(function(a, b) {
+          return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt);
+        });
         sub.textContent = _allActs.length + " activities · Live from database";
         acRender(acFiltered());
 
