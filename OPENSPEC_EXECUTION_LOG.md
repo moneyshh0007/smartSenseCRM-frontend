@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 17 Jun 2026 (Phase 21)
+**Last updated:** 18 Jun 2026 (Phase 29)
 
 ---
 
@@ -45,6 +45,14 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 19 | Contacts + Deals Kanban QA | Fix data.total undefined; fix initials crash; wire kanban drag-drop to Deals.update() | ✅ Complete |
 | 20 | Tasks owner + Company notes scoping | Add owner join to GET /tasks; tasks.html shows owner name; company-detail notes scoped to company contacts | ✅ Complete |
 | 21 | Deal owner name fix | Fix d.owner.firstName/lastName → d.owner.name in deal-detail, deals-table, company-detail deals tab | ✅ Complete |
+| 22 | User name field QA sweep | Fix user.firstName → user.name across my-day greeting, deals-forecast, and deals-table owner column | ✅ Complete |
+| 23 | Deal contacts dedup + source fields | Eliminate duplicate API call in deal-detail loadContacts(); extend contacts select with source + createdAt | ✅ Complete |
+| 24 | Server-side companyId filtering | Add ?companyId filter to GET /contacts and GET /deals; update api.js Contacts.list(); fix contact-detail task filter | ✅ Complete |
+| 25 | Slide context linkage (create forms) | Wire companyId/contactId/dealId from ctx into new-contact, new-deal, new-task onSave payloads | ✅ Complete |
+| 26 | Activity context + deal Tasks tab | Wire new-activity slide ctx; remove broken linked-record freetext; add Tasks tab to deal-detail | ✅ Complete |
+| 27 | Tasks API contact/deal includes | GET /tasks now returns nested contact and deal objects; contact-detail task checkboxes functional | ✅ Complete |
+| 28 | Company-detail activity scoping | Timeline filtered to company's own contacts; activity dates use occurredAt; boot sequence fixed | ✅ Complete |
+| 29 | occurredAt required field fix | Add occurredAt to all openAddNote() calls (was returning 400); fix deal-detail activity sort dates | ✅ Complete |
 
 ---
 
@@ -616,19 +624,212 @@ getJob(jobId)
 
 ---
 
+### Phase 17 — Companies Pipeline Value
+
+**Frontend:** `companies.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| Companies table showed no pipeline value — deals not fetched on companies page | Load `GET /deals` in parallel with `GET /companies`; build `pipelineMap[companyId] = { count, value }` from open deals |
+| KPI "Total pipeline" always "—" | Computed from `pipelineMap` values summed across all companies |
+
+**Result:** Companies table now shows per-company open deal count + pipeline value. KPI grid shows real total pipeline and "N companies with open deals" sub-line.
+
+---
+
+### Phase 18 — Contact + Company Detail QA
+
+**Frontend:** `contact-detail.html`, `company-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| Activity timeline on contact-detail showed `user.firstName` — field doesn't exist on User model | Changed to `a.user.name` |
+| contact-detail `loadTasks()` fetched all workspace tasks and filtered client-side | Changed to `SS_API.Tasks.list({ contactId })` (server-side filter) |
+| company-detail `loadContacts()` fetched all workspace contacts and filtered by `companyId` client-side | Changed to `SS_API.Contacts.list({ companyId })` (requires backend companyId filter — deferred) |
+
+---
+
+### Phase 19 — Contacts + Deals Kanban QA
+
+**Frontend:** `contacts.html`, `deals.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| `data.total` undefined on contacts page — API returns `contacts` array without `.total` | Replaced `data.total` with `data.contacts.length` |
+| `initials()` crashed when `c.firstName` or `c.lastName` was null | Added `(c.firstName\|\|"?")[0]` fallback |
+| Kanban drag-and-drop in `deals.html` never called the API — stage change was visual only | Added `SS_API.Deals.update(id, { stage })` call on drop |
+
+---
+
+### Phase 20 — Tasks Owner Name + Company Notes Scoping
+
+**Files:** `smartsense-backend/src/routes/tasks.ts`, `tasks.html`, `company-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| `tasks.html` Owner column always "—" — `GET /tasks` returned no owner data | Added `include: { owner: { select: { id, name } } }` to tasks findMany |
+| `tasks.html` owner column rendered `t.owner` as object | Changed to `t.owner ? t.owner.name : "—"` |
+| Company-detail Notes tab showed all workspace notes (no company scoping) | Rewrote `loadNotes()` to filter by contactIds of company's contacts |
+| "+ Add note" on company-detail created a floating note with no linkage | `openAddNote()` now passes `contactId: _companyContacts[0].id` |
+| `loadNotes()` ran before `loadContacts()` — `_companyContacts` was empty | Boot sequence changed to `loadContacts().then(() => loadNotes())` |
+
+---
+
+### Phase 21 — Deal Owner Name Fix
+
+**Files:** `deal-detail.html`, `deals-table.html`, `deals-forecast.html`, `company-detail.html`
+
+**Issue:** All four files used `d.owner.firstName + " " + d.owner.lastName` — User model has a single `name` field, not separate first/last.
+
+**Fix:** Replaced with `d.owner.name || "—"` in all four files (4 call sites total).
+
+---
+
+### Phase 22 — User Name Field QA Sweep
+
+**Files:** `my-day.html`, `deals-forecast.html`, `deals-table.html`
+
+**Issue:** Remaining uses of `user.firstName` (greeting) and `a.user.firstName/lastName` (activity rows) after Phase 21.
+
+| File | Location | Fix |
+|------|----------|-----|
+| `my-day.html` | Greeting line | `user.firstName \|\| email.split("@")[0]` → `user.name \|\| email.split("@")[0]` |
+| `deals-forecast.html` | Owner column in forecast table | `d.owner.firstName + " " + d.owner.lastName` → `d.owner.name \|\| "—"` |
+| `deals-table.html` | Owner column in deals table | Same fix |
+
+---
+
+### Phase 23 — Deal Contacts Dedup + Source Fields
+
+**Files:** `smartsense-backend/src/routes/deals.ts`, `deal-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| `deal-detail.loadContacts()` called `SS_API.Deals.get(dealId)` a second time — duplicate API call | Removed second API call; `loadContacts()` now reads synchronously from `DEAL.contacts` (already populated by `loadDeal()`) |
+| Contact rows in deal-detail missing Source and Created columns | Extended `GET /deals/:id` contacts select to include `source: true, createdAt: true` |
+| `loadContacts()` ran before `DEAL` was populated | Boot changed to `loadDeal().then(() => loadContacts())` |
+
+---
+
+### Phase 24 — Server-Side companyId Filtering
+
+**Files:** `smartsense-backend/src/routes/contacts.ts`, `smartsense-backend/src/routes/deals.ts`, `assets/api.js`, `company-detail.html`, `contact-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| `GET /contacts` had no filter params — all contacts fetched and filtered client-side | Added `?companyId` querystring to contacts route; handler applies `where.companyId` when present |
+| `GET /deals` had no `?companyId` filter | Same addition to deals route |
+| `api.js Contacts.list()` accepted no params | Updated to accept `params` object and serialise as `URLSearchParams` |
+| company-detail `loadContacts()` loaded all workspace contacts | Changed to `SS_API.Contacts.list({ companyId })` |
+| company-detail `loadDeals()` loaded all workspace deals | Changed to `SS_API.Deals.list({ companyId })` |
+| contact-detail `loadTasks()` loaded all workspace tasks | Changed to `SS_API.Tasks.list({ contactId })` |
+
+---
+
+### Phase 25 — Slide Context Linkage (Create Forms)
+
+**Files:** `assets/chrome.js`, `company-detail.html`, `contact-detail.html`
+
+**Problem:** All three create slides (`new-contact`, `new-deal`, `new-task`) accepted a `ctx` parameter but ignored it — no linkage IDs were passed into the API payload.
+
+**Fixes:**
+
+| Slide | Context field wired | Effect |
+|-------|-------------------|--------|
+| `new-contact` | `ctx.companyId → payload.companyId` | Contacts created from company-detail link to that company |
+| `new-deal` | `ctx.companyId → payload.companyId` | Deals created from company-detail link to that company |
+| `new-task` | `ctx.contactId → payload.contactId`; `ctx.dealId → payload.dealId` | Tasks created from record detail pages are linked to that record |
+
+**Call sites updated:**
+- `company-detail.html`: `SS_openSlide('new-contact', { companyId })` and `SS_openSlide('new-deal', { companyId, company: COMPANY.name })`
+- `contact-detail.html`: `SS_openSlide('new-task', { contactId })`
+
+---
+
+### Phase 26 — Activity Context Linkage + Deal Tasks Tab
+
+**Files:** `assets/chrome.js`, `deal-detail.html`, `contact-detail.html`
+
+**Activity slide fix:**
+- `new-activity` slide changed from `() =>` to `(ctx) =>`
+- Removed broken "Linked records" free-text input (was never wired to API)
+- Added `if (ctx && ctx.contactId) payload.contactId = ctx.contactId` and `ctx.dealId` equivalent
+- `deal-detail.html` "Log activity" button now passes `{ dealId }`
+- `contact-detail.html` "Log activity" button now passes `{ contactId }`
+
+**Deal Tasks tab added to `deal-detail.html`:**
+- New "Tasks" tab button and `<div data-pane="tasks">` added to tab bar
+- `renderTasks()` reads `DEAL.tasks` (loaded by `GET /deals/:id`) and renders checkbox list
+- `completeDealTask(id, cb)` calls `SS_API.Tasks.update(id, { completed })` and updates row visual state
+- `window.SS_loadTasks` hook refreshes `DEAL.tasks` via `GET /tasks?dealId=` and re-renders
+- Boot updated to `loadDeal().then(() => { loadContacts(); renderTasks(); })`
+
+---
+
+### Phase 27 — Tasks API Contact/Deal Includes
+
+**Files:** `smartsense-backend/src/routes/tasks.ts`, `contact-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| Task-detail slide shows "Contact" as link label — `ctx.contact` always undefined because `GET /tasks` returned only flat `contactId` | Added `contact: { select: { id, firstName, lastName } }` and `deal: { select: { id, name } }` to tasks findMany include |
+| contact-detail task checkboxes had no `onchange` handler — checking was purely visual | Added `onchange="completeContactTask(id, this)"` to each rendered checkbox; added `completeContactTask()` function matching deal-detail pattern |
+
+---
+
+### Phase 28 — Company-Detail Activity Scoping
+
+**Files:** `company-detail.html`
+
+**Issues found and fixed:**
+
+| Issue | Fix |
+|-------|-----|
+| Timeline tab showed ALL workspace activities — `loadActivities()` fetched with no filter | Build `contactIds` Set from `_companyContacts`; filter activities to those with `contactId` in that set |
+| `loadActivities()` ran in parallel with `loadContacts()` — `_companyContacts` was empty at that point | Moved `loadActivities()` into `loadContacts().then()` chain alongside `loadNotes()` |
+| Timeline displayed `a.createdAt` (record insertion date) instead of `a.occurredAt` (event date) | Changed sort and display to use `a.occurredAt \|\| a.createdAt` throughout |
+| "Activities (30d)" KPI counted by `createdAt` | Changed to use `occurredAt \|\| createdAt` for 30-day window calculation |
+
+---
+
+### Phase 29 — occurredAt Required Field Fix
+
+**Files:** `deal-detail.html`, `company-detail.html`, `contact-detail.html`
+
+**Critical bug:** All three `openAddNote()` functions called `SS_API.Activities.create()` without `occurredAt`. The backend Zod schema declares `occurredAt: z.string()` as required (non-optional) — every "Add note" action was returning a **400 validation error**.
+
+**Fix:** Added `occurredAt: new Date().toISOString()` to all three `Activities.create()` call sites.
+
+**Also fixed in `deal-detail.html`:** `loadActivities()` was sorting and displaying activities using `a.createdAt` instead of `a.occurredAt || a.createdAt`, causing the timeline to show incorrect dates for retroactively-logged activities.
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
 |------|-------|
-| Deals page deep QA | Kanban drag-and-drop verified; mark won/lost, edit deal, notes all wired ✅ |
-| Tasks page deep QA | Fixed count display bug; bulk complete, task detail edit, linked record nav all wired ✅ |
-| My Day dashboard | Fixed greeting crash + undefined KPI counts; all widgets wired to live API ✅ |
-| Activities page | Feed loads, type filter and advanced filter all wired ✅ |
-| Settings — Audit Log | `GET /audit-logs` wired; KPIs + client-side filter ✅ |
-| Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
-| Companies: pipeline value | Client-side join: loads deals in parallel, groups by companyId — open pipeline shown per company ✅ |
-| Deal owner name (all pages) | d.owner.firstName/lastName → d.owner.name fixed in deal-detail, deals-table, company-detail ✅ |
-| Settings other pages | Billing, Authentication, Roles, Pipelines, Selling Rules, Data Model — static prototype, deferred to Phase 2 |
+| Contacts Owner column | Contact model has `ownerId` but no Prisma `owner` relation — column always shows "—". Requires schema migration + new relation. Deferred to Phase 2. |
+| Settings other pages | `settings-billing.html`, `settings-authentication.html`, `settings-roles.html`, `settings-selling-rules.html`, `settings-data-model.html` — static prototype, deferred to Phase 2 |
+| Tasks "Linked to" dropdown in new-task slide | Dropdown shows hardcoded fake options; ctx wires contactId/dealId correctly in payload but dropdown is decorative. Replace with real dynamic list in Phase 2. |
+| Company notes scope | Notes added via company-detail are linked to the first contact only (no `companyId` on Activity model). Multi-contact companies may miss notes. Full fix requires Activity schema change. |
+| Contact detail — add task from detail opens task with contact linked | `+ New task` from contact-detail correctly passes contactId; task appears in `GET /tasks?contactId=` filter ✅ |
+| Deal detail Tasks tab | Fully wired: checkbox complete, `window.SS_loadTasks` refresh hook, reads from `DEAL.tasks` ✅ |
+| All note creation (deal, company, contact) | `occurredAt` now included in all `openAddNote()` calls — was previously causing 400 errors ✅ |
+| Activity timeline dates | All timelines now sort and display using `occurredAt \|\| createdAt` ✅ |
 
 ---
 
