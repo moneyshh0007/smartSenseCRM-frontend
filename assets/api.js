@@ -309,5 +309,21 @@ const Pipelines = {
   },
 };
 
+// ─── Selling Rules ───────────────────────────────────────────────────
+const SellingRules = {
+  async list() {
+    return apiFetch("/selling-rules");
+  },
+  async create(data) {
+    return apiFetch("/selling-rules", { method: "POST", body: JSON.stringify(data) });
+  },
+  async update(id, data) {
+    return apiFetch(`/selling-rules/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  },
+  async remove(id) {
+    return apiFetch(`/selling-rules/${id}`, { method: "DELETE" });
+  },
+};
+
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, Pipelines, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, Pipelines, SellingRules, getUser };
