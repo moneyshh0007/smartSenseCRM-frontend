@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 29)
+**Last updated:** 18 Jun 2026 (Phase 30)
 
 ---
 
@@ -818,6 +818,20 @@ getJob(jobId)
 
 ---
 
+### Phase 30 — Sidebar User Name + Activity Sort Fix
+
+**Files:** `assets/chrome.js`, `activities.html`
+
+**Issues fixed:**
+
+| Location | Bug | Fix |
+|----------|-----|-----|
+| `chrome.js` sidebar footer | Always showed hardcoded "Mayur S." / "Workspace Admin" regardless of logged-in user | Read `ss_user` from localStorage; compute initials and name dynamically; show role label from `ss_role` |
+| `chrome.js` user-profile slide | `var name = (u.firstName + u.lastName)` — User model has a single `name` field, so the slide always showed "—" | Changed to `u.name \|\| (u.firstName + u.lastName)` to prefer the `name` field |
+| `activities.html` | `_allActs` assigned directly from API response with no sort — list displayed in arbitrary server order | Added descending sort by `occurredAt \|\| createdAt` after fetch |
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
@@ -830,6 +844,8 @@ getJob(jobId)
 | Deal detail Tasks tab | Fully wired: checkbox complete, `window.SS_loadTasks` refresh hook, reads from `DEAL.tasks` ✅ |
 | All note creation (deal, company, contact) | `occurredAt` now included in all `openAddNote()` calls — was previously causing 400 errors ✅ |
 | Activity timeline dates | All timelines now sort and display using `occurredAt \|\| createdAt` ✅ |
+| Sidebar user name + role | Now reads from localStorage — no longer hardcoded ✅ |
+| Activities list sort | Now sorted by `occurredAt \|\| createdAt` descending ✅ |
 
 ---
 
