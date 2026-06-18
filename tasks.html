@@ -55,11 +55,12 @@
         <th>Due</th>
         <th>Priority</th>
         <th>Owner</th>
+        <th>Linked to</th>
       </tr>
     </thead>
     <tbody id="tasks-tbody">
       <tr>
-        <td colspan="5" style="text-align:center; padding:40px; color:var(--ink-50);">
+        <td colspan="6" style="text-align:center; padding:40px; color:var(--ink-50);">
           Loading...
         </td>
       </tr>
@@ -213,11 +214,17 @@
                         : companyId ? "company-detail?id=" + companyId
                         : "";
 
+          var linkedLabel = t.deal    ? t.deal.name
+                          : t.contact ? (t.contact.firstName + " " + t.contact.lastName).trim()
+                          : t.company ? t.company.name
+                          : "—";
+          var dealName = (t.deal && t.deal.name) ? t.deal.name.replace(/'/g, "") : "";
+
           var rowOnclick = navUrl
             ? "if(event.target.type!=='checkbox')window.location.href='" + navUrl + "'"
             : "if(event.target.type!=='checkbox'&&window.openTaskDetail)window.openTaskDetail('" + t.id + "')";
 
-          return "<tr style='cursor:pointer;' onclick=\"" + rowOnclick + "\">" +
+          return "<tr style='cursor:pointer;' data-deal='" + dealName + "' onclick=\"" + rowOnclick + "\">" +
             "<td><input type='checkbox' data-id='" + t.id + "' onchange=\"updateBulkBar()\" /></td>" +
             "<td>" +
               "<strong style='" + (t.completed ? "text-decoration:line-through;opacity:0.5;" : "") + "'>" + t.title + "</strong>" +
@@ -226,13 +233,14 @@
             "<td style='" + (isOverdue ? "color:var(--ink);font-weight:500;" : "") + "'>" + due + "</td>" +
             "<td><span class='" + badgeClass + "'>" + priority.toUpperCase() + "</span></td>" +
             "<td>" + (t.owner ? t.owner.name : "—") + "</td>" +
+            "<td>" + linkedLabel + "</td>" +
             "</tr>";
         }).join("");
 
       } catch (err) {
         console.error("Failed to load tasks:", err);
         document.getElementById("tasks-tbody").innerHTML =
-          "<tr><td colspan='5' style='text-align:center;padding:40px;color:var(--ink-50);'>Failed to load tasks. Please refresh.</td></tr>";
+          "<tr><td colspan='6' style='text-align:center;padding:40px;color:var(--ink-50);'>Failed to load tasks. Please refresh.</td></tr>";
       }
     }
 
@@ -245,25 +253,24 @@
       if (!_groupedByDeal) { loadTasks(); return; }
 
       // Group visible rows by deal association
-      var rows = Array.from(document.querySelectorAll("#tasks-tbody tr[onclick], #tasks-tbody tr:not([style*='none'])"));
+      var rows = Array.from(document.querySelectorAll("#tasks-tbody tr[data-deal]"));
       var grouped = {}, order = [];
       rows.forEach(function(row) {
-        var cells = row.querySelectorAll("td");
-        var title = cells[1] ? cells[1].textContent.trim() : "";
-        // Infer deal group from task title keywords
-        var group = "No deal";
-        ["Acme","Northwind","Globex","Hooli","Initech","Pied Piper","Vellichor","Soylent"].forEach(function(kw) {
-          if (title.toLowerCase().includes(kw.toLowerCase())) group = kw;
-        });
+        var group = row.getAttribute("data-deal") || "";
+        if (!group) group = "No deal";
         if (!grouped[group]) { grouped[group] = []; order.push(group); }
         grouped[group].push(row.cloneNode(true));
       });
+      // Ensure "No deal" appears last
+      var noDeal = "No deal";
+      var sortedOrder = order.filter(function(g) { return g !== noDeal; }).sort();
+      if (grouped[noDeal]) sortedOrder.push(noDeal);
 
       var tbody = document.getElementById("tasks-tbody");
       tbody.innerHTML = "";
-      order.forEach(function(group) {
+      sortedOrder.forEach(function(group) {
         var header = document.createElement("tr");
-        header.innerHTML = "<td colspan='5' style='background:var(--ink-05);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);padding:8px 12px;'>" + group + " · " + grouped[group].length + " task" + (grouped[group].length!==1?"s":"") + "</td>";
+        header.innerHTML = "<td colspan='6' style='background:var(--ink-05);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-50);padding:8px 12px;'>" + group + " · " + grouped[group].length + " task" + (grouped[group].length!==1?"s":"") + "</td>";
         tbody.appendChild(header);
         grouped[group].forEach(function(r) { tbody.appendChild(r); });
       });

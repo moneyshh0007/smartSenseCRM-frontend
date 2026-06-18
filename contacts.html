@@ -381,7 +381,7 @@
           "<td>" + title + "</td>" +
           "<td>" + company + "</td>" +
           "<td>" + date + "</td>" +
-          "<td>—</td>" +
+          "<td>" + (c.owner ? c.owner.name : "—") + "</td>" +
           "<td><span class='badge muted'>" + source + "</span></td>" +
           "</tr>";
       }).join("");
