@@ -137,7 +137,7 @@
     return { backdrop, panel };
   }
 
-  function openSlide({ eyebrow, title, body, primaryLabel, secondaryLabel, onSave, onCancel, note }) {
+  function openSlide({ eyebrow, title, body, primaryLabel, secondaryLabel, onSave, onCancel, note, afterShow }) {
     const { backdrop, panel } = ensureSlideHost();
     primaryLabel = primaryLabel || "Save";
     secondaryLabel = secondaryLabel || "Cancel";
@@ -176,6 +176,7 @@
       const first = panel.querySelector("input:not([type=checkbox]):not([type=radio]), textarea, select");
       if (first) first.focus();
       wireFormFormatters(panel);
+      if (afterShow) afterShow(panel);
     }, 260);
   }
 
@@ -694,29 +695,7 @@
           <div class="field"><label>Priority</label><select id="slide-nt-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
         </div>
         <div class="field"><label>Linked to</label>
-          <select id="slide-nt-linked">
-            <option value="">— None —</option>
-            <optgroup label="Deals">
-              <option value="deal:acme-annual">Acme — Annual License</option>
-              <option value="deal:northwind-multi">Northwind — Multi-year</option>
-              <option value="deal:globex-annual">Globex Inc — Annual</option>
-              <option value="deal:hooli-multi">Hooli — Multi-year</option>
-              <option value="deal:vellichor">Vellichor Ltd — Annual</option>
-            </optgroup>
-            <optgroup label="Contacts">
-              <option value="contact:sarah-chen">Sarah Chen · VP Sales, Acme</option>
-              <option value="contact:ellen-lee">Ellen Lee · Director, IT</option>
-              <option value="contact:carlos-mendes">Carlos Mendes · VP Finance</option>
-              <option value="contact:priya-n">Priya N. · Procurement Lead</option>
-            </optgroup>
-            <optgroup label="Companies">
-              <option value="company:acme">Acme Corp</option>
-              <option value="company:northwind">Northwind Corp</option>
-              <option value="company:globex">Globex Inc.</option>
-              <option value="company:hooli">Hooli</option>
-              <option value="company:initech">Initech</option>
-            </optgroup>
-          </select>
+          <select id="slide-nt-linked"><option value="">Loading…</option></select>
         </div>
         <div class="field"><label>Description</label><textarea placeholder="Optional notes"></textarea></div>
         <div class="checkbox-line"><input type="checkbox" /> <span>Set a reminder 15 minutes before due time</span></div>
@@ -724,15 +703,58 @@
       `,
       primaryLabel: "Create task",
       note: "Reminder will appear as a browser notification",
+      afterShow: async function(panel) {
+        var sel = panel.querySelector("#slide-nt-linked");
+        if (!sel || !window.SS_API) { if (sel) sel.innerHTML = '<option value="">— None —</option>'; return; }
+        var preselect = ctx && ctx.dealId ? "deal:" + ctx.dealId : ctx && ctx.contactId ? "contact:" + ctx.contactId : "";
+        try {
+          var results = await Promise.all([
+            window.SS_API.Deals.list({ limit: 100 }),
+            window.SS_API.Contacts.list({ limit: 100 }),
+          ]);
+          var closedStages = ["won", "lost", "closed_won", "closed_lost"];
+          var deals = (results[0].deals || results[0] || []).filter(function(d) {
+            return !d.stage || closedStages.indexOf((d.stage || "").toLowerCase()) === -1;
+          });
+          var contacts = results[1].contacts || results[1] || [];
+          sel.innerHTML = '<option value="">— None —</option>';
+          if (deals.length) {
+            var dg = document.createElement("optgroup");
+            dg.label = "Deals";
+            deals.forEach(function(d) {
+              var o = document.createElement("option");
+              o.value = "deal:" + d.id;
+              o.textContent = d.name || "Untitled deal";
+              dg.appendChild(o);
+            });
+            sel.appendChild(dg);
+          }
+          if (contacts.length) {
+            var cg = document.createElement("optgroup");
+            cg.label = "Contacts";
+            contacts.forEach(function(c) {
+              var o = document.createElement("option");
+              o.value = "contact:" + c.id;
+              o.textContent = ((c.firstName || "") + " " + (c.lastName || "")).trim() || c.email || "Contact";
+              cg.appendChild(o);
+            });
+            sel.appendChild(cg);
+          }
+          if (preselect) sel.value = preselect;
+        } catch(e) {
+          sel.innerHTML = '<option value="">— None —</option>';
+        }
+      },
       onSave: () => {
         const title = (document.getElementById("slide-nt-title")?.value || "").trim();
         const due = document.getElementById("slide-nt-due")?.value;
         const priority = document.getElementById("slide-nt-priority")?.value || "med";
+        const linked = document.getElementById("slide-nt-linked")?.value || "";
         if (title && window.SS_API) {
           const payload = { title, priority };
           if (due) payload.dueAt = new Date(due).toISOString();
-          if (ctx && ctx.contactId) payload.contactId = ctx.contactId;
-          if (ctx && ctx.dealId) payload.dealId = ctx.dealId;
+          if (linked.startsWith("deal:")) payload.dealId = linked.slice(5);
+          else if (linked.startsWith("contact:")) payload.contactId = linked.slice(8);
           window.SS_API.Tasks.create(payload)
             .then(() => {
               toast("Task created", { sub: "Visible in My Day and Tasks" });
