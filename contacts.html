@@ -286,7 +286,12 @@
       else if (field === "email" || field === "linked") value = boolSel.value;
       else                                             value = txtInput.value.trim();
 
-      if (!value) { txtInput.focus(); return; }
+      if (!value) {
+        if (field === "source" || field === "company") srcSel.focus();
+        else if (field === "email" || field === "linked") boolSel.focus();
+        else txtInput.focus();
+        return;
+      }
 
       _activeFilters.push({ field: field, op: op, value: value });
       renderFilterChips();
