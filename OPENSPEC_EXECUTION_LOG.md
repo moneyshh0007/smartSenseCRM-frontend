@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 33 + Deploy)
+**Last updated:** 18 Jun 2026 (Phase 2 complete)
 
 ---
 
@@ -886,16 +886,107 @@ Both Railway repos pushed after completing all Phase 1 frontend cleanup (Phases 
 
 ## Phase 1 — Complete
 
-All Phase 1 frontend bugs resolved. Remaining items require Prisma schema migrations and are deferred to Phase 2.
+All Phase 1 frontend bugs resolved and deployed on 18 Jun 2026.
 
-## Pending / Upcoming (Phase 2)
+---
 
-| Item | Notes |
-|------|-------|
-| Contacts Owner column | `Contact` model has `ownerId` but no Prisma `owner` relation — needs migration to add the relation before backend can include it in `GET /contacts`. Deferred to Phase 2. |
-| Company notes scope | `Activity` model has no `companyId` — notes from company-detail attach to the first contact only. Multi-contact companies may miss notes. Needs schema migration. Deferred to Phase 2. |
-| Tasks "Linked to" dropdown in new-task slide | Dropdown shows hardcoded fake options; ctx wires contactId/dealId correctly in payload but dropdown is decorative. Replace with real dynamic list. Deferred to Phase 2. |
-| Settings sub-pages | `settings-billing.html`, `settings-authentication.html`, `settings-roles.html`, `settings-selling-rules.html`, `settings-data-model.html` — static prototype, need real backend endpoints. Deferred to Phase 2. |
+## Phase 2
+
+### P2-1 — Tasks "Linked to" Dropdown (Dynamic)
+
+**Files:** `assets/chrome.js`
+
+**Issue:** new-task slide "Linked to" dropdown was populated with five hardcoded fake deals and four fake contacts. The dropdown value was never read by `onSave` — only `ctx.contactId`/`ctx.dealId` (set when opened from a detail page) were used.
+
+**Fix:**
+- Added `afterShow` callback support to `openSlide()` so slides can run async init code after the panel is in the DOM
+- On slide open, fetches real open deals and contacts in parallel via `Promise.all`; populates `<optgroup>` sections dynamically
+- Pre-selects the correct option when opened from a contact or deal detail page (`ctx.contactId` / `ctx.dealId`)
+- `onSave` now parses the `deal:<id>` / `contact:<id>` prefix from the dropdown selection and sets `payload.dealId` or `payload.contactId` accordingly
+
+---
+
+### P2-2 — Contact → Owner Relation (Schema Migration)
+
+**Files:** `prisma/schema.prisma`, `prisma/migrations/`, `src/routes/contacts.ts`
+
+**Issue:** `Contact` model had `ownerId String` as a bare foreign key with no Prisma `owner` relation defined. `GET /contacts` could not include owner data; the Owner column always showed "—".
+
+**Migration:** `20260618063300_add_contact_owner_relation_and_activity_companyid`
+
+**Changes:**
+- `Contact`: added `owner User @relation("ContactOwner", fields: [ownerId], references: [id])`
+- `User`: added `ownedContacts Contact[] @relation("ContactOwner")` back-relation
+- `GET /contacts`: now includes `owner { id, name }` in every response
+
+---
+
+### P2-3 — Activity companyId (Schema Migration + Backend + Frontend)
+
+**Files:** `prisma/schema.prisma`, `prisma/migrations/`, `src/routes/activities.ts`, `company-detail.html`
+
+**Issue:** `Activity` model had no `companyId` field. Notes added via company-detail were linked to the first contact in the company only — multi-contact companies missed notes, and the activity timeline used a manual client-side filter over all workspace activities rather than a server-side scope.
+
+**Migration:** `20260618063300_add_contact_owner_relation_and_activity_companyid` (batched with P2-2)
+
+**Changes:**
+- `Activity`: added `companyId String?` and `company Company? @relation(...)`
+- `Company`: added `activities Activity[]` back-relation
+- `GET /activities`: added `companyId` query filter; response now includes `company { id, name }`
+- `POST /activities`: added `companyId` to Zod schema and JSON schema body
+- `company-detail.html`:
+  - `loadActivities()` now uses `SS_API.Activities.list({ companyId })` directly — no more manual contactId filtering
+  - `loadNotes()` now uses `SS_API.Activities.list({ type: "note", companyId })` directly
+  - `openAddNote()` now sets `companyId` on the payload instead of falling back to `_companyContacts[0].id`
+  - All five loaders (`loadCompany`, `loadContacts`, `loadNotes`, `loadActivities`, `loadDeals`) now run in parallel on boot
+
+---
+
+### P2-4 — Settings Pages Wired to Real API
+
+**Files:** `src/routes/workspace.ts` (new), `src/routes/users.ts` (new), `src/server.ts`, `assets/api.js`, `settings-workspace.html`, `settings-roles.html`
+
+**Scope:** Three of five deferred settings pages wired to live data. `settings-billing.html` and `settings-authentication.html` skipped — require Stripe and SSO/SCIM integrations respectively.
+
+| Page | Before | After |
+|------|--------|-------|
+| `settings-audit-log.html` | Already live (verified) | No changes needed — `GET /audit-logs` returns correct shape |
+| `settings-workspace.html` | Read-only localStorage; save wrote only to localStorage | Reads from `GET /workspace`; `PATCH /workspace` persists to DB with slug-conflict check + audit log entry |
+| `settings-roles.html` | 5 hardcoded role cards with fake user counts (12/3/2/2/0) | Fetches `GET /users`, counts per role enum value, renders cards with real counts |
+
+**New backend routes:**
+- `GET /workspace` — returns workspace record with `_count.users`
+- `PATCH /workspace` — updates `name`/`slug`; checks slug uniqueness; writes audit log
+- `GET /users` — returns all workspace members (`id`, `name`, `email`, `role`, `createdAt`)
+
+**API client additions (`assets/api.js`):**
+- `SS_API.Workspace.get()` / `SS_API.Workspace.update(data)`
+- `SS_API.Users.list()`
+
+---
+
+### Deploy — 18 Jun 2026 (Phase 2)
+
+| Repo | Commits | Key changes |
+|------|---------|-------------|
+| `smartsenseCRM` (backend) | `d1cd594` → `25c7f6b` | P2-2+P2-3 migration, contacts/activities routes, workspace + users routes |
+| `smartSenseCRM-frontend` | `29f3100` → `79b70d5` | P2-1 dynamic dropdown, P2-3 company-detail, P2-4 settings pages, api.js extensions |
+
+---
+
+## Phase 2 — Complete
+
+All actionable Phase 2 items shipped. Remaining deferred items require external service integrations.
+
+## Deferred to Phase 3 / External Dependencies
+
+| Item | Reason |
+|------|--------|
+| `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) |
+| `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) |
+| `settings-pipelines.html` | Requires new `Pipeline` Prisma model + migration + CRUD routes |
+| `settings-selling-rules.html` | Requires new `SellingRule` Prisma model + migration + CRUD routes |
+| `settings-data-model.html` | Requires schema management API (custom fields, object definitions) |
 
 ## Phase 1 — Resolved Items
 
