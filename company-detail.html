@@ -338,14 +338,8 @@
     // ── Load activities ───────────────────────────────────────────────────
     async function loadActivities() {
       try {
-        var raw  = await SS_API.Activities.list({ limit: 100 });
-        var all  = (raw.activities || raw.data || raw || []);
-
-        // Filter to activities linked to this company's contacts only
-        var contactIds = new Set(_companyContacts.map(function(c) { return c.id; }));
-        var acts = contactIds.size > 0
-          ? all.filter(function(a) { return a.contactId && contactIds.has(a.contactId); })
-          : [];
+        var raw  = await SS_API.Activities.list({ companyId: companyId, limit: 100 });
+        var acts = (raw.activities || raw.data || raw || []);
 
         var thirtyDays = Date.now() - 30 * 86400000;
         var recent = acts.filter(function(a) {
@@ -471,8 +465,7 @@
         onSave: function() {
           var body = (document.getElementById("note-body").value || "").trim();
           if (!body) return;
-          var payload = { type: "note", title: "Note", body: body, occurredAt: new Date().toISOString() };
-          if (_companyContacts.length > 0) payload.contactId = _companyContacts[0].id;
+          var payload = { type: "note", title: "Note", body: body, occurredAt: new Date().toISOString(), companyId: companyId };
           SS_API.Activities.create(payload)
             .then(function() {
               if (window.toast) window.toast("Note saved");
@@ -488,22 +481,16 @@
     async function loadNotes() {
       var el = document.getElementById("notes-list");
       try {
-        var contactIds = new Set(_companyContacts.map(function(c) { return c.id; }));
-        if (contactIds.size === 0) {
-          el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">Add contacts to this company to see linked notes.</div>';
-          return;
-        }
-        var raw  = await SS_API.Activities.list({ type: "note", limit: 100 });
-        var acts = (raw.activities || raw.data || raw || []);
-        var notes = acts.filter(function(a) { return a.type === "note" && contactIds.has(a.contactId); });
+        var raw   = await SS_API.Activities.list({ type: "note", companyId: companyId, limit: 100 });
+        var notes = (raw.activities || raw.data || raw || []).filter(function(a) { return a.type === "note"; });
         if (!notes.length) {
           el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--ink-50);font-size:13px;">No notes yet — add the first note about this company.</div>';
           return;
         }
-        notes.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        notes.sort(function(a, b) { return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt); });
         el.innerHTML = notes.slice(0, 20).map(function(n) {
           return '<div class="note-item">' +
-            '<div class="note-item-date">' + fmtDate(n.createdAt) + '</div>' +
+            '<div class="note-item-date">' + fmtDate(n.occurredAt || n.createdAt) + '</div>' +
             '<div class="note-item-body">' + esc(n.body || n.title || "") + '</div>' +
             '</div>';
         }).join("");
@@ -527,7 +514,9 @@
 
     // ── Boot ──────────────────────────────────────────────────────────────
     loadCompany();
-    loadContacts().then(function() { loadNotes(); loadActivities(); });
+    loadContacts();
+    loadNotes();
+    loadActivities();
     loadDeals();
   </script>
   <script src="assets/chrome.js"></script>
