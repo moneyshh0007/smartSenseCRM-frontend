@@ -35,23 +35,23 @@
   <div class="kpi-grid mb-5">
     <div class="kpi">
       <div class="kpi-label">Total contacts</div>
-      <div class="kpi-value">1,847</div>
+      <div class="kpi-value" id="kpi-total">—</div>
       <div class="kpi-delta">All records</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">New this week</div>
-      <div class="kpi-value">23</div>
+      <div class="kpi-value" id="kpi-new-week">—</div>
       <div class="kpi-delta up">Since last Monday</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">With email</div>
-      <div class="kpi-value">1,612</div>
-      <div class="kpi-delta">87% of records</div>
+      <div class="kpi-value" id="kpi-with-email">—</div>
+      <div class="kpi-delta" id="kpi-email-pct">—</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Linked to company</div>
-      <div class="kpi-value">1,604</div>
-      <div class="kpi-delta">87% of records</div>
+      <div class="kpi-value" id="kpi-linked-company">—</div>
+      <div class="kpi-delta" id="kpi-company-pct">—</div>
     </div>
   </div>
 
@@ -393,6 +393,23 @@
         const sub = document.getElementById("contacts-sub");
         _allContacts = data.contacts || [];
         sub.textContent = _allContacts.length + " Contacts · Live from database";
+
+        // Update KPI cards from real data
+        var total = _allContacts.length;
+        var now = new Date();
+        var daysToMon = (now.getDay() === 0 ? 6 : now.getDay() - 1);
+        var lastMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToMon);
+        var newThisWeek = _allContacts.filter(function(c) { return c.createdAt && new Date(c.createdAt) >= lastMonday; }).length;
+        var withEmail = _allContacts.filter(function(c) { return !!c.email; }).length;
+        var linkedCompany = _allContacts.filter(function(c) { return !!c.companyId; }).length;
+        var pct = function(n) { return total > 0 ? Math.round(n / total * 100) + "% of records" : "—"; };
+        document.getElementById("kpi-total").textContent = total.toLocaleString();
+        document.getElementById("kpi-new-week").textContent = newThisWeek.toLocaleString();
+        document.getElementById("kpi-with-email").textContent = withEmail.toLocaleString();
+        document.getElementById("kpi-email-pct").textContent = pct(withEmail);
+        document.getElementById("kpi-linked-company").textContent = linkedCompany.toLocaleString();
+        document.getElementById("kpi-company-pct").textContent = pct(linkedCompany);
+
         renderContacts(filteredContacts());
       } catch (err) {
         console.error("Failed to load contacts:", err);
