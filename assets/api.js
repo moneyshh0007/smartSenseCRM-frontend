@@ -273,5 +273,25 @@ const AuditLogs = {
   },
 };
 
+// ─── Workspace ───────────────────────────────────────────────────────
+const Workspace = {
+  async get() {
+    return apiFetch("/workspace");
+  },
+  async update(data) {
+    return apiFetch("/workspace", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+};
+
+// ─── Users ───────────────────────────────────────────────────────────
+const Users = {
+  async list() {
+    return apiFetch("/users");
+  },
+};
+
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, getUser };

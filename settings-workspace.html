@@ -133,47 +133,49 @@
   <script>
     if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";
 
-    function loadWorkspace() {
+    function renderWorkspace(ws) {
+      document.getElementById("ws-name").value = ws.name || "";
+      document.getElementById("ws-slug").value = ws.slug || "";
+      var created = ws.createdAt
+        ? new Date(ws.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
+        : "—";
+      var plan = ws.plan || "Business";
+      document.getElementById("ws-sub").textContent =
+        ws.name + " · Created " + created + " · " + plan + " plan";
+    }
+
+    async function loadWorkspace() {
       try {
-        var ws   = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
-        var user = SS_API.getUser() || {};
-
-        var name = ws.name || "—";
-        var slug = ws.slug || "—";
-        var plan = ws.plan || "Business";
-
-        document.getElementById("ws-name").value = name;
-        document.getElementById("ws-slug").value = slug;
-
-        var created = ws.createdAt
-          ? new Date(ws.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
-          : "—";
-        document.getElementById("ws-sub").textContent =
-          name + " · Created " + created + " · " + plan + " plan";
-
+        var data = await SS_API.Workspace.get();
+        var ws = data.workspace || data;
+        // Keep localStorage in sync for sidebar/header
+        var stored = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
+        stored.name = ws.name; stored.slug = ws.slug; stored.plan = ws.plan; stored.createdAt = ws.createdAt;
+        localStorage.setItem("ss_workspace", JSON.stringify(stored));
+        renderWorkspace(ws);
       } catch (err) {
         console.error("loadWorkspace:", err);
+        // Fallback to localStorage
+        var ws = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
+        if (ws.name) renderWorkspace(ws);
       }
     }
 
-    function saveWorkspace() {
+    async function saveWorkspace() {
       var name = (document.getElementById("ws-name").value || "").trim();
       var slug = (document.getElementById("ws-slug").value || "").trim();
-      if (!name) { alert("Workspace name is required."); return; }
-      // Update localStorage so the page sub reflects the new name immediately
+      if (!name) { if (window.SS_toast) SS_toast("Name is required", { sub: "Workspace name cannot be empty" }); return; }
       try {
-        var ws   = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
-        ws.name  = name;
-        ws.slug  = slug;
-        localStorage.setItem("ss_workspace", JSON.stringify(ws));
-        var plan = ws.plan || "Business";
-        var created = ws.createdAt
-          ? new Date(ws.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
-          : "—";
-        document.getElementById("ws-sub").textContent = name + " · Created " + created + " · " + plan + " plan";
-      } catch(e) {}
-      if (window.SS_toast) SS_toast("Workspace saved", { sub: name + " · Changes saved locally" });
-      else alert("Workspace saved.");
+        var data = await SS_API.Workspace.update({ name: name, slug: slug || undefined });
+        var ws = data.workspace || data;
+        var stored = JSON.parse(localStorage.getItem("ss_workspace") || "{}");
+        stored.name = ws.name; stored.slug = ws.slug;
+        localStorage.setItem("ss_workspace", JSON.stringify(stored));
+        renderWorkspace(ws);
+        if (window.SS_toast) SS_toast("Workspace saved", { sub: ws.name + " · Saved to database" });
+      } catch (err) {
+        if (window.SS_toast) SS_toast("Save failed", { sub: err.message || "Could not save workspace" });
+      }
     }
 
     loadWorkspace();

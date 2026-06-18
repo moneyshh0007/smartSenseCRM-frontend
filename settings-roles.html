@@ -179,7 +179,46 @@
   <script>if (!SS_API.Auth.isLoggedIn()) window.location.href = "index.html";</script>
   <script src="assets/chrome.js"></script>
   <script>
-    // Role cards are now fully clickable via inline onclick — no extra wiring needed.
+    // Role display names and descriptions keyed by Prisma enum value
+    var ROLE_META = {
+      SALES_REP:       { label: "Sales Rep",       desc: "Daily-driver IC. Can manage own records and their related activities." },
+      SALES_MANAGER:   { label: "Sales Manager",   desc: "Read all reps' data within their team. Manage forecast, run reports." },
+      REVOPS_LEAD:     { label: "RevOps Lead",      desc: "Edit schema, pipelines, selling rules. Read all data. Cannot change billing." },
+      WORKSPACE_ADMIN: { label: "Workspace Admin", desc: "Full access. Manages billing, SSO, residency, audit log, role definitions." },
+      JUNIOR_REP:      { label: "Junior Rep",       desc: "Restricted access. Cannot see deals above $100k. No settings or import access." },
+      READ_ONLY:       { label: "Read Only",        desc: "View-only access across all records. Cannot create or edit." },
+    };
+    var ROLE_ORDER = ["WORKSPACE_ADMIN","SALES_MANAGER","REVOPS_LEAD","SALES_REP","JUNIOR_REP","READ_ONLY"];
+
+    async function loadRoles() {
+      try {
+        var data = await SS_API.Users.list();
+        var users = data.users || [];
+        // Count per role
+        var counts = {};
+        users.forEach(function(u) { counts[u.role] = (counts[u.role] || 0) + 1; });
+        // Render role cards
+        var grid = document.querySelector(".split-2.mb-6");
+        if (!grid) return;
+        var roles = ROLE_ORDER.filter(function(r) { return ROLE_META[r]; });
+        grid.innerHTML = roles.map(function(role) {
+          var meta  = ROLE_META[role];
+          var count = counts[role] || 0;
+          var slug  = meta.label.replace(/\s+/g, "+");
+          return "<div class='card role-card' onclick=\"window.location.href='settings-role-detail?role=" + slug + "'\">" +
+            "<div class='card-head'>" +
+            "<div class='card-title'>" + meta.label + "</div>" +
+            "<span class='text-mono text-muted' style='font-size:11px;'>" + count + " USER" + (count !== 1 ? "S" : "") + " ↗</span>" +
+            "</div>" +
+            "<div class='text-muted' style='font-size:12px;'>" + meta.desc + "</div>" +
+            "</div>";
+        }).join("");
+      } catch (err) {
+        console.error("loadRoles:", err);
+      }
+    }
+
+    loadRoles();
   </script>
   <script>
     // D4 — Interactive permission matrix
