@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (P3-1 Pipelines complete)
+**Last updated:** 18 Jun 2026 (P3-2 Selling Rules complete)
 
 ---
 
@@ -54,6 +54,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 28 | Company-detail activity scoping | Timeline filtered to company's own contacts; activity dates use occurredAt; boot sequence fixed | ✅ Complete |
 | 29 | occurredAt required field fix | Add occurredAt to all openAddNote() calls (was returning 400); fix deal-detail activity sort dates | ✅ Complete |
 | P3-1 | Pipelines Settings | Pipeline model + migration + CRUD API + settings-pipelines.html wired to live data | ✅ Complete |
+| P3-2 | Selling Rules Settings | SellingRule model + migration + CRUD API + settings-selling-rules.html wired to live data | ✅ Complete |
 
 ---
 
@@ -1042,6 +1043,32 @@ All actionable Phase 2 items shipped and verified live.
 
 ---
 
+### P3-2 — Selling Rules Settings
+
+**Completed:** 18 Jun 2026  
+**Spec:** `settings-selling-rules.html` → live `SellingRule` API
+
+**Problem:** `settings-selling-rules.html` used an in-memory `rules` array with no persistence — creating, toggling, or deleting rules was lost on refresh.
+
+**Solution:**
+- Added `SellingRule` Prisma model (individual string fields for trigger, appliesTo, conditionField, action, etc.) and `sellingRules SellingRule[]` relation on `Workspace`
+- Applied migration `20260618132606_add_selling_rule_model` to Neon PostgreSQL
+- Created `src/routes/selling-rules.ts`: GET (active-first ordering), POST (Zod validation), PATCH (partial update including active toggle), DELETE (hard delete) — all with JWT auth and AuditLog writes
+- Registered `sellingRuleRoutes` in `server.ts`
+- Added `SellingRules` namespace to `assets/api.js`
+- Rewrote `settings-selling-rules.html`: `loadRules()` calls `SS_API.SellingRules.list()`, toggle calls PATCH, delete calls DELETE with confirm prompt, save panel calls create or update. Templates modal pre-fills the panel form. Flagged deals table kept as static illustrative placeholder (real evaluation requires a background job engine — out of scope for Phase 1)
+
+**Key decisions:**
+- `SellingRule` uses individual string columns (not a JSON blob) for each rule property — easier to query/filter in future
+- Active toggle calls `SS_API.SellingRules.update(id, { active: newActive })` via PATCH — same route as full edits, with `patchSchema = createSchema.partial()`
+- Flagged deals table is explicitly labelled "ILLUSTRATIVE" in the UI so no one mistakes it for live data
+
+**Commits:**
+- Backend commit: `f8fb4d6` — `feat(p3-2): add SellingRule model, migration, and CRUD routes`
+- Frontend commit: `13fca0e` — `feat(p3-2): wire settings-selling-rules.html to live API`
+
+---
+
 ## Phase 3 — In Progress
 
 ## Deferred (Phase 3 remaining) / External Dependencies
@@ -1050,8 +1077,8 @@ All actionable Phase 2 items shipped and verified live.
 |------|--------|
 | `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) |
 | `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) |
-| `settings-selling-rules.html` | Requires new `SellingRule` Prisma model + migration + CRUD routes |
 | `settings-data-model.html` | Requires schema management API (custom fields, object definitions) |
+| Selling rules evaluation engine | Background job to evaluate rules against live deals and populate flagged-deals table |
 
 ## Phase 1 — Resolved Items
 
