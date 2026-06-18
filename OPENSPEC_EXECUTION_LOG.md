@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 30)
+**Last updated:** 18 Jun 2026 (Phase 31)
 
 ---
 
@@ -832,6 +832,19 @@ getJob(jobId)
 
 ---
 
+### Phase 31 — Tasks "Linked to" Column + Group-by-Deal Fix + Contacts Owner
+
+**Files:** `tasks.html`, `contacts.html`
+
+| Location | Bug | Fix |
+|----------|-----|-----|
+| `tasks.html` table | No "Linked to" column — Phase 27 added `contact`/`deal` includes to `GET /tasks` but the table never displayed them | Added 6th column; renders `t.deal.name` or `t.contact.firstName + lastName`; stamps `data-deal` attribute on each row |
+| `tasks.html` group-by-deal | Scanned task title text for hardcoded fake company keywords (`["Acme","Northwind",...]`) — every real task always landed in "No deal" | Now reads `data-deal` attribute set at render time from the real `t.deal.name`; deals sorted alphabetically, "No deal" last |
+| `tasks.html` colspan | Loading/error rows and group headers used `colspan='5'` after adding a 6th column | Updated all to `colspan='6'` |
+| `contacts.html` owner column | Hardcoded `"—"` — never read from API | Changed to `c.owner ? c.owner.name : "—"`; forward-compatible when backend adds the Prisma owner relation |
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
@@ -839,6 +852,9 @@ getJob(jobId)
 | Contacts Owner column | Contact model has `ownerId` but no Prisma `owner` relation — column always shows "—". Requires schema migration + new relation. Deferred to Phase 2. |
 | Settings other pages | `settings-billing.html`, `settings-authentication.html`, `settings-roles.html`, `settings-selling-rules.html`, `settings-data-model.html` — static prototype, deferred to Phase 2 |
 | Tasks "Linked to" dropdown in new-task slide | Dropdown shows hardcoded fake options; ctx wires contactId/dealId correctly in payload but dropdown is decorative. Replace with real dynamic list in Phase 2. |
+| Tasks list "Linked to" column | Now populated from real `t.deal.name` / `t.contact` objects ✅ |
+| Tasks group-by-deal | Now groups by real deal name via data-deal attribute ✅ |
+| Contacts owner column | Now reads `c.owner.name` (forward-compatible) ✅ |
 | Company notes scope | Notes added via company-detail are linked to the first contact only (no `companyId` on Activity model). Multi-contact companies may miss notes. Full fix requires Activity schema change. |
 | Contact detail — add task from detail opens task with contact linked | `+ New task` from contact-detail correctly passes contactId; task appears in `GET /tasks?contactId=` filter ✅ |
 | Deal detail Tasks tab | Fully wired: checkbox complete, `window.SS_loadTasks` refresh hook, reads from `DEAL.tasks` ✅ |
