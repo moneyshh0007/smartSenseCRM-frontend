@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (P3-2 Selling Rules complete)
+**Last updated:** 18 Jun 2026 (P3-3 Data Model complete)
 
 ---
 
@@ -55,6 +55,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 29 | occurredAt required field fix | Add occurredAt to all openAddNote() calls (was returning 400); fix deal-detail activity sort dates | ✅ Complete |
 | P3-1 | Pipelines Settings | Pipeline model + migration + CRUD API + settings-pipelines.html wired to live data | ✅ Complete |
 | P3-2 | Selling Rules Settings | SellingRule model + migration + CRUD API + settings-selling-rules.html wired to live data | ✅ Complete |
+| P3-3 | Data Model Settings | CustomObject model + migration + CRUD API + settings-data-model.html wired to live data | ✅ Complete |
 
 ---
 
@@ -1043,6 +1044,32 @@ All actionable Phase 2 items shipped and verified live.
 
 ---
 
+### P3-3 — Data Model Settings
+
+**Completed:** 18 Jun 2026  
+**Spec:** `settings-data-model.html` → live `CustomObject` API
+
+**Problem:** `settings-data-model.html` used localStorage for custom objects — they were lost on a different browser or after clearing storage.
+
+**Solution:**
+- Added `CustomObject` Prisma model with `name`, `plural`, `icon`, `description`, `apiKey` (unique per workspace), and `fields` JSON array (`[{name, type, required}]`). Added `@@unique([workspaceId, apiKey])` constraint.
+- Applied migration `20260618133012_add_custom_object_model` to Neon PostgreSQL
+- Created `src/routes/custom-objects.ts`: GET (list, ordered by createdAt), POST (Zod validation, 409 on duplicate apiKey), DELETE (hard delete + AuditLog)
+- Registered `customObjectRoutes` in `server.ts`
+- Added `CustomObjects` namespace to `assets/api.js`
+- Rewrote `settings-data-model.html`: 6 default objects (Contact, Company, Deal, Task, Note, Activity) stay hardcoded — they derive from the Prisma core schema and have no record counts exposed. Custom objects load from API; create via panel with 6 templates; delete with confirm prompt. Fields stored as JSON on the object record (migration-free approach, appropriate for Phase 1).
+
+**Key decisions:**
+- Default objects are hardcoded in the UI — they are real Prisma models, not database rows, so there's nothing to fetch
+- Custom object `fields` stored as a JSON array on the `CustomObject` row — a full custom-fields engine (per-record typed values, filterable, API-exposed) is a Phase 2 item
+- `@@unique([workspaceId, apiKey])` enforces at the DB layer; route returns 409 before the DB constraint is hit
+
+**Commits:**
+- Backend commit: `c21ca66` — `feat(p3-3): add CustomObject model, migration, and CRUD routes`
+- Frontend commit: `12dd4ff` — `feat(p3-3): wire settings-data-model.html to live CustomObject API`
+
+---
+
 ### P3-2 — Selling Rules Settings
 
 **Completed:** 18 Jun 2026  
@@ -1077,7 +1104,9 @@ All actionable Phase 2 items shipped and verified live.
 |------|--------|
 | `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) |
 | `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) |
-| `settings-data-model.html` | Requires schema management API (custom fields, object definitions) |
+| `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) — already in table above |
+| `settings-authentication.html` | Requires SSO/SCIM provider integration — already in table above |
+| Custom fields engine (Phase 2) | Per-record typed field values for custom objects, filterable via API |
 | Selling rules evaluation engine | Background job to evaluate rules against live deals and populate flagged-deals table |
 
 ## Phase 1 — Resolved Items
