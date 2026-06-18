@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 31)
+**Last updated:** 18 Jun 2026 (Phase 32)
 
 ---
 
@@ -845,6 +845,21 @@ getJob(jobId)
 
 ---
 
+### Phase 32 — Contacts KPI Cards Dynamic Update
+
+**Files:** `contacts.html`
+
+**Issue:** Four KPI cards showed hardcoded fake numbers (1,847 / 23 / 1,612 / 1,604) that never changed regardless of real data.
+
+**Fix:** Added `id` attributes to the KPI value and percentage-delta elements. After `loadContacts()` populates `_allContacts`, computed live values:
+- **Total contacts** — `_allContacts.length`
+- **New this week** — contacts with `createdAt >= last Monday`
+- **With email** — contacts where `c.email` is truthy
+- **Linked to company** — contacts where `c.companyId` is truthy
+- Percentage deltas recalculated from actual counts
+
+---
+
 ## Pending / Upcoming
 
 | Item | Notes |
@@ -853,6 +868,7 @@ getJob(jobId)
 | Settings other pages | `settings-billing.html`, `settings-authentication.html`, `settings-roles.html`, `settings-selling-rules.html`, `settings-data-model.html` — static prototype, deferred to Phase 2 |
 | Tasks "Linked to" dropdown in new-task slide | Dropdown shows hardcoded fake options; ctx wires contactId/dealId correctly in payload but dropdown is decorative. Replace with real dynamic list in Phase 2. |
 | Tasks list "Linked to" column | Now populated from real `t.deal.name` / `t.contact` objects ✅ |
+| Contacts KPI cards | Now computed from real `_allContacts` data ✅ |
 | Tasks group-by-deal | Now groups by real deal name via data-deal attribute ✅ |
 | Contacts owner column | Now reads `c.owner.name` (forward-compatible) ✅ |
 | Company notes scope | Notes added via company-detail are linked to the first contact only (no `companyId` on Activity model). Multi-contact companies may miss notes. Full fix requires Activity schema change. |
