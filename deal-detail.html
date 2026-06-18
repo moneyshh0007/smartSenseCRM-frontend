@@ -361,8 +361,10 @@
 
         // Update last-activity KPI
         if (acts.length > 0) {
-          var latest = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })[0];
-          document.getElementById("kpi-last").textContent     = fmtRelative(latest.createdAt);
+          var latest = acts.slice().sort(function(a, b) {
+            return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt);
+          })[0];
+          document.getElementById("kpi-last").textContent     = fmtRelative(latest.occurredAt || latest.createdAt);
           document.getElementById("kpi-last-sub").textContent = latest.type || latest.title || "—";
         } else {
           document.getElementById("kpi-last").textContent     = "—";
@@ -373,12 +375,14 @@
         if (acts.length === 0) {
           tlEl.innerHTML = "<div style='padding:32px;text-align:center;color:var(--ink-50);font-size:13px;'>No activities logged yet for this deal.</div>";
         } else {
-          var sorted = acts.slice().sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+          var sorted = acts.slice().sort(function(a, b) {
+            return new Date(b.occurredAt || b.createdAt) - new Date(a.occurredAt || a.createdAt);
+          });
           tlEl.innerHTML = sorted.map(function(a) {
             var type = (a.type || "NOTE").toUpperCase();
             var who  = a.user ? (a.user.name || "") : "";
             return "<div class='timeline-item'>" +
-              "<div class='timeline-meta'><span>" + fmtDate(a.createdAt) + "</span>" +
+              "<div class='timeline-meta'><span>" + fmtDate(a.occurredAt || a.createdAt) + "</span>" +
               "<span class='badge muted'>" + type + "</span>" +
               (who ? "<span>By " + who + "</span>" : "") + "</div>" +
               "<div class='timeline-title'>" + (a.title || "Activity") + "</div>" +
@@ -571,7 +575,7 @@
         onSave: function(panel) {
           var body = ((panel.querySelector("#note-body") || {}).value || "").trim();
           if (!body) { alert("Please write a note."); return false; }
-          SS_API.Activities.create({ type: "note", title: "Note", body: body, dealId: dealId })
+          SS_API.Activities.create({ type: "note", title: "Note", body: body, dealId: dealId, occurredAt: new Date().toISOString() })
             .then(function() { loadNotes(); })
             .catch(function(err) { console.error("addNote:", err); });
         }

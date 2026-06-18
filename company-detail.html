@@ -471,7 +471,7 @@
         onSave: function() {
           var body = (document.getElementById("note-body").value || "").trim();
           if (!body) return;
-          var payload = { type: "note", title: "Note", body: body };
+          var payload = { type: "note", title: "Note", body: body, occurredAt: new Date().toISOString() };
           if (_companyContacts.length > 0) payload.contactId = _companyContacts[0].id;
           SS_API.Activities.create(payload)
             .then(function() {

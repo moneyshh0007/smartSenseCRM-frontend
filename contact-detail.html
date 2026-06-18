@@ -439,7 +439,7 @@
         onSave: function() {
           var body = (document.getElementById("note-body").value || "").trim();
           if (!body) { if (window.SS_toast) window.SS_toast("Note is empty"); return false; }
-          SS_API.Activities.create({ type: "note", title: "Note", body: body, contactId: contactId })
+          SS_API.Activities.create({ type: "note", title: "Note", body: body, contactId: contactId, occurredAt: new Date().toISOString() })
             .then(function() {
               if (window.SS_toast) window.SS_toast("Note saved");
               loadNotes();
