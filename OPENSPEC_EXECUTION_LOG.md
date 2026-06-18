@@ -3,7 +3,7 @@
 **Project:** SmartSense CRM Phase 1 Prototype  
 **Backend:** `smartsense-backend` → Railway (`https://smartsensecrm-production.up.railway.app`)  
 **Frontend:** static HTML → Railway (`https://smartsensecrm-frontend-production.up.railway.app`)  
-**Last updated:** 18 Jun 2026 (Phase 2 complete + hotfixes)
+**Last updated:** 18 Jun 2026 (P3-1 Pipelines complete)
 
 ---
 
@@ -53,6 +53,7 @@ Every feature begins with a specification that defines requirements, API shape, 
 | 27 | Tasks API contact/deal includes | GET /tasks now returns nested contact and deal objects; contact-detail task checkboxes functional | ✅ Complete |
 | 28 | Company-detail activity scoping | Timeline filtered to company's own contacts; activity dates use occurredAt; boot sequence fixed | ✅ Complete |
 | 29 | occurredAt required field fix | Add occurredAt to all openAddNote() calls (was returning 400); fix deal-detail activity sort dates | ✅ Complete |
+| P3-1 | Pipelines Settings | Pipeline model + migration + CRUD API + settings-pipelines.html wired to live data | ✅ Complete |
 
 ---
 
@@ -993,15 +994,62 @@ Two backend fixes applied after observing Railway crash loop in deploy logs.
 
 ## Phase 2 — Complete
 
-All actionable Phase 2 items shipped and verified live. Remaining deferred items require external service integrations.
+All actionable Phase 2 items shipped and verified live.
 
-## Deferred to Phase 3 / External Dependencies
+---
+
+### P3-1 — Pipelines Settings
+
+**Date:** 18 Jun 2026  
+**Files:** `smartsense-backend/prisma/schema.prisma`, `smartsense-backend/prisma/migrations/20260618131641_add_pipeline_model/`, `smartsense-backend/src/routes/pipelines.ts`, `smartsense-backend/src/server.ts`, `assets/api.js`, `assets/chrome.js`, `settings-pipelines.html`
+
+**Scope:** Replace fully hardcoded (localStorage-only) `settings-pipelines.html` with live database-backed pipelines.
+
+**Backend changes:**
+- Added `Pipeline` model to `schema.prisma`: `id`, `workspaceId`, `name`, `isDefault Boolean @default(false)`, `stages Json @default("[]")`, `createdAt`, `updatedAt`, relation to `Workspace`
+- Added `pipelines Pipeline[]` to `Workspace` model
+- Migration: `20260618131641_add_pipeline_model`
+- New `src/routes/pipelines.ts`: `GET /pipelines`, `POST /pipelines`, `PATCH /pipelines/:id`, `DELETE /pipelines/:id`
+  - All routes JWT-authenticated via `preHandler: authenticate`
+  - `POST` validates with Zod: `name (min 1)`, `stages (array, min 1)`, optional `isDefault`
+  - `PATCH` accepts any subset of `name`, `stages`, `isDefault`
+  - Setting `isDefault: true` clears all other pipelines' `isDefault` before updating
+  - `DELETE` returns `409` if the pipeline is currently set as default
+  - All mutations write an `AuditLog` entry
+- Stages stored as JSON: `[{ name, probability (0–100), order }]`
+- Registered `pipelineRoutes` in `server.ts`
+
+**Frontend changes (`api.js`):**
+- Added `SS_API.Pipelines`: `list()`, `create(data)`, `update(id, data)`, `remove(id)`
+
+**Frontend changes (`chrome.js`):**
+- `new-pipeline` slide `onSave`: replaced DOM-injection + localStorage code with `SS_API.Pipelines.create()`; calls `SS_reloadPipelines()` on success
+- `pipeline-settings` slide (second/active definition): replaced localStorage code with `SS_API.Pipelines.update()`; added `note` field with Delete button; added `window.__pipeCtxName` assignment
+- Added `window.__pipeDeleteCurrent()` — calls `SS_API.Pipelines.remove(pid)`, reloads on success, blocks if no `SS_API`
+
+**Frontend changes (`settings-pipelines.html`):**
+- Removed all hardcoded `PIPELINE_DATA`, `localStorage` restore/save, DOM-injection logic
+- `loadPipelines()`: calls `SS_API.Pipelines.list()`, renders pipeline cards from real data
+- `renderPipelines()`: generates cards with real `id`, `name`, `stages`, `isDefault`, `createdAt`
+- `openPipelineSettings(id)`: looks up pipeline from `_allPipelines`, normalises stage format for the slide (API `{ probability }` → slide `{ prob, probability }`)
+- `makeDefaultPipeline(id)`: calls `SS_API.Pipelines.update(id, { isDefault: true })` then reloads
+- `window.SS_reloadPipelines = loadPipelines` — exposed so chrome.js slide callbacks can trigger a page refresh after save/delete
+
+**Deploy:**
+- Backend commit: `3731723` — `feat(pipelines): add Pipeline model, migration, and CRUD API routes`
+- Frontend commit: `de1dc76` — `feat(pipelines): wire settings-pipelines.html to live Pipeline API`
+- Verification: `GET /health → 200 OK` ✅
+
+---
+
+## Phase 3 — In Progress
+
+## Deferred (Phase 3 remaining) / External Dependencies
 
 | Item | Reason |
 |------|--------|
 | `settings-billing.html` | Requires Stripe integration (plan data, invoices, payment method) |
 | `settings-authentication.html` | Requires SSO/SCIM provider integration (Google Workspace, Azure AD) |
-| `settings-pipelines.html` | Requires new `Pipeline` Prisma model + migration + CRUD routes |
 | `settings-selling-rules.html` | Requires new `SellingRule` Prisma model + migration + CRUD routes |
 | `settings-data-model.html` | Requires schema management API (custom fields, object definitions) |
 
