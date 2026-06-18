@@ -309,6 +309,13 @@ const Pipelines = {
   },
 };
 
+// ─── Custom Objects ──────────────────────────────────────────────────
+const CustomObjects = {
+  async list() { return apiFetch("/custom-objects"); },
+  async create(data) { return apiFetch("/custom-objects", { method: "POST", body: JSON.stringify(data) }); },
+  async remove(id) { return apiFetch(`/custom-objects/${id}`, { method: "DELETE" }); },
+};
+
 // ─── Selling Rules ───────────────────────────────────────────────────
 const SellingRules = {
   async list() {
@@ -326,4 +333,4 @@ const SellingRules = {
 };
 
 // ─── Export ──────────────────────────────────────────────────────────
-window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, Pipelines, SellingRules, getUser };
+window.SS_API = { Auth, Contacts, Companies, Deals, Tasks, Activities, Imports, AuditLogs, Workspace, Users, Pipelines, SellingRules, CustomObjects, getUser };
